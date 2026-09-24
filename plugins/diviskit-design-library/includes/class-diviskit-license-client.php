@@ -401,6 +401,23 @@ class Diviskit_License_Client {
 		$info         = (object) $response;
 		$info->plugin = $this->config['basename'];
 		$info->slug   = $this->config['slug'];
+		// plugin-install.php dereferences these — fill defensively so the
+		// "View details" modal renders without undefined-property warnings.
+		$info->name             = $this->config['plugin_title'];
+		$info->version          = $info->new_version;
+		$info->author           = 'Diviskit';
+		$info->author_profile   = $this->config['purchase_url'] ?: '';
+		$info->homepage         = $this->config['purchase_url'] ?: '';
+		$info->download_link    = (string) ( $info->package ?? '' );
+		$info->last_updated     = wp_date( 'Y-m-d' );
+		$info->rating           = 0;
+		$info->ratings          = [];
+		$info->num_ratings      = 0;
+		$info->active_installs  = 0;
+		$info->downloaded       = 0;
+		$info->contributors     = [];
+		$info->donate_link      = '';
+		$info->external         = true;
 		if ( ! empty( $info->sections ) ) {
 			$info->sections = (array) $info->sections;
 		}
