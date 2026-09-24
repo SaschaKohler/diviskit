@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "diviskit-mcp": {
+      "command": "npx",
+      "args": ["-y", "--package", "@diviskit/mcp-server", "diviskit-mcp"],
+      "env": {
+        "WP_URL": "https://{{site}}.ddev.site",
+        "WP_USER": "{{wp_user}}",
+        "WP_APP_PASSWORD": "{{app_password_no_spaces}}",
+        "WP_CLI_CMD": "ddev wp",
+        "WP_PATH": "{{absolute_project_path}}",
+        "NODE_TLS_REJECT_UNAUTHORIZED": "0"
+      }
+    }
+  }
+}

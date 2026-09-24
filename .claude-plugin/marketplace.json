@@ -1,0 +1,20 @@
+{
+  "name": "diviskit",
+  "metadata": {
+    "description": "Diviskit — AI agent tools and skills for building Divi 5 WordPress pages with Claude Code, Codex, and Devin"
+  },
+  "owner": {
+    "name": "diviskit-dev",
+    "email": "hello@diviskit.com"
+  },
+  "plugins": [
+    {
+      "name": "diviskit-agent",
+      "description": "Free Diviskit skills — harness primer, Divi 5 builder (block formats + design rules), and SCF automation. Requires the diviskit-agent WordPress plugin and @diviskit/mcp-server.",
+      "author": {
+        "name": "diviskit-dev"
+      },
+      "source": "./claude/diviskit-agent"
+    }
+  ]
+}

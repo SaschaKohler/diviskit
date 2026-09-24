@@ -1,0 +1,477 @@
+/**
+ * WordPress REST API client with Application Password authentication.
+ *
+ * Uses WP Application Passwords (built into WP 5.6+) for auth.
+ * Generate one at: WP Admin → Users → Your Profile → Application Passwords.
+ */
+
+import { type HandshakeResult } from './compatibility.js';
+import {
+  type DiviopsResponse,
+  ErrorCodes,
+  isEnveloped,
+} from './envelope.js';
+
+/**
+ * Normalize quote-escape pathologies inside `$variable(...)$` token regions only.
+ *
+ * Divi block-attrs JSON uses `\"` (2-byte: backslash + quote) for inner quotes
+ * inside variable token payloads. Three pathological forms can leak in through
+ * callers and silently break the WP block parser at write time.
+ *
+ * Over-escape (existing #395/#396 fix). Two forms produced when callers
+ * round-trip pre-existing broken bytes:
+ *   - `\u005cu0022` (11 bytes literal) — the
+ *     mass-corruption form (backslash itself unicode-escaped, observed in the
+ *     wild on Divi 5.3.x sites)
+ *   - `\\u0022`     (7 bytes literal: 2 backslashes + `u0022`) — produced when
+ *     a caller passes the 6-byte unicode-escape form through an extra
+ *     JSON-encoding layer
+ *   These cause render-only failure: the resolver can't decode the token, and
+ *   attr paths like `background.color`, `spacing.margin`, `border.color`,
+ *   `layout.columnGap` silently fall through to defaults (or leak literal
+ *   `0022` into emitted CSS).
+ *
+ * Under-escape (#409 fix). One form produced when an agent transcribes
+ * `section_get` markup (which emits inner quotes as `&quot;` HTML entities) and
+ * a layer in the agent → MCP → WP pipeline strips one level of escaping:
+ *   - bare `"` (1 byte) — the inner quote loses its `\` prefix and prematurely
+ *     terminates the OUTER block-attrs string at parse time. The WP block
+ *     parser then silently drops ALL attrs from the affected module. Section
+ *     appears to save (`success: true`) but renders empty / broken.
+ *
+ * We normalize defensively so any write — clean, pre-broken, or
+ * agent-transcribed — settles on canonical 2-byte `\"`.
+ *
+ * Order matters: collapse over-escapes first, then escape under-escapes. The
+ * negative lookbehind on the under-escape rule skips `\"` produced by the
+ * over-escape pass (and any already-canonical input). Idempotent.
+ *
+ * Scope is intentionally narrow: rewrites only happen inside `$variable(...)$`
+ * regions (Divi's actual resolver boundary). Bytes outside those regions —
+ * arbitrary user text, code samples, string-variable values that happen to
+ * contain `\u005cu0022`, `\\u0022`, or bare `"` — are left untouched.
+ */
+function normalizeQuoteEscapes(s: string): string {
+  return s.replace(/\$variable\([^$]*?\)\$/g, (token) => {
+    // Pass 1: collapse over-escaped forms (#395/#396) to canonical \"
+    let normalized = token.replace(/(?:\\u005cu0022|\\\\u0022)/g, '\\"');
+    // Pass 2: escape any bare " (#409) to canonical \" — negative lookbehind
+    // skips properly-escaped quotes produced by Pass 1 or already canonical.
+    normalized = normalized.replace(/(?<!\\)"/g, '\\"');
+    return normalized;
+  });
+}
+
+/**
+ * Body keys whose values (and descendants) carry Divi block markup or block
+ * attribute trees, where `$variable(...)$` token-region normalization is the
+ * intended behavior. Strings reachable only through other top-level keys
+ * — variable values, labels, match-text predicates, descriptions, etc.
+ * — are passed through verbatim so a literal `$variable({"x":"y"})$`
+ * docs example in a `string_variable_value` is preserved (#409 review:
+ * Codex-flagged regression — without this scoping, the bare-quote pass would
+ * silently rewrite literal token-shaped substrings in user-prose fields).
+ */
+const BLOCK_CONTENT_KEYS = new Set([
+  'content',         // update_page_content, render_preview, validate_blocks,
+                     // section_append, section_replace, update_tb_layout,
+                     // library_save, create_page
+  'attrs',           // update_module — attr values embedded in block JSON
+  'header_content',  // create_tb_template
+  'footer_content',  // create_tb_template
+]);
+
+/**
+ * Endpoints whose target storage is a PHP-serialized WP option (or other
+ * non-JSON serialization) rather than block-markup `post_content`. For these,
+ * quote-escape normalization is harmful: the under-escape pass inserts literal
+ * `\` characters into bare-`"`-containing `$variable(...)$` token strings,
+ * which are then PHP-serialized verbatim into the option — producing the
+ * pathological `\"` (literal backslash + quote) byte sequence inside the
+ * stored value where canonical VB output stores a bare `"` (the surrounding
+ * PHP array provides all the structure; the string itself is uninterpreted).
+ *
+ * The frontend-render side tolerates the malformed bytes via a regex-based
+ * extractor, but the VB-UI field-display layer strict-parses the inner
+ * payload and silently falls back to placeholder values when it can't decode
+ * — see #716.
+ *
+ * Match by endpoint prefix so any future `/preset/*` route inherits the
+ * exclusion automatically. Block-markup writers (`/section/*`, `/module/*`,
+ * `/page/*`, `/canvas/*`, `/tb-layout/*`, `/tb-template/*`, `/library/save`,
+ * `/render-preview`, `/validate-blocks`) still receive normalization.
+ */
+const NON_BLOCK_STORAGE_PREFIXES: readonly string[] = [
+  '/preset/',
+];
+
+function endpointSkipsNormalization(endpoint: string): boolean {
+  return NON_BLOCK_STORAGE_PREFIXES.some((prefix) => endpoint.startsWith(prefix));
+}
+
+function normalizeBody(value: unknown, withinBlockTree = false): unknown {
+  if (typeof value === 'string') {
+    return withinBlockTree ? normalizeQuoteEscapes(value) : value;
+  }
+  if (Array.isArray(value)) return value.map((v) => normalizeBody(v, withinBlockTree));
+  // Restrict recursion to plain objects so Date / RegExp / class instances
+  // with custom `toJSON` keep their canonical serialization.
+  if (
+    value &&
+    typeof value === 'object' &&
+    Object.getPrototypeOf(value) === Object.prototype
+  ) {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value)) {
+      out[k] = normalizeBody(v, withinBlockTree || BLOCK_CONTENT_KEYS.has(k));
+    }
+    return out;
+  }
+  return value;
+}
+
+export interface WPClientConfig {
+  siteUrl: string;
+  username: string;
+  applicationPassword: string;
+  fetch?: typeof globalThis.fetch;
+}
+
+export class WPClient {
+  private baseUrl: string;
+  private authHeader: string;
+  private fetchImpl: typeof globalThis.fetch;
+
+  constructor(config: WPClientConfig) {
+    // Strip trailing slash.
+    this.baseUrl = config.siteUrl.replace(/\/+$/, '');
+    this.fetchImpl = config.fetch ?? globalThis.fetch.bind(globalThis);
+
+    // WP Application Passwords use Basic Auth.
+    const credentials = Buffer.from(
+      `${config.username}:${config.applicationPassword}`
+    ).toString('base64');
+    this.authHeader = `Basic ${credentials}`;
+  }
+
+  /**
+   * Make a request to the diviskit/v1 REST namespace.
+   */
+  async request<T = unknown>(
+    endpoint: string,
+    options: {
+      method?: string;
+      body?: Record<string, unknown>;
+      params?: Record<string, string>;
+      signal?: AbortSignal;
+    } = {}
+  ): Promise<T> {
+    const { method = 'GET', body, params, signal } = options;
+
+    let url = `${this.baseUrl}/wp-json/diviskit/v1${endpoint}`;
+
+    if (params) {
+      const searchParams = new URLSearchParams(params);
+      url += `?${searchParams.toString()}`;
+    }
+
+    const fetchOptions: RequestInit = {
+      method,
+      headers: {
+        Authorization: this.authHeader,
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      signal,
+    };
+
+    if (body && method !== 'GET') {
+      const normalized = endpointSkipsNormalization(endpoint) ? body : normalizeBody(body);
+      fetchOptions.body = JSON.stringify(normalized);
+    }
+
+    const response = await this.fetchImpl(url, fetchOptions);
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      let errorMessage: string;
+      try {
+        const errorJson = JSON.parse(errorBody);
+        errorMessage = errorJson.message || errorBody;
+      } catch {
+        errorMessage = errorBody;
+      }
+
+      if (response.status === 429) {
+        const retryAfter = response.headers.get('Retry-After') || '60';
+        throw new Error(
+          `Rate limited: ${errorMessage} (retry after ${retryAfter}s)`
+        );
+      }
+
+      throw new Error(
+        `WordPress API error (${response.status}): ${errorMessage}`
+      );
+    }
+
+    return response.json() as Promise<T>;
+  }
+
+  /**
+   * Envelope-aware sibling of `request()`.
+   *
+   * Issue the same HTTP call as `request()`, but return the parsed body
+   * directly as a `DiviopsResponse<T>` without throwing on envelope errors:
+   *
+   *   - Body is an envelope (`{ok: true, data}` or `{ok: false, error}`)
+   *     → return it verbatim. Plugin-emitted error envelopes (typically
+   *     4xx with `{ok: false, error: {code, message, hint?}}`) flow back
+   *     to the caller as a typed result, not a throw.
+   *   - Response is non-2xx and body is NOT an envelope (e.g. a WP REST
+   *     framework error before the route runs, an unexpected 5xx)
+   *     → synthesize `{ok: false, error: {code: 'wp_error', message: ...}}`
+   *     so callers see a uniform shape regardless of upstream.
+   *   - Response is 2xx but body is not enveloped (legacy routes that
+   *     have not adopted yet) → wrap as `{ok: true, data: <body>}` to
+   *     preserve a single contract for adopting tools to consume.
+   *
+   * Transport errors (network, JSON parse failure on a 2xx body) still
+   * throw — those are not domain-level outcomes the envelope models.
+   *
+   * Migration: pilot's three `schema_*` tools and every subsequent
+   * namespace adoption use this method. Once the rollout completes,
+   * `request()` becomes orphan and is removed.
+   */
+  async requestEnveloped<T = unknown>(
+    endpoint: string,
+    options: {
+      method?: string;
+      body?: Record<string, unknown>;
+      params?: Record<string, string>;
+      signal?: AbortSignal;
+    } = {},
+  ): Promise<DiviopsResponse<T>> {
+    const { method = 'GET', body, params, signal } = options;
+
+    let url = `${this.baseUrl}/wp-json/diviskit/v1${endpoint}`;
+    if (params) {
+      const searchParams = new URLSearchParams(params);
+      url += `?${searchParams.toString()}`;
+    }
+
+    const fetchOptions: RequestInit = {
+      method,
+      headers: {
+        Authorization: this.authHeader,
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      signal,
+    };
+    if (body && method !== 'GET') {
+      const normalized = endpointSkipsNormalization(endpoint) ? body : normalizeBody(body);
+      fetchOptions.body = JSON.stringify(normalized);
+    }
+
+    const response = await this.fetchImpl(url, fetchOptions);
+    const rawBody = await response.text();
+
+    // Try to parse the body as JSON. Failure is recoverable for non-2xx
+    // responses (HTML/plain-text error pages from a misconfigured host or
+    // upstream proxy synthesize a `wp_error` envelope rather than throwing)
+    // and is fatal only on a 2xx body that promised JSON but didn't deliver.
+    let parsed: unknown;
+    let parseError: unknown = null;
+    try {
+      parsed = rawBody === '' ? null : JSON.parse(rawBody);
+    } catch (e) {
+      parseError = e;
+    }
+
+    if (parseError === null && isEnveloped(parsed)) {
+      return parsed as DiviopsResponse<T>;
+    }
+
+    if (!response.ok) {
+      // Non-2xx + body either non-JSON or non-enveloped JSON. Two sub-cases:
+      //
+      //  (1) Body is a parsed `WP_Error`-shaped JSON object — `{code, message,
+      //      data?: {status?, hint?}}`. This is what older diviskit-agent
+      //      versions (pre-envelope-adoption) emit alongside `WP_Error`-based
+      //      handlers, and what the WP REST framework itself emits for
+      //      framework-level errors (`rest_forbidden`, `rest_no_route`,
+      //      `rest_invalid_param`, etc.). Promote `code` to the envelope's
+      //      `error.code` so callers running against a mixed-version
+      //      deployment (new server + older plugin emitting non-envelope
+      //      error bodies) still receive granular codes like `invalid_type`,
+      //      `not_found`, `rest_forbidden` — instead of having every legacy
+      //      4xx collapse to a generic `wp_error` and lose the upstream
+      //      slug. Hint is forwarded when present in `data.hint` (matches
+      //      the convention `envelope_from_wp_error` writes plugin-side).
+      //
+      //  (2) Body is non-JSON, or JSON without `code`/`message` (HTML/plain
+      //      error pages from a misconfigured host, host firewall pages,
+      //      502/504 from a reverse proxy, etc.) — fall back to a synthesized
+      //      `wp_error` so adopted tools still see a uniform envelope.
+      const isLegacyWpErrorBody =
+        parseError === null &&
+        parsed !== null &&
+        typeof parsed === 'object' &&
+        typeof (parsed as Record<string, unknown>).code === 'string' &&
+        typeof (parsed as Record<string, unknown>).message === 'string';
+      if (isLegacyWpErrorBody) {
+        const obj = parsed as Record<string, unknown>;
+        const out: { code: string; message: string; hint?: string } = {
+          code: obj.code as string,
+          message: obj.message as string,
+        };
+        const data = obj.data;
+        if (
+          data !== null &&
+          typeof data === 'object' &&
+          'hint' in (data as Record<string, unknown>) &&
+          typeof (data as Record<string, unknown>).hint === 'string'
+        ) {
+          out.hint = (data as Record<string, unknown>).hint as string;
+        }
+        if (response.status === 429) {
+          const retryAfter = response.headers.get('Retry-After') || '60';
+          out.message = `${out.message} (retry after ${retryAfter}s)`;
+        }
+        return { ok: false, error: out };
+      }
+
+      const messageFromBody = parseError
+        ? rawBody.slice(0, 200)
+        : parsed && typeof parsed === 'object' && parsed !== null && 'message' in parsed
+          ? String((parsed as Record<string, unknown>).message)
+          : rawBody;
+      let message = `WordPress API error (${response.status}): ${messageFromBody}`;
+      if (response.status === 429) {
+        const retryAfter = response.headers.get('Retry-After') || '60';
+        message = `Rate limited (${response.status}): ${messageFromBody} (retry after ${retryAfter}s)`;
+      }
+      return {
+        ok: false,
+        error: { code: ErrorCodes.WP_ERROR, message },
+      };
+    }
+
+    // 2xx with non-JSON body — only legitimate failure mode that warrants a
+    // throw. A successful HTTP status with garbage in the body is a server-
+    // side contract violation, not a domain-level outcome the envelope can
+    // represent.
+    if (parseError) {
+      throw new Error(
+        `WordPress API non-JSON body (${response.status}): ${rawBody.slice(0, 200)}`,
+      );
+    }
+
+    // 2xx body that is not yet shaped as an envelope — legacy route. Wrap
+    // it so adopting tools always see a uniform success shape.
+    return { ok: true, data: parsed as T };
+  }
+
+  /**
+   * Test the connection to WordPress.
+   *
+   * Routes through `requestEnveloped` because `/schema/settings` was
+   * envelope-adopted in the schema_* pilot — its body is now
+   * `{ ok: true, data: { builder, ... } }`. Reading
+   * `result.builder.version` against that shape (the pre-pilot pattern)
+   * silently regresses meta_ping to "Connected to Divi unknown" on
+   * healthy sites.
+   */
+  async testConnection(signal?: AbortSignal): Promise<{ ok: boolean; message: string }> {
+    try {
+      const response = await this.requestEnveloped<{
+        builder?: { version?: string };
+      }>('/schema/settings', { signal });
+      if (!response.ok) {
+        return {
+          ok: false,
+          message: `Connection failed: [${response.error.code}] ${response.error.message}`,
+        };
+      }
+      return {
+        ok: true,
+        message: `Connected to Divi ${response.data.builder?.version ?? 'unknown'}`,
+      };
+    } catch (error) {
+      if (signal?.aborted) throw signal.reason ?? error;
+      return {
+        ok: false,
+        message: `Connection failed: ${error instanceof Error ? error.message : String(error)}`,
+      };
+    }
+  }
+
+  /**
+   * Perform a capability handshake with the WP plugin.
+   *
+   * As of #486 there is no global plugin-version floor — compatibility is
+   * decided per-tool against `result.capabilities`. This method only:
+   *  - issues the request (network/auth errors propagate)
+   *  - normalizes the legacy pre-1.2.0 shape (`capabilities: string[]`)
+   *    into the post-1.2.0 shape (`capabilities: Record<string,boolean>`)
+   *    so the rest of the server can assume a uniform map.
+   *
+   * The plugin still rejects servers below its own MIN_SERVER_VERSION
+   * with HTTP 426 — that error surfaces here as a regular request error.
+   */
+  async handshake(
+    serverVersion: string,
+    signal?: AbortSignal,
+  ): Promise<HandshakeResult> {
+    const result = await this.request<HandshakeResult>('/handshake', {
+      method: 'POST',
+      body: { mcp_server_version: serverVersion },
+      signal,
+    });
+
+    // Pre-1.2.0 plugins emit `capabilities` as a string[] of coarse
+    // namespace tags. Coerce to an empty map so per-tool gates fail fast
+    // with the upgrade hint instead of silently passing because of a
+    // shape mismatch.
+    if (Array.isArray(result.capabilities)) {
+      result.capabilities = {};
+    } else if (
+      result.capabilities === null ||
+      typeof result.capabilities !== 'object'
+    ) {
+      result.capabilities = {};
+    }
+
+    // ADR-003 / ADR-007 Pro-extension fields. Free-only sites omit
+    // them entirely; pre-V1 Pro plugins might emit partial shapes.
+    // Normalize defensively so downstream gates can read uniform
+    // types without per-call shape checks.
+    if (typeof result.pro_active !== 'boolean') {
+      result.pro_active = false;
+    }
+    if (
+      result.available_targets === null ||
+      typeof result.available_targets !== 'object' ||
+      Array.isArray(result.available_targets)
+    ) {
+      result.available_targets = {};
+    }
+    if (
+      result.active_modules === null ||
+      typeof result.active_modules !== 'object' ||
+      Array.isArray(result.active_modules)
+    ) {
+      result.active_modules = {};
+    }
+    if (
+      result.plugins === null ||
+      typeof result.plugins !== 'object' ||
+      Array.isArray(result.plugins)
+    ) {
+      result.plugins = {};
+    }
+
+    return result;
+  }
+}

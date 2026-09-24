@@ -1,0 +1,23 @@
+{
+  "name": "diviskit-agent",
+  "description": "AI agent skills for building pages and layouts on WordPress sites running Divi 5. Ships the Diviskit harness primer (envelope, handshake, dry-run contract), the diviskit-builder skill (verified Divi 5 block formats, presets, theme builder, design systems, WebGL effects via Diviskit Design Library), and the diviskit-scf skill (Secure Custom Fields / ACF automation). Requires the diviskit-agent WordPress plugin and the @diviskit/mcp-server MCP server.",
+  "version": "1.0.0",
+  "author": {
+    "name": "diviskit-dev"
+  },
+  "homepage": "https://github.com/SaschaKohler/diviskit",
+  "repository": "https://github.com/SaschaKohler/diviskit",
+  "license": "MIT",
+  "keywords": [
+    "divi",
+    "divi-5",
+    "wordpress",
+    "page-builder",
+    "mcp",
+    "design",
+    "ai-agent",
+    "diviskit",
+    "scf",
+    "acf"
+  ]
+}

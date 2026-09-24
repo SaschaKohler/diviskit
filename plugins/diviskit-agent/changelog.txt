@@ -1,0 +1,148 @@
+# Diviskit Agent Changelog
+
+This file is the extended plugin-local changelog for `diviskit-agent`.
+
+Policy:
+
+- Keep the current public release entry in `readme.txt` for WordPress.org.
+- Use this file for longer plugin-local history as the Free WordPress.org channel matures.
+- Keep entries customer-facing. Avoid internal issue numbers unless they are needed to explain a user-visible change.
+- Do not include secrets, credentials, customer data, or environment-specific URLs.
+
+## 1.6.0
+
+- Forked from DiviOps Agent 1.5.25 (GPL v2) as Diviskit Agent.
+- Canonical REST namespace is now `diviskit/v1`; `diviops/v1` is dual-registered as a compat alias so existing MCP clients keep working. When the legacy DiviOps Agent plugin is active, the compat alias is skipped and an admin notice is shown.
+- Handshake gains `server: "diviskit"` and `namespaces` fields; Pro extensions are collected via `diviskit_agent_handshake_extensions` with `diviops_agent_handshake_extensions` applied as a legacy alias.
+- Rate limiting is configured via `DIVISKIT_RATE_LIMIT_*` constants/env vars and the `diviskit_rate_limits` filter; the legacy `DIVIOPS_*` names remain as fallbacks.
+
+## 1.5.25
+
+- Adds a read-only Design System dashboard for existing presets, variables and sampled consumers, with explicit partial coverage and unresolved references.
+- Exposes direct variable-reference IDs in preset inspection; zero references do not mean safe to delete, and stored settings are not computed styles.
+- Accounts for supported preset-provided container layout settings in validation warnings, preserving inline precedence and unresolved-reference warnings. Write behavior and compatibility requirements are unchanged.
+
+## 1.5.24
+
+- Corrects the Setup Guide book icon's vertical alignment in the Diviskit dashboard on WordPress 7.1.
+- Presentation only; existing behavior and compatibility requirements remain unchanged.
+
+## 1.5.23
+
+- Adds basic Free updates for one existing SCF 6.9.4 top-level text field, with preview by default, expected-state checks and persisted readback.
+- No atomic CAS, SCF snapshot rollback or full native-form equivalence; existing Divi bindings/design are not authored.
+
+## 1.5.22
+
+- Shows unloaded optional add-ons as Not active and moves read-only snapshot history after the component overview, collapsed by default with its count visible. Existing per-snapshot metadata, permissions and result limits remain.
+- Adds an internal protected-restore service that captures the current layout, verifies the recovery point against the actual after-state and permits at most one bounded recovery attempt on failure.
+- Keeps snapshot storage and basic guarded restore in Free. Direct Free restore behavior is unchanged; no new public capability, tool, restore UI or full-site backup is introduced.
+
+## 1.5.21
+
+- Refreshes the scoped native WordPress admin dashboard with a clearer installed-component overview and expandable read-only snapshot metadata.
+- Preserves existing access and compatibility requirements. Displayed status does not verify MCP connectivity; snapshots are not full-site backups.
+
+## 1.5.20
+
+- Supports standard WordPress Posts alongside Pages through the existing status endpoint, retaining mapped edit and applicable publish permission checks before dry-run plans and no-op responses.
+- Keeps custom post types and attachments outside this endpoint's scope and does not expand scheduling behavior.
+
+## 1.5.19
+
+- Serializes the selected native module opener with the existing canonical block serializer, avoiding false readback refusals when WordPress escapes HTML-bearing attributes during save.
+- Preserves unchanged surrounding content, strict byte-integrity verification, permissions, backups and rollback. No new capability, API or global MCP/Pro version floor is introduced.
+
+## 1.5.18
+
+- Adds `cross_env_staff_body_evidence` for bounded source/target inspection of the native `diviops_staff` detail-body recipe, including current-post bindings, the existing plain-text role field and isolated body assignment prerequisites.
+- Keeps inspection/preflight and snapshot storage in Free. Pro applies the reviewed design to one existing target body without creating records, fields, layouts or template assignments.
+- Bridges changed Pro body writes to the existing Free recovery store; dry-run and converged no-op do not create snapshots. Missing, ambiguous or changed prerequisites refuse the bounded workflow rather than enabling general body migration or field mapping.
+- Source candidate only: the prior bounded technical proof is not user visual acceptance or new-package qualification. No Visual Builder save or executed rollback was tested in that promotion proof.
+
+## 1.5.17
+
+- Adds optional `body_content` to the existing Theme Builder template-create operation; no new tool is introduced. Successful creation returns `body_layout_id` alongside the existing template, header/footer and master identities.
+- Includes body permissions and cumulative content checks before dry-run plans or mutation, using the same core sanitization path as header/footer creation. Dry-run describes body creation and linking without writing.
+- Advertises `tb_template_create_body` so updated MCP clients refuse nonempty body requests against older plugins before dispatch. Omitted or empty body content keeps legacy behavior; restart the MCP session after updating to refresh its capability snapshot.
+- Creates and links only the requested layout/template state, without global Theme Builder save or legacy-template cleanup. Guided native editor binding and content readback remain necessary; this is not a general VB compatibility guarantee.
+
+## 1.5.16
+
+- Adds an optional exact-checksum guard to the full-content page writer and refuses stale reviewed content both at request entry and immediately before mutation.
+- Advertises that enforcement through the precise `page_update_content_expected_checksum` capability so checksum-dependent clients can distinguish it from the legacy unconditional writer.
+- Lets receipt-owned Pro workflows reuse the existing Free integrity, rollback, cache, and readback path without moving generic page-writing ownership into Pro.
+- Keeps existing callers backward-compatible when `expected_checksum` is omitted; no force path or broader page-write behavior is added.
+
+## 1.5.15
+
+- Restores the declared PHP 7.4+ runtime floor by moving compatibility and authoring-limit constants from traits into the consuming class.
+- Prevents the activation-time fatal error affecting Free 1.5.12 through 1.5.14 on PHP 7.4, 8.0, and 8.1.
+- Keeps the Divi Post Filter compatibility repair, authoring limits, capability handshake, and all other runtime behavior unchanged.
+
+## 1.5.14
+
+- Adds cumulative input, block-count, nesting-depth, string-count and parsed-string-byte limits before full-content dry-run plans and mutations, including aggregate Theme Builder content.
+- Preserves the existing seven-handler permission, integrity, sanitization and operation-dependent backup/rollback/readback order. Native-first guidance allows intentional custom HTML; no semantic HTML-shape detector is added.
+- The separately versioned MCP server and client-side skill must be updated independently for their revised behavior and guidance.
+
+## 1.5.13
+
+- Confirms compatibility with WordPress 7.1 and updates the WordPress.org compatibility metadata.
+- Keeps the MCP server, capabilities, REST behavior, and Free/Pro boundary unchanged from 1.5.12.
+
+## 1.5.12
+
+- Adds the narrow, self-retiring Divi 5.10/5.11 Post Filter product-price permission repair, including the exact route-specific Divi nonce and Visual Builder/edit-post authority checks. Other Divi routes are unchanged.
+- Preserves exact upload-path provenance for reviewed cross-environment media discovery, including custom upload roots and root-level files, while keeping ambiguous basename matches fail-closed.
+- Rejects legacy `divi/link` attribute paths that Divi ignores and fails closed when The SEO Framework's canonical WordPress plugin directory is unavailable.
+
+## 1.5.11
+
+- Adds stronger handshake and target-identity evidence for connected MCP health diagnostics while preserving classic direct MCP/stdio and WordPress REST use; this does not publish or require the launcher.
+- Enforces mapped create permission for every page-create/status request and mapped publish permission for `publish`, `future`, and `private` before dry-run planning or mutation; fixed-publish Canvas, Divi Library, and Theme Builder creation paths use the same guard.
+- Consolidates access to the exact Divi-owned variable and preset registry options behind documented helpers without renaming or migrating those upstream-owned storage keys.
+- Keeps the WordPress.org review lane independent: the submitted replacement there remains Free 1.5.10 until reviewers request or authorize another package.
+
+## 1.5.10
+
+- Adds provider-neutral discovery plus guarded get, set, and clear operations for explicit The SEO Framework `seo_title` and `meta_description` values on one editable post.
+- Requires exact target edit permission before exposing stored values or writing, and reports dry-run, checksum drift refusal, exact no-op, provider readback, lifecycle/cache, and verified request-local rollback evidence.
+- Keeps the caller contract semantic and explicit-metadata-only. Generic or caller-controlled postmeta, automatic Divi/dynamic-content/Theme Builder description extraction, and bulk, policy, cross-site, scheduled, managed, or fleet SEO workflows remain outside this Free/core primitive.
+
+## 1.5.9
+
+- Extends read-only cross-environment source export and target-context evidence to existing Theme Builder headers and footers when the connected capability supports footer evidence, including checksums, dependency/linkage evidence, and preflight/refusal data.
+- Adds metadata-only local storage sequence evidence to the Free-owned rollback snapshot inventory so Pro retention can order same-second records safely without exposing snapshot payloads.
+- Keeps basic one-site snapshot capture, list, get, delete, dashboard inspection, and guarded restore in Free; snapshot payload, viability, and exact deletion ownership remain Free/core responsibilities.
+
+## 1.5.8
+
+- Adds a guarded preset-registry doctor with inspection-first behavior and explicit mutation safeguards for duplicate or stale registry entries.
+- Improves nested module moves with a parser-backed fallback for placements that the direct block parser cannot safely resolve.
+- Rejects foreign CSS variable references recursively across supported Divi content and design writers before mutation.
+
+## 1.5.7
+
+- Adds guarded rollback snapshots for Divi content writes, including captured before-state records, list/get/delete inspection surfaces, and verified restore support.
+- Adds dashboard-ready rollback snapshot data so operators can review available snapshots before restoring content.
+- Restore operations refuse content or supported Divi post-meta drift before mutation and report readback/cache evidence after verified restore.
+
+## 1.5.6
+
+- Adds typed WordPress menu tools for listing menus, reading normalized menu trees, creating menus, appending page/custom-link items, and assigning registered theme locations.
+- Adds safer FluentCart 1.5 Advanced Variations read enrichment while preserving refusal for unsupported write shapes.
+- Adds sanctioned read-only post taxonomy term inspection through the WP-CLI fallback path.
+
+## 1.5.5
+
+- Adds preflight metadata used by the MCP server's `diviops_meta_info` surface, including richer plugin version records for connected-suite checks.
+- Keeps the capability handshake additive and backwards-compatible for existing MCP clients.
+
+## 1.5.4
+
+- Current Free plugin release line for the Diviskit Agent REST bridge.
+- Provides authenticated `/diviskit/v1/*` endpoints and capability handshake support for the Diviskit MCP server.
+- Establishes WordPress.org readiness metadata with explicit `Stable tag: 1.5.4`, `Tested up to: 7.0`, GPLv2-or-later license metadata, external-service/authentication disclosure, and Free/Pro boundary language.
+
+Historical release details before this plugin-local changelog remain in the GitHub release history until they are intentionally backfilled.
