@@ -205,7 +205,10 @@ class Diviskit_License_Client {
 		$query_var = sanitize_key( (string) ( $this->config['query_var'] ?? self::QUERY_VAR ) )
 			?: self::QUERY_VAR;
 
-		$url      = add_query_arg( [ $query_var => $action ], $this->config['api_url'] );
+		// Path form {store}/vendokit-license/<action> — survives ingress
+		// basic-auth exemptions which can only match paths, not query
+		// args. Requires vendokit ≥ the path-dispatch version on the store.
+		$url      = trailingslashit( $this->config['api_url'] ) . $query_var . '/' . $action;
 		$response = wp_remote_post( $url, [ 'timeout' => 15, 'body' => $body ] );
 		if ( is_wp_error( $response ) ) {
 			return new WP_Error( 'api_unreachable', $response->get_error_message() );
