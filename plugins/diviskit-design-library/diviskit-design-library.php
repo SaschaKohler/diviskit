@@ -326,9 +326,16 @@ if ( ! class_exists( 'DiviOps_Design_Library', false ) ) {
  * Store URL: define DSK_DESIGN_LIBRARY_STORE_URL in wp-config.php to
  * override, or filter dsk_design_library_store_url.
  */
-if ( file_exists( __DIR__ . '/includes/class-diviskit-license-client.php' ) ) {
+// Deferred to plugins_loaded so class_exists('Diviskit_Agent') reflects
+// the fully loaded plugin set — the license page hangs under the agent's
+// "Diviskit" menu when present, under Settings otherwise.
+add_action( 'plugins_loaded', function () {
+	if ( ! file_exists( __DIR__ . '/includes/class-diviskit-license-client.php' ) ) {
+		return;
+	}
 	require_once __DIR__ . '/includes/class-diviskit-license-client.php';
 
+	$agent_menu = class_exists( 'Diviskit_Agent' );
 	Diviskit_License_Client::register( array(
 		'item'         => (string) apply_filters( 'dsk_design_library_license_item', 'diviskit-design-library' ),
 		'api_url'      => defined( 'DSK_DESIGN_LIBRARY_STORE_URL' )
@@ -339,8 +346,24 @@ if ( file_exists( __DIR__ . '/includes/class-diviskit-license-client.php' ) ) {
 		'slug'         => 'diviskit-design-library',
 		'plugin_title' => 'Diviskit Design Library',
 		'purchase_url' => apply_filters( 'dsk_design_library_purchase_url', 'https://diviskit.com/item/diviskit-design-library/' ),
-		'free'         => true,
+		'license_ui'   => 'embed',
+		'license_url'  => admin_url( $agent_menu
+			? 'admin.php?page=ddl-license'
+			: 'options-general.php?page=ddl-license' ),
 	) );
-}
+
+	add_action( 'admin_menu', function () use ( $agent_menu ) {
+		$render = function () {
+			echo '<div class="wrap"><h1>Diviskit Design Library — License</h1>';
+			Diviskit_License_Client::instance( 'diviskit-design-library' )?->render_license_panel();
+			echo '</div>';
+		};
+		if ( $agent_menu ) {
+			add_submenu_page( 'diviskit', __( 'Design Library License', 'diviskit-design-library' ), __( 'Design Library', 'diviskit-design-library' ), 'manage_options', 'ddl-license', $render );
+		} else {
+			add_options_page( __( 'Design Library License', 'diviskit-design-library' ), __( 'Design Library', 'diviskit-design-library' ), 'manage_options', 'ddl-license', $render );
+		}
+	} );
+}, 20 );
 
 Diviskit_Design_Library::init();

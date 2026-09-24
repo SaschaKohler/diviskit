@@ -21,6 +21,15 @@
  * update checks — the store must flag the product "free_download" so
  * get_license_version returns a signed package URL without a key.
  *
+ * License UI placement — 'license_ui' config:
+ *   'page'  (default) own page under Settings → "<Title> License"
+ *   'embed' no menu entry; the host embeds
+ *           Diviskit_License_Client::instance('<slug>')->render_license_panel()
+ *           in its own admin screen. Set 'license_url' to that screen's
+ *           admin URL (redirects + plugin-list link point there).
+ *   'none'  no UI at all (e.g. a companion plugin sharing another
+ *           product's license via 'settings_key' => 'dklc_state_<slug>').
+ *
  * What the host product gets for free:
  *   - license state in wp_options (per product, namespaced by slug)
  *   - activate / deactivate / refresh against ?vendokit-license=*
@@ -41,7 +50,7 @@ if ( ! class_exists( 'Diviskit_License_Client' ) ) :
 
 class Diviskit_License_Client {
 
-	const SDK_VERSION       = '1.3.0';
+	const SDK_VERSION       = '1.4.0';
 	const QUERY_VAR         = 'vendokit-license';
 
 	const STATUS_ACTIVE      = 'active';
@@ -70,9 +79,13 @@ class Diviskit_License_Client {
 			'settings_key' => '',
 			'query_var'    => self::QUERY_VAR,
 			'free'         => false,
+			'license_ui'   => 'page',
+			'license_url'  => '',
 		] );
 		$config['item']         = sanitize_title( (string) $config['item'] );
 		$config['item_id']      = absint( $config['item_id'] );
+		$config['license_ui']   = in_array( $config['license_ui'], [ 'page', 'embed', 'none' ], true )
+			? $config['license_ui'] : 'page';
 		$config['api_url']      = trailingslashit( esc_url_raw( $config['api_url'] ) );
 		$config['slug']         = sanitize_key( (string) $config['slug'] );
 		$config['basename']     = $config['file'] ? plugin_basename( $config['file'] ) : '';
@@ -99,11 +112,16 @@ class Diviskit_License_Client {
 
 		// Free products update anonymously — no license UI or handlers.
 		if ( is_admin() && empty( $this->config['free'] ) ) {
-			add_action( 'admin_menu', [ $this, 'add_page' ] );
+			// Form handlers always live — embedded panels post here too.
 			add_action( 'admin_post_dklc_activate_' . $this->config['slug'], [ $this, 'handle_activate' ] );
 			add_action( 'admin_post_dklc_deactivate_' . $this->config['slug'], [ $this, 'handle_deactivate' ] );
 			add_action( 'admin_post_dklc_refresh_' . $this->config['slug'], [ $this, 'handle_refresh' ] );
-			add_filter( 'plugin_action_links_' . $this->config['basename'], [ $this, 'plugin_action_links' ] );
+			if ( 'none' !== $this->config['license_ui'] ) {
+				add_filter( 'plugin_action_links_' . $this->config['basename'], [ $this, 'plugin_action_links' ] );
+			}
+			if ( 'page' === $this->config['license_ui'] ) {
+				add_action( 'admin_menu', [ $this, 'add_page' ] );
+			}
 		}
 	}
 
@@ -395,8 +413,16 @@ class Diviskit_License_Client {
 		);
 	}
 
+	/** Admin URL of the license screen — the embedded host page when
+	 *  'license_url' is configured, else the standalone options page. */
+	private function license_url(): string {
+		return '' !== (string) $this->config['license_url']
+			? (string) $this->config['license_url']
+			: admin_url( 'options-general.php?page=dklc-license-' . $this->config['slug'] );
+	}
+
 	public function plugin_action_links( array $links ): array {
-		$links[] = '<a href="' . esc_url( admin_url( 'options-general.php?page=dklc-license-' . $this->config['slug'] ) ) . '">License</a>';
+		$links[] = '<a href="' . esc_url( $this->license_url() ) . '">License</a>';
 		return $links;
 	}
 
@@ -404,12 +430,31 @@ class Diviskit_License_Client {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( 'forbidden' );
 		}
+		?>
+		<div class="wrap">
+			<h1><?php echo esc_html( $this->config['plugin_title'] ); ?> — License</h1>
+			<?php $this->render_license_panel(); ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * The license card without .wrap/<h1> — embed it in the host
+	 * plugin's own admin screen:
+	 *   Diviskit_License_Client::instance('<slug>')?->render_license_panel();
+	 */
+	public function render_license_panel(): void {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		if ( ! empty( $this->config['free'] ) ) {
+			echo '<p>' . esc_html__( 'Free product — updates enabled, no license needed.', 'diviskit' ) . '</p>';
+			return;
+		}
 		$state  = $this->status_payload();
 		$action = 'dklc_' . $this->config['slug'];
 		$nonce  = 'dklc_nonce_' . $this->config['slug'];
 		?>
-		<div class="wrap">
-			<h1><?php echo esc_html( $this->config['plugin_title'] ); ?> — License</h1>
 			<?php if ( isset( $_GET['dklc_notice'] ) ) : ?>
 				<div class="notice notice-<?php echo 'success' === $_GET['dklc_notice'] ? 'success' : 'error'; ?> is-dismissible"><p>
 					<?php echo esc_html( sanitize_text_field( wp_unslash( $_GET['dklc_message'] ?? '' ) ) ); ?>
@@ -447,7 +492,6 @@ class Diviskit_License_Client {
 			<?php if ( $this->config['purchase_url'] ) : ?>
 				<p><a href="<?php echo esc_url( $this->config['purchase_url'] ); ?>" target="_blank" rel="noopener">Purchase / manage license</a></p>
 			<?php endif; ?>
-		</div>
 		<?php
 	}
 
@@ -461,7 +505,7 @@ class Diviskit_License_Client {
 	private function redirect( string $type, string $message ): void {
 		wp_safe_redirect( add_query_arg(
 			[ 'dklc_notice' => $type, 'dklc_message' => $message ],
-			admin_url( 'options-general.php?page=dklc-license-' . $this->config['slug'] )
+			$this->license_url()
 		) );
 		exit;
 	}
