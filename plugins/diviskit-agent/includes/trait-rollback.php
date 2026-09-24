@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 trait Diviskit_Agent_Rollback {
 	private static function rollback_snapshot_option_prefix(): string {
-		return 'diviops_rollback_snapshot_';
+		return 'diviskit_rollback_snapshot_';
 	}
 
 	private static function rollback_snapshot_created_stale_seconds(): int {
@@ -746,7 +746,7 @@ trait Diviskit_Agent_Rollback {
 	public static function rollback_snapshot_get( $request ) {
 		$snapshot_id = self::rollback_snapshot_validate_id( $request->get_param( 'snapshot_id' ) );
 		if ( false === $snapshot_id ) {
-			return self::envelope_error( 'invalid_input', 'Invalid rollback snapshot id.', 'Use the snapshot_id returned by diviops_rollback_snapshot_list.', 400 );
+			return self::envelope_error( 'invalid_input', 'Invalid rollback snapshot id.', 'Use the snapshot_id returned by diviskit_rollback_snapshot_list.', 400 );
 		}
 
 		$option_name = self::rollback_snapshot_option_name( $snapshot_id );
@@ -792,7 +792,7 @@ trait Diviskit_Agent_Rollback {
 	public static function rollback_snapshot_delete( $request ) {
 		$snapshot_id = self::rollback_snapshot_validate_id( $request->get_param( 'snapshot_id' ) );
 		if ( false === $snapshot_id ) {
-			return self::envelope_error( 'invalid_input', 'Invalid rollback snapshot id.', 'Use the snapshot_id returned by diviops_rollback_snapshot_list.', 400 );
+			return self::envelope_error( 'invalid_input', 'Invalid rollback snapshot id.', 'Use the snapshot_id returned by diviskit_rollback_snapshot_list.', 400 );
 		}
 
 		$option_name = self::rollback_snapshot_option_name( $snapshot_id );
@@ -908,7 +908,7 @@ trait Diviskit_Agent_Rollback {
 		};
 		$snapshot_id = self::rollback_snapshot_validate_id( $snapshot_id );
 		if ( false === $snapshot_id ) {
-			return $respond( self::envelope_error( 'invalid_input', 'Invalid rollback snapshot id.', 'Use the snapshot_id returned by diviops_rollback_snapshot_list.', 400 ) );
+			return $respond( self::envelope_error( 'invalid_input', 'Invalid rollback snapshot id.', 'Use the snapshot_id returned by diviskit_rollback_snapshot_list.', 400 ) );
 		}
 
 		$option_name = self::rollback_snapshot_option_name( $snapshot_id );

@@ -15,7 +15,7 @@
  * `heading_font` / `body_font` customizer options); this registry is the
  * Diviskit-controlled font catalog that presets reference via canonical
  * slugs (e.g. `gfid-oa-sora`). Architecturally clean parallel to
- * `global_color_*` — leaves `gvid-*` fonts to `diviops_variable_*`.
+ * `global_color_*` — leaves `gvid-*` fonts to `diviskit_variable_*`.
  *
  * All four handlers route through envelope_success / envelope_error.
  * Mapping:
@@ -490,8 +490,8 @@ trait Diviskit_Agent_GlobalFont {
 		if ( isset( $fonts[ $id ] ) ) {
 			return self::envelope_error(
 				'conflict',
-				sprintf( "Font '%s' already exists. Use diviops_global_font_update to modify, or pick a different id.", $id ),
-				'Use diviops_global_font_update to modify an existing font.',
+				sprintf( "Font '%s' already exists. Use diviskit_global_font_update to modify, or pick a different id.", $id ),
+				'Use diviskit_global_font_update to modify an existing font.',
 				409,
 				[ 'id' => $id, 'existing' => $fonts[ $id ] ]
 			);
@@ -587,7 +587,7 @@ trait Diviskit_Agent_GlobalFont {
 			return self::envelope_error(
 				'not_found',
 				sprintf( "Font '%s' not found in registry.", $id ),
-				'Run diviops_global_font_list to see existing gfids, or use diviops_global_font_create to add it.',
+				'Run diviskit_global_font_list to see existing gfids, or use diviskit_global_font_create to add it.',
 				404,
 				[ 'id' => $id ]
 			);
@@ -681,7 +681,7 @@ trait Diviskit_Agent_GlobalFont {
 			return self::envelope_error(
 				'not_found',
 				"Font '{$id}' not found in registry.",
-				'Run diviops_global_font_list to see existing gfids.',
+				'Run diviskit_global_font_list to see existing gfids.',
 				404,
 				[ 'id' => $id ]
 			);

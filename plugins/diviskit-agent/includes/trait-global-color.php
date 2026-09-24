@@ -677,7 +677,7 @@ trait Diviskit_Agent_GlobalColor {
 			return self::envelope_error(
 				'not_found',
 				"Color '{$gcid}' not found in registry.",
-				'Run diviops_global_color_list to see existing gcids.',
+				'Run diviskit_global_color_list to see existing gcids.',
 				404
 			);
 		}
@@ -707,7 +707,7 @@ trait Diviskit_Agent_GlobalColor {
 						$gcid,
 						$refs['all_ids'][ $gcid ]
 					),
-					'Pass force=true to override, or remove references first; run diviops_variable_scan_orphans afterwards if forced.',
+					'Pass force=true to override, or remove references first; run diviskit_variable_scan_orphans afterwards if forced.',
 					409,
 					[
 						'id'             => $gcid,

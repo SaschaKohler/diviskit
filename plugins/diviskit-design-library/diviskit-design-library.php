@@ -9,6 +9,7 @@
  * Text Domain: diviskit-design-library
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ * Update URI: https://diviskit.com/item/diviskit-design-library/
  *
  * Forked from the GPL-licensed diviops-design-library. Integration contract:
  * `dsk-*` CSS classes, `_diviskit_design_*` post-meta keys and
@@ -332,12 +333,13 @@ if ( file_exists( __DIR__ . '/includes/class-diviskit-license-client.php' ) ) {
 		'item_id'      => (int) apply_filters( 'dsk_design_library_license_item_id', 319 ),
 		'api_url'      => defined( 'DSK_DESIGN_LIBRARY_STORE_URL' )
 			? DSK_DESIGN_LIBRARY_STORE_URL
-			: apply_filters( 'dsk_design_library_store_url', 'https://divi-ops-ext.ddev.site' ),
+			: apply_filters( 'dsk_design_library_store_url', 'https://diviskit.com' ),
 		'version'      => Diviskit_Design_Library::VERSION,
 		'file'         => __FILE__,
 		'slug'         => 'diviskit-design-library',
 		'plugin_title' => 'Diviskit Design Library',
-		'purchase_url' => apply_filters( 'dsk_design_library_purchase_url', 'https://divi-ops-ext.ddev.site/item/diviskit-design-library/' ),
+		'purchase_url' => apply_filters( 'dsk_design_library_purchase_url', 'https://diviskit.com/item/diviskit-design-library/' ),
+		'free'         => true,
 	) );
 }
 

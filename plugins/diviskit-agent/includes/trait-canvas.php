@@ -22,7 +22,7 @@
  *                     an existing canvas under the same parent_page_id. Carries
  *                     `error.data = { existing_canvas_id, parent_page_id, title }` for
  *                     callers that want to retrieve / re-rename the conflicting canvas.
- *                     Mirrors diviops_preset_create's uniqueness contract.
+ *                     Mirrors diviskit_preset_create's uniqueness contract.
  *   - wp_error      — wp_insert_post / wp_update_post / wp_delete_post returned WP_Error
  *                     (or wp_delete_post returned false)
  *   - capability_missing actually surfaces upstream as the REST framework's
@@ -75,7 +75,7 @@ trait Diviskit_Agent_Canvas {
 			return self::envelope_error(
 				'not_found',
 				"Parent page #{$parent_page_id} not found.",
-				'Run diviops_page_list to discover valid parent_page_id values.',
+				'Run diviskit_page_list to discover valid parent_page_id values.',
 				404
 			);
 		}
@@ -123,7 +123,7 @@ trait Diviskit_Agent_Canvas {
 			return self::envelope_error(
 				'conflict',
 				sprintf( "A canvas titled '%s' already exists under parent page #%d.", $title, $parent_page_id ),
-				'Use diviops_canvas_update to modify the existing canvas, or pick a different title.',
+				'Use diviskit_canvas_update to modify the existing canvas, or pick a different title.',
 				409,
 				[
 					'existing_canvas_id' => $existing_id,
@@ -211,7 +211,7 @@ trait Diviskit_Agent_Canvas {
 			return self::envelope_error(
 				'not_found',
 				"Canvas #{$source_id} not found.",
-				'Run diviops_canvas_list to discover valid canvas_post_id values.',
+				'Run diviskit_canvas_list to discover valid canvas_post_id values.',
 				404
 			);
 		}
@@ -641,7 +641,7 @@ trait Diviskit_Agent_Canvas {
 
 		global $wpdb;
 		if ( $wpdb && isset( $wpdb->posts, $wpdb->postmeta ) && method_exists( $wpdb, 'prepare' ) && method_exists( $wpdb, 'get_col' ) ) {
-			$batch_size            = min( 100, max( 1, (int) apply_filters( 'diviops_canvas_audit_candidate_query_batch_size', 50 ) ) );
+			$batch_size            = min( 100, max( 1, (int) apply_filters( 'diviskit_canvas_audit_candidate_query_batch_size', 50 ) ) );
 			$post_type_placeholders = implode( ', ', array_fill( 0, count( $post_types ), '%s' ) );
 			$meta_keys             = [ '_divi_off_canvas_data', '_divi_dynamic_assets_canvases_used' ];
 			$meta_key_placeholders = implode( ', ', array_fill( 0, count( $meta_keys ), '%s' ) );
@@ -653,7 +653,7 @@ trait Diviskit_Agent_Canvas {
 				$exclude_args   = $excluded_ids;
 			}
 
-			$max_candidates = max( 1, (int) apply_filters( 'diviops_canvas_audit_max_candidates', 500 ) );
+			$max_candidates = max( 1, (int) apply_filters( 'diviskit_canvas_audit_max_candidates', 500 ) );
 			$ids            = [];
 			foreach ( array_chunk( $canvas_ids, $batch_size ) as $batch ) {
 				$likes = [];
@@ -719,7 +719,7 @@ trait Diviskit_Agent_Canvas {
 			];
 		}
 
-		$max_candidates = max( 1, (int) apply_filters( 'diviops_canvas_audit_max_candidates', 500 ) );
+		$max_candidates = max( 1, (int) apply_filters( 'diviskit_canvas_audit_max_candidates', 500 ) );
 		$query = new WP_Query( [
 			'post_type'      => $post_types,
 			'post_status'    => 'any',
@@ -1084,7 +1084,7 @@ trait Diviskit_Agent_Canvas {
 			return self::envelope_error(
 				'not_found',
 				"Canvas #{$post_id} not found.",
-				'Run diviops_canvas_list to discover valid canvas_post_id values.',
+				'Run diviskit_canvas_list to discover valid canvas_post_id values.',
 				404
 			);
 		}
@@ -1116,7 +1116,7 @@ trait Diviskit_Agent_Canvas {
 			return self::envelope_error(
 				'not_found',
 				"Canvas #{$post_id} not found.",
-				'Run diviops_canvas_list to discover valid canvas_post_id values.',
+				'Run diviskit_canvas_list to discover valid canvas_post_id values.',
 				404
 			);
 		}
@@ -1247,7 +1247,7 @@ trait Diviskit_Agent_Canvas {
 			return self::envelope_error(
 				'not_found',
 				"Canvas #{$post_id} not found.",
-				'Run diviops_canvas_list to discover valid canvas_post_id values.',
+				'Run diviskit_canvas_list to discover valid canvas_post_id values.',
 				404
 			);
 		}

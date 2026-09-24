@@ -9,6 +9,25 @@ Policy:
 - Keep entries customer-facing. Avoid internal issue numbers unless they are needed to explain a user-visible change.
 - Do not include secrets, credentials, customer data, or environment-specific URLs.
 
+## 1.7.0
+
+- **Breaking:** removes the `diviops/v1` compat alias entirely — all routes are served on the canonical `diviskit/v1` namespace only; the handshake `namespaces` field reports `[diviskit/v1]`. MCP clients still pointing at `diviops/v1` must switch to `diviskit/v1`.
+- Removes the remaining pre-fork compat surfaces: the `diviops_agent_handshake_extensions` and `diviops_rate_limits` filter aliases, the `DIVIOPS_RATE_LIMIT_*`/`DIVIOPS_WP_CLI_PATH` constant and env fallbacks, the legacy-plugin detection (`DiviOps_Agent` coexistence notice), and the legacy Design-Library class fallback in the dashboard.
+- Error hints and snapshot metadata now reference `diviskit_*` tool names throughout.
+
+## 1.6.2
+
+- Ships the authoring skills inside the plugin (`skills/`) as the canonical source and serves them at `GET /wp-json/diviskit/v1/skills` (manifest with per-file sha256/mode) and `GET /wp-json/diviskit/v1/skills/<name>` (base64 bundle) — canonical namespace only, registered before the Divi-availability guard so clients can sync even while Divi is inactive.
+- Add-ons contribute their own skills via the new `diviskit_skills_dirs` filter (bundle slug → directory); `diviskit-pro` registers its `skills/` dir so Pro skills appear only where Pro is installed.
+- The distribution's `bin/install-skills.sh` now pulls skills from the site (credentials from `.devin/mcp_config.local.json` or `WP_*` env vars, checksum-verified writes) — `--pro` is deprecated since the endpoint self-gates on the installed plugin surface. The `claude/` bundles in the suite remain for the Claude Code marketplace as build artifacts of the plugin source.
+
+## 1.6.1
+
+- Connect card no longer presents the legacy `diviops/v1` namespace as a setup or handshake self-test target; the alias stays registered for existing MCP clients.
+- Writes a marked "Diviskit MCP" section into `ABSPATH/AGENTS.md` on activation and on version changes (`admin_init` + `diviskit_agents_md_version` option). Existing AGENTS.md content is preserved; the marked block is replaced in place or appended.
+- Adds a copyable AI-editor setup prompt to the connect card — the pasted prompt drives app-password creation, `.devin/mcp_config.local.json`, handshake verification and an MCP stdio smoke test.
+- Extracts the MCP client config template into `mcp_client_config()`, shared by the dashboard snippet and the generated AGENTS.md.
+
 ## 1.6.0
 
 - Forked from DiviOps Agent 1.5.25 (GPL v2) as Diviskit Agent.

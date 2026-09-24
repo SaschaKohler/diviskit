@@ -233,7 +233,7 @@ trait Diviskit_Agent_Menu {
 			return self::envelope_error(
 				'conflict',
 				"Menu already contains page #{$page_id} under this parent with a different label.",
-				'Use the existing item or wait for diviops_menu_item_update in a later slice.',
+				'Use the existing item or wait for diviskit_menu_item_update in a later slice.',
 				409,
 				[
 					'existing_item_id' => (int) $existing->ID,
@@ -319,7 +319,7 @@ trait Diviskit_Agent_Menu {
 			return self::envelope_error(
 				'conflict',
 				'Menu already contains this custom URL under this parent with a different label.',
-				'Use the existing item or wait for diviops_menu_item_update in a later slice.',
+				'Use the existing item or wait for diviskit_menu_item_update in a later slice.',
 				409,
 				[
 					'existing_item_id' => (int) $existing->ID,
@@ -366,7 +366,7 @@ trait Diviskit_Agent_Menu {
 			return self::envelope_error(
 				'invalid_input',
 				"Theme location '{$location}' is not registered by the current theme.",
-				'Call diviops_menu_list and use one of data.registered_locations keys.',
+				'Call diviskit_menu_list and use one of data.registered_locations keys.',
 				400,
 				[
 					'field'                => 'location',
@@ -440,7 +440,7 @@ trait Diviskit_Agent_Menu {
 		return self::envelope_error(
 			'not_found',
 			"Menu #{$menu_id} not found.",
-			'Call diviops_menu_list to discover existing menus.',
+			'Call diviskit_menu_list to discover existing menus.',
 			404,
 			[ 'menu_id' => $menu_id ]
 		);
@@ -562,7 +562,7 @@ trait Diviskit_Agent_Menu {
 		return self::envelope_error(
 			'not_found',
 			"Parent menu item #{$parent_item_id} not found in menu #{$menu_id}.",
-			'Pass parent_item_id=0 or an item ID from diviops_menu_get for this menu.',
+			'Pass parent_item_id=0 or an item ID from diviskit_menu_get for this menu.',
 			404,
 			[ 'menu_id' => $menu_id, 'parent_item_id' => $parent_item_id ]
 		);

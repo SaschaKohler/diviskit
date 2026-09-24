@@ -190,7 +190,7 @@ trait Diviskit_Agent_ThemeBuilder {
 			return self::envelope_error(
 				'not_found',
 				"Theme Builder layout #{$post_id} not found.",
-				'Run diviops_tb_template_list to discover valid header_layout_id / body_layout_id / footer_layout_id values.',
+				'Run diviskit_tb_template_list to discover valid header_layout_id / body_layout_id / footer_layout_id values.',
 				404
 			);
 		}
@@ -220,7 +220,7 @@ trait Diviskit_Agent_ThemeBuilder {
 			return self::envelope_error(
 				'not_found',
 				"Theme Builder layout #{$post_id} not found.",
-				'Run diviops_tb_template_list to discover valid header_layout_id / body_layout_id / footer_layout_id values.',
+				'Run diviskit_tb_template_list to discover valid header_layout_id / body_layout_id / footer_layout_id values.',
 				404
 			);
 		}
@@ -250,7 +250,7 @@ trait Diviskit_Agent_ThemeBuilder {
 		}
 
 		if ( (bool) $request->get_param( 'dry_run' ) ) {
-			$extra = $backup ? [ 'backup' => self::rollback_snapshot_plan_for_post_write( $post, 'diviops_tb_layout_update', [ 'tool_operation' => 'tb_layout.update' ] ) ] : [];
+			$extra = $backup ? [ 'backup' => self::rollback_snapshot_plan_for_post_write( $post, 'diviskit_tb_layout_update', [ 'tool_operation' => 'tb_layout.update' ] ) ] : [];
 			return self::dry_run_response(
 				"Would replace post_content on {$post->post_type} #{$post_id} ('{$post->post_title}') (" . strlen( (string) $post->post_content ) . "→" . strlen( $content ) . ' bytes).',
 				[ [
@@ -266,7 +266,7 @@ trait Diviskit_Agent_ThemeBuilder {
 
 		$snapshot = null;
 		if ( $backup ) {
-			$snapshot = self::rollback_snapshot_create_for_post_write( $post, 'diviops_tb_layout_update', [ 'tool_operation' => 'tb_layout.update' ] );
+			$snapshot = self::rollback_snapshot_create_for_post_write( $post, 'diviskit_tb_layout_update', [ 'tool_operation' => 'tb_layout.update' ] );
 			if ( is_wp_error( $snapshot ) ) {
 				return self::envelope_from_wp_error( $snapshot );
 			}
@@ -319,7 +319,7 @@ trait Diviskit_Agent_ThemeBuilder {
 			return self::envelope_error(
 				'not_found',
 				"Theme Builder layout #{$post_id} not found.",
-				'Run diviops_tb_template_list to discover valid header_layout_id / body_layout_id / footer_layout_id values.',
+				'Run diviskit_tb_template_list to discover valid header_layout_id / body_layout_id / footer_layout_id values.',
 				404,
 				[ 'layout_id' => $post_id ]
 			);
@@ -421,7 +421,7 @@ trait Diviskit_Agent_ThemeBuilder {
 		if ( $dry_run ) {
 			$extra = [ 'target' => $target_summary ];
 			if ( $backup ) {
-				$extra['backup'] = self::rollback_snapshot_plan_for_post_write( $post, 'diviops_tb_layout_block_insert', [ 'tool_operation' => 'tb_layout.block_insert', 'target' => $target_summary, 'position' => $position, 'inserted_block_count' => $inserted_count ] );
+				$extra['backup'] = self::rollback_snapshot_plan_for_post_write( $post, 'diviskit_tb_layout_block_insert', [ 'tool_operation' => 'tb_layout.block_insert', 'target' => $target_summary, 'position' => $position, 'inserted_block_count' => $inserted_count ] );
 			}
 			return self::dry_run_response(
 				$already_there
@@ -434,7 +434,7 @@ trait Diviskit_Agent_ThemeBuilder {
 		}
 
 		if ( $already_there ) {
-			$snapshot = $backup ? self::rollback_snapshot_noop_for_post_write( $post, 'diviops_tb_layout_block_insert', [ 'tool_operation' => 'tb_layout.block_insert', 'target' => $target_summary, 'position' => $position, 'inserted_block_count' => $inserted_count ] ) : null;
+			$snapshot = $backup ? self::rollback_snapshot_noop_for_post_write( $post, 'diviskit_tb_layout_block_insert', [ 'tool_operation' => 'tb_layout.block_insert', 'target' => $target_summary, 'position' => $position, 'inserted_block_count' => $inserted_count ] ) : null;
 			return self::envelope_success( self::rollback_snapshot_add_to_response( [
 				'success'              => true,
 				'noop'                 => true,
@@ -467,7 +467,7 @@ trait Diviskit_Agent_ThemeBuilder {
 		$new_content = $normalized['content'];
 		$current_normalized = self::normalize_divi_full_content_for_write( (string) $post->post_content );
 		if ( ! empty( $current_normalized['ok'] ) && $new_content === $current_normalized['content'] ) {
-			$snapshot = $backup ? self::rollback_snapshot_noop_for_post_write( $post, 'diviops_tb_layout_block_insert', [ 'tool_operation' => 'tb_layout.block_insert', 'target' => $target_summary, 'position' => $position, 'inserted_block_count' => $inserted_count ] ) : null;
+			$snapshot = $backup ? self::rollback_snapshot_noop_for_post_write( $post, 'diviskit_tb_layout_block_insert', [ 'tool_operation' => 'tb_layout.block_insert', 'target' => $target_summary, 'position' => $position, 'inserted_block_count' => $inserted_count ] ) : null;
 			return self::envelope_success( self::rollback_snapshot_add_to_response( [
 				'success'              => true,
 				'noop'                 => true,
@@ -482,7 +482,7 @@ trait Diviskit_Agent_ThemeBuilder {
 
 		$snapshot = null;
 		if ( $backup ) {
-			$snapshot = self::rollback_snapshot_create_for_post_write( $post, 'diviops_tb_layout_block_insert', [ 'tool_operation' => 'tb_layout.block_insert', 'target' => $target_summary, 'position' => $position, 'inserted_block_count' => $inserted_count ] );
+			$snapshot = self::rollback_snapshot_create_for_post_write( $post, 'diviskit_tb_layout_block_insert', [ 'tool_operation' => 'tb_layout.block_insert', 'target' => $target_summary, 'position' => $position, 'inserted_block_count' => $inserted_count ] );
 			if ( is_wp_error( $snapshot ) ) {
 				return self::envelope_from_wp_error( $snapshot );
 			}
@@ -984,7 +984,7 @@ trait Diviskit_Agent_ThemeBuilder {
 		// position-first ordering and avoids the alternative
 		// (re-positioning the new default to front of linked list,
 		// which has a bigger blast radius). Caller resolves by trashing
-		// the existing default via diviops_tb_template_trash or pinning
+		// the existing default via diviskit_tb_template_trash or pinning
 		// to a specific condition. Namespaced runtime code per the
 		// namespace_gate_vs_runtime_codes convention; rejection rather
 		// than silent flip per destructive_idempotent_silent (constraint
@@ -1002,7 +1002,7 @@ trait Diviskit_Agent_ThemeBuilder {
 				return self::envelope_error(
 					'tb_template.default_already_exists',
 					"A Default Website Template already exists in the active master (et_template #{$existing_default_id}).",
-					'Trash the existing default via diviops_tb_template_trash, or pin this template to a specific condition (e.g. "singular:post_type:page:all", "homepage", "404") instead of "default".',
+					'Trash the existing default via diviskit_tb_template_trash, or pin this template to a specific condition (e.g. "singular:post_type:page:all", "homepage", "404") instead of "default".',
 					409,
 					[
 						'existing_default_id' => $existing_default_id,
@@ -1189,7 +1189,7 @@ trait Diviskit_Agent_ThemeBuilder {
 	 * header/body/footer layouts AND scrub the `_et_template` meta refs on
 	 * the Theme Builder master post.
 	 *
-	 * Closes the orphan-meta gap left by `diviops_page_trash` (or wp-cli
+	 * Closes the orphan-meta gap left by `diviskit_page_trash` (or wp-cli
 	 * `post delete`) on a linked layout, which trashes the layout post but
 	 * leaves stale `_et_template = <id>` rows on the master `et_theme_builder`
 	 * post. UI deletion via the Divi Theme Builder cleans them; this typed
@@ -1217,7 +1217,7 @@ trait Diviskit_Agent_ThemeBuilder {
 			return self::envelope_error(
 				'not_found',
 				"Theme Builder template #{$template_id} not found.",
-				'Run diviops_tb_template_list to discover valid template IDs.',
+				'Run diviskit_tb_template_list to discover valid template IDs.',
 				404,
 				[ 'template_id' => $template_id ]
 			);

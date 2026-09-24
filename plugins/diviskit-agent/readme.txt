@@ -3,7 +3,7 @@ Contributors: diviskit
 Tags: divi, mcp, ai, rest-api, site-builder
 Requires at least: 6.5
 Tested up to: 7.1
-Stable tag: 1.6.0
+Stable tag: 1.7.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -115,6 +115,21 @@ Run it from anywhere inside your DDEV project (or pass the project directory as 
 2. An agent-authored page open in the Divi 5 Visual Builder, with the native Heading module content controls available for continued editing. Divi is a separate required product.
 
 == Changelog ==
+
+= 1.7.0 =
+
+* Breaking: the `diviops/v1` compat alias and the remaining pre-fork compat surfaces (`diviops_*` filter aliases, `DIVIOPS_*` constant/env fallbacks, legacy-plugin detection) are removed — all routes are served on `diviskit/v1` only. MCP clients still configured for `diviops/v1` must update.
+
+= 1.6.2 =
+
+* Ships the Diviskit authoring skills inside the plugin (`skills/`) and serves them at `GET /wp-json/diviskit/v1/skills` (+ `/skills/<name>` bundles) on the canonical namespace — clients sync version-locked copies instead of stale manual copies.
+* Add-on plugins can contribute their own skills via the `diviskit_skills_dirs` filter; `diviskit-pro` uses it to expose its skill bundle.
+
+= 1.6.1 =
+
+* The connect dashboard now offers only the canonical `diviskit/v1` namespace as a setup and self-test target; the `diviops/v1` compat alias stays registered for existing MCP clients.
+* Writes a marked "Diviskit MCP" section into the site's `AGENTS.md` on activation and after updates — AI editors get the REST base, a ready-made MCP client config and the verification commands.
+* Dashboard gains a copyable AI-editor setup prompt that drives the full MCP setup (application password, client config, handshake check, smoke test).
 
 = 1.5.25 =
 

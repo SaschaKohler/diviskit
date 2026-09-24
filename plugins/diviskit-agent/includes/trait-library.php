@@ -146,7 +146,7 @@ trait Diviskit_Agent_Library {
 			return self::envelope_error(
 				'not_found',
 				"Library item #{$post_id} not found.",
-				'Use diviops_library_list to find a valid item ID.',
+				'Use diviskit_library_list to find a valid item ID.',
 				404
 			);
 		}

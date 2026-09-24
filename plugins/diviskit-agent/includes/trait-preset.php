@@ -76,7 +76,7 @@ trait Diviskit_Agent_Preset {
 			return self::envelope_success( array_merge( $base, [ 'repair' => true, 'dry_run' => false, 'mutated' => false, 'noop' => true, 'plan' => $plan ] ) );
 		}
 
-		$backup_name = 'diviops_preset_registry_backup_' . gmdate( 'Ymd_His' ) . '_' . wp_generate_password( 8, false, false );
+		$backup_name = 'diviskit_preset_registry_backup_' . gmdate( 'Ymd_His' ) . '_' . wp_generate_password( 8, false, false );
 		if ( ! add_option( $backup_name, $registry, '', false ) ) {
 			return self::envelope_error( 'wp_error', 'Could not create the non-autoloaded preset registry backup; no mutation was attempted.', null, 500 );
 		}
@@ -216,7 +216,7 @@ trait Diviskit_Agent_Preset {
 	 * — surfaced here under `legacy_presets` for inventory/diagnostic
 	 * symmetry only; it is NOT a D5 READ fallback, NEVER written by
 	 * create/update/delete, and tagged with `provenance: "legacy_d4_ng"`
-	 * in the `diviops_preset_audit_storage` aggregate view.
+	 * in the `diviskit_preset_audit_storage` aggregate view.
 	 *
 	 * Response carries top-level `_meta.source_path` + `_meta.probed_paths`
 	 * so callers can distinguish "actually empty" from "we probed the
@@ -312,7 +312,7 @@ trait Diviskit_Agent_Preset {
 		$preset_id = sanitize_text_field( (string) $request->get_param( 'preset_id' ) );
 		$audit     = self::audit_d5_preset_storage();
 		if ( '' === $preset_id || ! isset( $audit['aggregated'][ $preset_id ] ) ) {
-			return self::envelope_error( 'not_found', "Preset '{$preset_id}' not found in D5 preset storage.", 'Use diviops_preset_audit to discover registered D5 preset UUIDs.', 404, [ 'preset_id' => $preset_id ] );
+			return self::envelope_error( 'not_found', "Preset '{$preset_id}' not found in D5 preset storage.", 'Use diviskit_preset_audit to discover registered D5 preset UUIDs.', 404, [ 'preset_id' => $preset_id ] );
 		}
 
 		$preset       = (array) $audit['aggregated'][ $preset_id ];
@@ -1398,7 +1398,7 @@ trait Diviskit_Agent_Preset {
 			return self::envelope_error(
 				'not_found',
 				"Preset '{$preset_id}' not found",
-				'Use diviops_preset_audit to discover valid preset IDs.',
+				'Use diviskit_preset_audit to discover valid preset IDs.',
 				404
 			);
 		}
@@ -1475,7 +1475,7 @@ trait Diviskit_Agent_Preset {
 					return self::envelope_error(
 						'conflict',
 						"Preset '{$preset_id}' is the registered default for {$type}/{$mod}.",
-						'Clear the default pointer first via diviops_preset_set_default with unset=true, or pass force=true to delete and clear the pointer in the same write.',
+						'Clear the default pointer first via diviskit_preset_set_default with unset=true, or pass force=true to delete and clear the pointer in the same write.',
 						409,
 						[
 							'preset_id' => $preset_id,
@@ -1512,7 +1512,7 @@ trait Diviskit_Agent_Preset {
 			return self::envelope_error(
 				'not_found',
 				"Preset '{$preset_id}' not found",
-				'Use diviops_preset_audit to discover valid preset IDs.',
+				'Use diviskit_preset_audit to discover valid preset IDs.',
 				404
 			);
 		}
@@ -1587,7 +1587,7 @@ trait Diviskit_Agent_Preset {
 				return self::envelope_error(
 					'not_found',
 					"Bucket '{$req_type}/{$req_module}' not found in registry.",
-					'Use diviops_preset_audit to discover valid type/module combinations.',
+					'Use diviskit_preset_audit to discover valid type/module combinations.',
 					404
 				);
 			}
@@ -1681,7 +1681,7 @@ trait Diviskit_Agent_Preset {
 			return self::envelope_error(
 				'not_found',
 				"Preset '{$preset_id}' not found",
-				'Use diviops_preset_audit to discover valid preset IDs. To clear an orphan default pointer (UUID gone from items[]), pass type + module + unset=true instead.',
+				'Use diviskit_preset_audit to discover valid preset IDs. To clear an orphan default pointer (UUID gone from items[]), pass type + module + unset=true instead.',
 				404
 			);
 		}
@@ -1816,7 +1816,7 @@ trait Diviskit_Agent_Preset {
 				return self::envelope_error(
 					'conflict',
 					sprintf( "Preset named '%s' already exists in %s/%s.", $name, $bucket, $bucket_key ),
-					'Use diviops_preset_update to change attrs on the existing preset, or pick a different name.',
+					'Use diviskit_preset_update to change attrs on the existing preset, or pick a different name.',
 					409,
 					[
 						'existing_preset_id' => (string) $existing_uid,
@@ -2033,7 +2033,7 @@ trait Diviskit_Agent_Preset {
 			return self::envelope_error(
 				'not_found',
 				"new_uuid '{$new_uuid}' does not exist in preset registry.",
-				'Use diviops_preset_audit to discover registered preset UUIDs.',
+				'Use diviskit_preset_audit to discover registered preset UUIDs.',
 				404
 			);
 		}
@@ -2052,7 +2052,7 @@ trait Diviskit_Agent_Preset {
 			return self::envelope_error(
 				'preset.bucket_mismatch',
 				"Bucket mismatch: old_uuid is a {$old_bucket} preset, new_uuid is a {$new_bucket} preset. Cross-bucket swaps are not supported.",
-				'Pick a new_uuid in the same bucket as old_uuid, or use diviops_preset_audit to discover candidates.',
+				'Pick a new_uuid in the same bucket as old_uuid, or use diviskit_preset_audit to discover candidates.',
 				400,
 				[
 					'old_bucket' => $old_bucket,

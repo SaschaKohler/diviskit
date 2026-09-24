@@ -1,14 +1,15 @@
 <?php
 /**
  * Plugin Name: Diviskit Agent
- * Description: REST API bridge for Diviskit — connects AI coding agents to your Divi 5 site for page building and design management. Forked from the GPL-licensed DiviOps Agent; serves the identical REST contract on diviskit/v1 plus a diviops/v1 compat alias.
- * Version: 1.6.0
+ * Description: REST API bridge for Diviskit — connects AI coding agents to your Divi 5 site for page building and design management. Forked from the GPL-licensed DiviOps Agent; serves the REST contract on the canonical diviskit/v1 namespace.
+ * Version: 1.7.0
  * Author: Diviskit
  * Text Domain: diviskit-agent
  * Requires at least: 6.5
  * Requires PHP: 7.4
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ * Update URI: https://diviskit.com/item/diviskit-agent/
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -35,6 +36,7 @@ require_once __DIR__ . '/includes/trait-render.php';
 require_once __DIR__ . '/includes/trait-rollback.php';
 require_once __DIR__ . '/includes/trait-scf.php';
 require_once __DIR__ . '/includes/trait-seo.php';
+require_once __DIR__ . '/includes/trait-skills.php';
 require_once __DIR__ . '/includes/trait-theme-builder.php';
 require_once __DIR__ . '/includes/trait-validate.php';
 require_once __DIR__ . '/includes/trait-variable.php';
@@ -62,6 +64,7 @@ class Diviskit_Agent {
 	use Diviskit_Agent_Rollback;
 	use Diviskit_Agent_SCF;
 	use Diviskit_Agent_SEO;
+	use Diviskit_Agent_Skills;
 	use Diviskit_Agent_ThemeBuilder;
 	use Diviskit_Agent_Validate;
 	use Diviskit_Agent_Variable;
@@ -70,7 +73,7 @@ class Diviskit_Agent {
 	 * Plugin version — surfaced in /handshake for self-diagnosis only;
 	 * server no longer gates on it (capability map is the gate).
 	 */
-	const VERSION = '1.6.0';
+	const VERSION = '1.7.0';
 
 	/**
 	 * Minimum MCP server version this plugin is compatible with.
@@ -81,7 +84,7 @@ class Diviskit_Agent {
 	 * Per-tool capability map emitted by /handshake.
 	 *
 	 * Each key is a post-rename MCP tool name slug (without the
-	 * `diviskit_` prefix (legacy `diviops_` tool slugs remain valid)) or a precise additive behavior capability for
+	 * `diviskit_` prefix) or a precise additive behavior capability for
 	 * a backwards-compatible route extension. The server's `requireCapability(<key>)`
 	 * gate at every plugin-touching tool entry compares against this
 	 * list. Tools the server adds in newer releases that aren't yet
@@ -129,6 +132,8 @@ class Diviskit_Agent {
 		'schema_get_module', 'schema_get_module_dump_all', 'schema_get_settings', 'schema_list_modules',
 		// section
 		'section_append', 'section_append_backup', 'section_get', 'section_remove', 'section_remove_backup', 'section_replace', 'section_replace_backup',
+		// skills
+		'skill_get', 'skill_list',
 		// theme builder
 		'tb_layout_block_insert', 'tb_layout_block_insert_backup', 'tb_layout_get', 'tb_layout_update', 'tb_layout_update_backup', 'tb_template_create', 'tb_template_create_body', 'tb_template_list',
 		'tb_template_trash',
@@ -158,14 +163,10 @@ class Diviskit_Agent {
 	];
 
 	/**
-	 * REST namespaces. `diviskit/v1` is the canonical namespace; `diviops/v1`
-	 * is dual-registered as a compat alias so existing @diviops/mcp-server
-	 * clients keep working during migration. When the legacy diviops-agent
-	 * plugin is active alongside this one it owns diviops/v1 and the alias
-	 * registration is skipped (route-table merge would be unpredictable).
+	 * REST namespace. `diviskit/v1` is the canonical and only namespace —
+	 * the legacy diviops/v1 compat alias was removed in 1.7.0.
 	 */
-	const REST_NAMESPACE        = 'diviskit/v1';
-	const REST_NAMESPACE_LEGACY = 'diviops/v1';
+	const REST_NAMESPACE = 'diviskit/v1';
 	const REASSIGN_MAX_PAGES  = 1000;
 	const VARIABLES_SCAN_MAX_POSTS = 2000;
 
@@ -216,73 +217,205 @@ class Diviskit_Agent {
 		'string_bytes' => 1048576,
 	];
 
-	/**
-	 * Set at init() (plugin-file load) — before any late-bound
-	 * class_alias('Diviskit_Agent','DiviOps_Agent') compat shim could make
-	 * the check ambiguous.
-	 */
-	private static $legacy_agent_active = false;
-
 	public static function init() {
-		self::$legacy_agent_active = class_exists( 'DiviOps_Agent', false );
 		add_action( 'rest_api_init', [ __CLASS__, 'register_routes' ] );
 		add_filter( 'rest_endpoints', [ __CLASS__, 'repair_divi_post_filter_price_permission' ] );
 		add_filter( 'rest_pre_dispatch', [ __CLASS__, 'check_rate_limit' ], 10, 3 );
 		add_filter( 'rest_post_dispatch', [ __CLASS__, 'wrap_rest_framework_validation_errors' ], 10, 3 );
 		add_action( 'admin_menu', [ __CLASS__, 'register_admin_page' ] );
 		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_admin_styles' ] );
-		if ( self::legacy_agent_active() ) {
-			add_action( 'admin_notices', [ __CLASS__, 'render_legacy_agent_notice' ] );
-		}
+		add_action( 'admin_init', [ __CLASS__, 'maybe_write_agents_md' ] );
 	}
 
 	/**
-	 * Whether the legacy diviops-agent plugin is loaded alongside this fork.
-	 * When it is, it owns the diviops/v1 namespace and compat registration
-	 * is skipped so the two plugins never merge into one route table.
-	 */
-	private static function legacy_agent_active() {
-		return self::$legacy_agent_active;
-	}
-
-	/**
-	 * Whether a REST route path belongs to this agent (canonical or compat).
+	 * Whether a REST route path belongs to this agent.
 	 *
 	 * @param string $route Route path as returned by WP_REST_Request::get_route().
 	 */
 	private static function is_agent_route( $route ) {
-		foreach ( [ self::REST_NAMESPACE, self::REST_NAMESPACE_LEGACY ] as $ns ) {
-			if ( $route === '/' . $ns || strpos( $route, '/' . $ns . '/' ) === 0 ) {
-				return true;
-			}
-		}
-		return false;
+		$ns = '/' . self::REST_NAMESPACE;
+		return $route === $ns || strpos( $route, $ns . '/' ) === 0;
 	}
 
 	/**
-	 * Register a route on diviskit/v1 plus the diviops/v1 compat alias.
+	 * Register a route on diviskit/v1.
 	 * Drop-in wrapper around register_rest_route() — same signature minus
 	 * the namespace argument.
 	 */
 	private static function register_route( $route, $args ) {
 		register_rest_route( self::REST_NAMESPACE, $route, $args );
-		if ( ! self::legacy_agent_active() ) {
-			register_rest_route( self::REST_NAMESPACE_LEGACY, $route, $args );
+	}
+
+	/**
+	 * Plugin activation — drop the Diviskit section into the project
+	 * AGENTS.md so an AI editor opened on this directory can self-serve
+	 * the MCP connection setup.
+	 */
+	public static function activate() {
+		if ( self::write_project_agents_md() ) {
+			update_option( 'diviskit_agents_md_version', self::VERSION, false );
 		}
 	}
 
 	/**
-	 * Admin notice when the legacy plugin is still active next to the fork.
+	 * Regenerate the AGENTS.md Diviskit section when the plugin version on
+	 * disk differs from the version that last wrote the file — covers
+	 * updates and installs where the activation hook never ran.
 	 */
-	public static function render_legacy_agent_notice() {
-		if ( ! current_user_can( 'activate_plugins' ) ) {
+	public static function maybe_write_agents_md() {
+		if ( get_option( 'diviskit_agents_md_version' ) === self::VERSION ) {
 			return;
 		}
-		echo '<div class="notice notice-warning"><p>';
-		echo '<strong>Diviskit Agent</strong> is active alongside the legacy <strong>DiviOps Agent</strong>. ';
-		echo 'Diviskit serves <code>diviskit/v1</code>; the legacy plugin still owns <code>diviops/v1</code>. ';
-		echo 'Deactivate DiviOps Agent to let Diviskit take over the compat namespace.';
-		echo '</p></div>';
+		if ( self::write_project_agents_md() ) {
+			update_option( 'diviskit_agents_md_version', self::VERSION, false );
+		}
+	}
+
+	/**
+	 * Write or update the marked Diviskit section inside ABSPATH/AGENTS.md.
+	 * An existing file is preserved: a marked block is replaced in place,
+	 * otherwise the section is appended.
+	 */
+	private static function write_project_agents_md() {
+		$begin   = '<!-- BEGIN DIVISKIT-AGENT -->';
+		$end     = '<!-- END DIVISKIT-AGENT -->';
+		$section = $begin . "\n" . self::agents_md_section() . $end . "\n";
+		$path    = ABSPATH . 'AGENTS.md';
+
+		if ( file_exists( $path ) ) {
+			$existing = file_get_contents( $path );
+			if ( false === $existing ) {
+				return false;
+			}
+			$start = strpos( $existing, $begin );
+			$stop  = strpos( $existing, $end );
+			if ( false !== $start && false !== $stop && $stop > $start ) {
+				$content = substr( $existing, 0, $start ) . rtrim( $section ) . substr( $existing, $stop + strlen( $end ) );
+			} else {
+				$content = rtrim( $existing ) . "\n\n" . $section;
+			}
+		} else {
+			$content = "# AGENTS.md\n\n" . $section;
+		}
+
+		return false !== file_put_contents( $path, $content );
+	}
+
+	/**
+	 * AGENTS.md section — site-specific REST base, MCP client config and
+	 * the verification procedure an AI agent follows for the connection
+	 * setup. Wrapped in BEGIN/END markers by write_project_agents_md().
+	 */
+	private static function agents_md_section() {
+		$rest_base  = rest_url( self::REST_NAMESPACE );
+		$config     = wp_json_encode( self::mcp_client_config(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
+		$min_server = self::MIN_SERVER_VERSION;
+		$prompt     = self::mcp_setup_prompt();
+
+		ob_start();
+?>
+## Diviskit MCP
+
+This site runs the **Diviskit Agent** WordPress plugin — a REST bridge that
+lets AI coding agents manage Divi 5 content via the `@diviskit/mcp-server`
+MCP server.
+
+- REST base: `<?php echo esc_url( $rest_base ); ?>` — namespace `diviskit/v1`.
+- Handshake: `POST <?php echo esc_url( $rest_base ); ?>/handshake` with body
+  `{"mcp_server_version":"<server version>"}` and Application-Password basic
+  auth → `{ "compatible": true, "capabilities": { ... } }`.
+- Envelope: every endpoint returns `{ "ok": true, "data": ... }` or
+  `{ "ok": false, "error": { "code", "message", "hint" } }`.
+
+### MCP client config
+
+Create `.devin/mcp_config.local.json` (Devin) or your client's MCP config
+equivalent, replacing `<application-password>` with a real WordPress
+Application Password:
+
+```json
+<?php echo $config; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON config template written to a project file, not HTML output. ?>
+```
+
+Gitignore the file — it contains credentials. Create the password under
+Users → Profile → Application Passwords, or via WP-CLI:
+`wp user application-password create <user> diviskit-mcp --porcelain`
+(DDEV: `ddev wp user application-password create admin diviskit-mcp --porcelain`).
+
+### Verify
+
+```bash
+curl -s -X POST "<?php echo esc_url( $rest_base ); ?>/handshake" \
+  -u "<user>:<app-password>" \
+  -H "Content-Type: application/json" \
+  -d '{"mcp_server_version":"<?php echo esc_attr( $min_server ); ?>"}'
+```
+
+Expect `"compatible": true` and a `capabilities` map. Then restart the AI
+client and smoke-test: `tools/list` exposes `diviskit_*` tools and a
+read-only call like `diviskit_page_list` returns `{ "ok": true, ... }`.
+
+### Ready-to-paste setup prompt
+
+```
+<?php echo $prompt; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text prompt written to a project file, not HTML output. ?>
+```
+
+<?php
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * MCP client config template for this site — shared by the admin
+	 * dashboard snippet and the generated AGENTS.md.
+	 * NODE_TLS_REJECT_UNAUTHORIZED is only emitted for local/self-signed
+	 * dev hosts — never for production.
+	 */
+	private static function mcp_client_config() {
+		$wp_url   = get_site_url();
+		$wp_host  = (string) wp_parse_url( $wp_url, PHP_URL_HOST );
+		$is_local = (bool) preg_match( '/(^localhost$|\.ddev\.site$|\.local$|\.test$|^127\.0\.0\.1$)/', $wp_host );
+		$env      = [
+			'WP_URL'          => $wp_url,
+			'WP_USER'         => wp_get_current_user()->user_login ? wp_get_current_user()->user_login : 'admin',
+			'WP_APP_PASSWORD' => '<application-password>',
+		];
+		if ( $is_local ) {
+			$env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+		}
+		return [
+			'mcpServers' => [
+				'diviskit-mcp' => [
+					'command' => 'npx',
+					'args'    => [ '-y', '--package', '@diviskit/mcp-server', 'diviskit-mcp' ],
+					'env'     => $env,
+				],
+			],
+		];
+	}
+
+	/**
+	 * Paste-ready setup prompt — shown on the admin dashboard and embedded
+	 * in the generated AGENTS.md. The receiving agent performs the full
+	 * MCP setup: app password, client config, handshake check, smoke test.
+	 */
+	private static function mcp_setup_prompt() {
+		$rest_base = rest_url( self::REST_NAMESPACE );
+
+		ob_start();
+?>
+Set up the Diviskit MCP server for this WordPress project so that diviskit_* MCP tools become available.
+
+The Diviskit Agent plugin has written an AGENTS.md into the project root — read its "Diviskit MCP" section first. It contains the REST base (<?php echo esc_url( $rest_base ); ?>), the ready-made MCP client config and the verification commands. Use diviskit/v1 only.
+
+Steps:
+1. Create a WordPress Application Password named "diviskit-mcp". Prefer WP-CLI: `wp user application-password create <user> diviskit-mcp --porcelain` (DDEV: `ddev wp user application-password create admin diviskit-mcp --porcelain`). If there is no CLI access, ask me to create one under Users → Profile → Application Passwords and paste it.
+2. Write the MCP config from AGENTS.md to `.devin/mcp_config.local.json`, replacing `<application-password>`, and add the file to `.gitignore`.
+3. Verify the handshake with the curl command from AGENTS.md — expect `"compatible": true` and a `capabilities` map.
+4. Smoke-test the server over stdio with the env vars from the config: send `initialize`, then `tools/list` (expect diviskit_* tools), then one read-only `tools/call` such as `diviskit_page_list` (expect `{"ok":true,...}`).
+5. Tell me to restart the AI client or reload the MCP session, then confirm the diviskit_* tools registered.
+<?php
+		return (string) ob_get_clean();
 	}
 
 	/**
@@ -354,7 +487,6 @@ class Diviskit_Agent {
 	 *   - DIVISKIT_RATE_LIMIT_WRITE constant or env var (default: 30/min)
 	 *   - DIVISKIT_RATE_LIMIT_DISABLED constant or env var (disables entirely)
 	 *   - 'diviskit_rate_limits' filter (receives ['read' => int, 'write' => int])
- *     ('diviops_rate_limits' is applied afterwards as a legacy alias)
 	 *
 	 * @param mixed            $result  Response to replace the requested one.
 	 * @param WP_REST_Server   $server  Server instance.
@@ -362,7 +494,7 @@ class Diviskit_Agent {
 	 * @return mixed|WP_Error
 	 */
 	public static function check_rate_limit( $result, $server, $request ) {
-		// Only apply to our namespaces (canonical + compat alias).
+		// Only apply to the canonical namespace.
 		if ( ! self::is_agent_route( $request->get_route() ) ) {
 			return $result;
 		}
@@ -389,8 +521,6 @@ class Diviskit_Agent {
 			'read'  => $read_limit,
 			'write' => $write_limit,
 		] );
-		// Legacy pre-fork filter name still honored for existing integrations.
-		$limits = apply_filters( 'diviops_rate_limits', $limits );
 		if ( ! is_array( $limits ) || ! isset( $limits['read'], $limits['write'] ) ) {
 			$limits = [ 'read' => $read_limit, 'write' => $write_limit ];
 		}
@@ -720,6 +850,23 @@ class Diviskit_Agent {
 			'args'                => [
 				'mcp_server_version' => [ 'required' => true, 'type' => 'string' ],
 			],
+		] );
+
+		// ── Skill bundles ───────────────────────────────────────────
+		// Canonical authoring knowledge shipped inside the plugin.
+		// Registered before the Divi guard so clients can sync skills
+		// even while Divi is inactive. Canonical diviskit/v1 only —
+		// new routes are not dual-registered on the legacy namespace.
+		register_rest_route( self::REST_NAMESPACE, '/skills', [
+			'methods'             => 'GET',
+			'callback'            => [ __CLASS__, 'skills_list' ],
+			'permission_callback' => [ __CLASS__, 'check_read_permission' ],
+		] );
+
+		register_rest_route( self::REST_NAMESPACE, '/skills/(?P<name>[a-z0-9-]+)', [
+			'methods'             => 'GET',
+			'callback'            => [ __CLASS__, 'skills_get' ],
+			'permission_callback' => [ __CLASS__, 'check_read_permission' ],
 		] );
 
 		// Divi availability guard — still requires auth to avoid exposing plugin status.
@@ -2183,19 +2330,14 @@ class Diviskit_Agent {
 			'read'  => $read_limit,
 			'write' => $write_limit,
 		] );
-		$limits = apply_filters( 'diviops_rate_limits', $limits );
 		if ( is_array( $limits ) && isset( $limits['read'], $limits['write'] ) ) {
 			$read_limit  = (int) $limits['read'];
 			$write_limit = (int) $limits['write'];
 		}
 
-		// Design Library status — prefer the Diviskit fork, fall back to the
-		// legacy class name (the fork aliases it, so this also covers the old plugin).
-		$ddl_active  = class_exists( 'Diviskit_Design_Library' ) || class_exists( 'DiviOps_Design_Library' );
-		$ddl_version = null;
-		if ( $ddl_active ) {
-			$ddl_version = defined( 'Diviskit_Design_Library::VERSION' ) ? Diviskit_Design_Library::VERSION : DiviOps_Design_Library::VERSION;
-		}
+		// Design Library status.
+		$ddl_active  = class_exists( 'Diviskit_Design_Library' );
+		$ddl_version = $ddl_active && defined( 'Diviskit_Design_Library::VERSION' ) ? Diviskit_Design_Library::VERSION : null;
 
 		// Pro status.
 		$pro_active  = class_exists( 'Diviskit_Pro' );
@@ -2205,20 +2347,16 @@ class Diviskit_Agent {
 		// Handshake extension data (Pro modules, targets) — same filters the
 		// REST handshake applies, so the dashboard shows what clients see.
 		$hs_extensions = apply_filters( 'diviskit_agent_handshake_extensions', [] );
-		$hs_extensions = apply_filters( 'diviops_agent_handshake_extensions', is_array( $hs_extensions ) ? $hs_extensions : [] );
 		$active_modules    = is_array( $hs_extensions ) && isset( $hs_extensions['active_modules'] ) && is_array( $hs_extensions['active_modules'] ) ? $hs_extensions['active_modules'] : [];
 		$pro_capabilities  = is_array( $hs_extensions ) && isset( $hs_extensions['capabilities'] ) && is_array( $hs_extensions['capabilities'] ) ? array_keys( $hs_extensions['capabilities'] ) : [];
 
-		// Route counts per namespace from the live route table.
-		$route_counts = [ self::REST_NAMESPACE => 0, self::REST_NAMESPACE_LEGACY => 0 ];
+		// Route count for the canonical namespace from the live route table.
+		$route_count = 0;
 		foreach ( array_keys( rest_get_server()->get_routes() ) as $route_path ) {
-			foreach ( array_keys( $route_counts ) as $ns ) {
-				if ( 0 === strpos( $route_path, '/' . $ns . '/' ) ) {
-					$route_counts[ $ns ]++;
-				}
+			if ( 0 === strpos( $route_path, '/' . self::REST_NAMESPACE . '/' ) ) {
+				$route_count++;
 			}
 		}
-		$legacy_ns_served = ! self::legacy_agent_active();
 
 		// Capability groups (prefix before first underscore → count).
 		$capability_groups = [];
@@ -2231,28 +2369,9 @@ class Diviskit_Agent {
 		}
 		ksort( $capability_groups );
 
-		// Copy-ready MCP client config for this site. NODE_TLS_REJECT_UNAUTHORIZED
-		// is only emitted for local/self-signed dev hosts — never for production.
-		$wp_url      = get_site_url();
-		$wp_host     = (string) wp_parse_url( $wp_url, PHP_URL_HOST );
-		$is_local    = (bool) preg_match( '/(^localhost$|\.ddev\.site$|\.local$|\.test$|^127\.0\.0\.1$)/', $wp_host );
-		$mcp_env     = [
-			'WP_URL'          => $wp_url,
-			'WP_USER'         => wp_get_current_user()->user_login,
-			'WP_APP_PASSWORD' => '<application-password>',
-		];
-		if ( $is_local ) {
-			$mcp_env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
-		}
-		$mcp_config  = wp_json_encode( [
-			'mcpServers' => [
-				'diviskit-mcp' => [
-					'command' => 'npx',
-					'args'    => [ '-y', '--package', '@diviskit/mcp-server', 'diviskit-mcp' ],
-					'env'     => $mcp_env,
-				],
-			],
-		], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
+		// Copy-ready MCP client config for this site — same template the
+		// generated AGENTS.md embeds.
+		$mcp_config = wp_json_encode( self::mcp_client_config(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
 
 		$brand_logo_url   = plugins_url( 'assets/diviskit-wordmark.svg', __FILE__ );
 		$snapshot_request = new class() {
@@ -2290,44 +2409,27 @@ class Diviskit_Agent {
 					<?php if ( ! $divi_active ) : ?>
 						<p class="diviskit-callout"><?php esc_html_e( 'Divi is not active. Activate the Divi theme to use Divi-dependent MCP tools.', 'diviskit-agent' ); ?></p>
 					<?php endif; ?>
-					<?php if ( self::legacy_agent_active() ) : ?>
-						<p class="diviskit-callout diviskit-callout--warning"><?php esc_html_e( 'The legacy DiviOps Agent plugin is still active. Diviskit serves diviskit/v1 while the legacy plugin owns diviops/v1 — deactivate DiviOps Agent to let Diviskit take over the compat namespace.', 'diviskit-agent' ); ?></p>
-					<?php endif; ?>
 
 					<section class="diviskit-card diviskit-card--hero" aria-labelledby="diviskit-connect-title">
 						<div class="diviskit-section-heading">
 							<h2 id="diviskit-connect-title"><?php esc_html_e( 'Connect your agent', 'diviskit-agent' ); ?></h2>
 							<button type="button" id="diviskit-selftest-run" class="button"><span class="dashicons dashicons-heartbeat" aria-hidden="true"></span><?php esc_html_e( 'Run handshake self-test', 'diviskit-agent' ); ?></button>
 						</div>
-						<p class="diviskit-muted"><?php esc_html_e( 'This site exposes the Diviskit REST contract on two namespaces. Point your MCP client at either one — diviskit/v1 is canonical, diviops/v1 is the compat alias for existing setups.', 'diviskit-agent' ); ?></p>
+						<p class="diviskit-muted"><?php esc_html_e( 'Point your MCP client at the diviskit/v1 namespace below.', 'diviskit-agent' ); ?></p>
 						<p id="diviskit-selftest-result" class="diviskit-selftest" data-running="<?php esc_attr_e( 'Running handshake…', 'diviskit-agent' ); ?>" hidden><?php esc_html_e( 'Self-test has not run yet.', 'diviskit-agent' ); ?></p>
 						<div class="diviskit-namespaces">
-							<?php foreach ( [ self::REST_NAMESPACE, self::REST_NAMESPACE_LEGACY ] as $ns ) :
-								$ns_url    = rest_url( $ns );
-								$ns_live   = self::REST_NAMESPACE === $ns || $legacy_ns_served;
-								$ns_id     = 'diviskit-ns-' . sanitize_key( str_replace( '/', '-', $ns ) );
-								$ns_routes = $route_counts[ $ns ] ?? 0;
-								?>
-								<div class="diviskit-namespace<?php echo $ns_live ? '' : ' diviskit-namespace--inactive'; ?>">
-									<div>
-										<code id="<?php echo esc_attr( $ns_id ); ?>"><?php echo esc_url( $ns_url ); ?></code>
-										<span class="diviskit-muted">
-											<?php
-											if ( self::REST_NAMESPACE === $ns ) {
-												/* translators: %d: number of registered REST routes. */
-												echo esc_html( sprintf( __( 'canonical · %d routes', 'diviskit-agent' ), $ns_routes ) );
-											} elseif ( $legacy_ns_served ) {
-												/* translators: %d: number of registered REST routes. */
-												echo esc_html( sprintf( __( 'compat alias · %d routes', 'diviskit-agent' ), $ns_routes ) );
-											} else {
-												esc_html_e( 'compat alias · owned by legacy DiviOps Agent', 'diviskit-agent' );
-											}
-											?>
-										</span>
-									</div>
-									<button type="button" class="button button-small" data-diviskit-copy="<?php echo esc_attr( $ns_id ); ?>" data-copied="<?php esc_attr_e( 'Copied', 'diviskit-agent' ); ?>"><?php esc_html_e( 'Copy URL', 'diviskit-agent' ); ?></button>
+							<div class="diviskit-namespace">
+								<div>
+									<code id="diviskit-ns-canonical"><?php echo esc_url( rest_url( self::REST_NAMESPACE ) ); ?></code>
+									<span class="diviskit-muted">
+										<?php
+										/* translators: %d: number of registered REST routes. */
+										echo esc_html( sprintf( __( 'canonical · %d routes', 'diviskit-agent' ), $route_count ) );
+										?>
+									</span>
 								</div>
-							<?php endforeach; ?>
+								<button type="button" class="button button-small" data-diviskit-copy="diviskit-ns-canonical" data-copied="<?php esc_attr_e( 'Copied', 'diviskit-agent' ); ?>"><?php esc_html_e( 'Copy URL', 'diviskit-agent' ); ?></button>
+							</div>
 						</div>
 						<details class="diviskit-mcp-config">
 							<summary><?php esc_html_e( 'MCP client configuration', 'diviskit-agent' ); ?></summary>
@@ -2341,6 +2443,18 @@ class Diviskit_Agent {
 							</div>
 							<p class="diviskit-muted"><a href="<?php echo esc_url( admin_url( 'profile.php#application-passwords-section' ) ); ?>"><?php esc_html_e( 'Create an Application Password on your profile', 'diviskit-agent' ); ?></a></p>
 						</details>
+						<details class="diviskit-mcp-config">
+							<summary><?php esc_html_e( 'AI editor setup prompt', 'diviskit-agent' ); ?></summary>
+							<p class="diviskit-muted"><?php esc_html_e( 'Paste this prompt into your AI editor (Devin, Claude Code, Codex, …). The agent reads the AGENTS.md this plugin wrote to your site root, then runs the full MCP setup — application password, client config, handshake check and smoke test.', 'diviskit-agent' ); ?></p>
+							<div class="diviskit-config-block">
+								<pre id="diviskit-setup-prompt"><?php echo esc_html( self::mcp_setup_prompt() ); ?></pre>
+								<button type="button" class="button button-small" data-diviskit-copy="diviskit-setup-prompt" data-copied="<?php esc_attr_e( 'Copied', 'diviskit-agent' ); ?>"><?php esc_html_e( 'Copy prompt', 'diviskit-agent' ); ?></button>
+							</div>
+							<p class="diviskit-muted"><?php
+								/* translators: %s: absolute path of the generated AGENTS.md. */
+								echo esc_html( sprintf( __( 'Setup instructions live in %s — regenerated automatically on plugin updates.', 'diviskit-agent' ), '<code>' . ABSPATH . 'AGENTS.md</code>' ) );
+							?></p>
+						</details>
 					</section>
 
 					<div class="diviskit-overview-grid">
@@ -2350,7 +2464,7 @@ class Diviskit_Agent {
 								<div><dt><?php esc_html_e( 'Plugin version', 'diviskit-agent' ); ?></dt><dd><?php echo esc_html( self::VERSION ); ?> <span class="diviskit-muted"><?php esc_html_e( 'Free', 'diviskit-agent' ); ?></span></dd></div>
 								<div><dt><?php esc_html_e( 'Divi theme', 'diviskit-agent' ); ?></dt><dd><span class="diviskit-status <?php echo $divi_active ? 'diviskit-status--success' : 'diviskit-status--warning'; ?>"><?php echo esc_html( $divi_active ? __( 'Active', 'diviskit-agent' ) : __( 'Not active', 'diviskit-agent' ) ); ?></span> <?php echo esc_html( $divi_version ?: '' ); ?></dd></div>
 								<div><dt><?php esc_html_e( 'Rate limiting', 'diviskit-agent' ); ?></dt><dd><span class="diviskit-status <?php echo $rate_disabled ? 'diviskit-status--warning' : 'diviskit-status--success'; ?>"><?php echo esc_html( $rate_disabled ? __( 'Disabled', 'diviskit-agent' ) : __( 'Active', 'diviskit-agent' ) ); ?></span> <?php if ( ! $rate_disabled ) : ?><span class="diviskit-muted"><?php echo esc_html( $read_limit ); ?>/<?php echo esc_html( $write_limit ); ?> <?php esc_html_e( 'per min (read/write)', 'diviskit-agent' ); ?></span><?php endif; ?></dd></div>
-								<div><dt><?php esc_html_e( 'WP-CLI', 'diviskit-agent' ); ?></dt><dd><?php echo esc_html( defined( 'DIVISKIT_WP_CLI_PATH' ) || defined( 'DIVIOPS_WP_CLI_PATH' ) || getenv( 'WP_PATH' ) || getenv( 'WP_CLI_CMD' ) ? __( 'configured', 'diviskit-agent' ) : __( 'not configured', 'diviskit-agent' ) ); ?></dd></div>
+								<div><dt><?php esc_html_e( 'WP-CLI', 'diviskit-agent' ); ?></dt><dd><?php echo esc_html( defined( 'DIVISKIT_WP_CLI_PATH' ) || getenv( 'WP_PATH' ) || getenv( 'WP_CLI_CMD' ) ? __( 'configured', 'diviskit-agent' ) : __( 'not configured', 'diviskit-agent' ) ); ?></dd></div>
 							</dl>
 							<p class="diviskit-muted"><?php
 								/* translators: 1: read limit constant, 2: write limit constant, 3: filter name. */
@@ -2490,28 +2604,16 @@ class Diviskit_Agent {
 // Rate-limit constants — resolved once at bootstrap so these are the single
 // source of truth at runtime. Placed after the class declaration so the
 // class constants can serve as defaults. Precedence: DIVISKIT_* wp-config.php
-// constant > DIVISKIT_* env var > legacy DIVIOPS_* constant > legacy
-// DIVIOPS_* env var > class default. Empty / non-numeric env values fall
-// through; an explicit numeric "0" is honored so operators can fully
-// disable a bucket.
+// constant > DIVISKIT_* env var > class default. Empty / non-numeric env
+// values fall through; an explicit numeric "0" is honored so operators can
+// fully disable a bucket.
 $diviskit_env = [
 	'DISABLED' => getenv( 'DIVISKIT_RATE_LIMIT_DISABLED' ),
 	'READ'     => getenv( 'DIVISKIT_RATE_LIMIT_READ' ),
 	'WRITE'    => getenv( 'DIVISKIT_RATE_LIMIT_WRITE' ),
 ];
-$diviops_env = [
-	'DISABLED' => getenv( 'DIVIOPS_RATE_LIMIT_DISABLED' ),
-	'READ'     => getenv( 'DIVIOPS_RATE_LIMIT_READ' ),
-	'WRITE'    => getenv( 'DIVIOPS_RATE_LIMIT_WRITE' ),
-];
 if ( ! defined( 'DIVISKIT_RATE_LIMIT_DISABLED' ) ) {
-	if ( false !== $diviskit_env['DISABLED'] ) {
-		$diviskit_disabled = filter_var( $diviskit_env['DISABLED'], FILTER_VALIDATE_BOOLEAN );
-	} elseif ( defined( 'DIVIOPS_RATE_LIMIT_DISABLED' ) ) {
-		$diviskit_disabled = (bool) DIVIOPS_RATE_LIMIT_DISABLED;
-	} else {
-		$diviskit_disabled = filter_var( $diviops_env['DISABLED'], FILTER_VALIDATE_BOOLEAN );
-	}
+	$diviskit_disabled = filter_var( $diviskit_env['DISABLED'], FILTER_VALIDATE_BOOLEAN );
 	define( 'DIVISKIT_RATE_LIMIT_DISABLED', $diviskit_disabled );
 }
 foreach ( [ 'READ' => 'RATE_LIMIT_READ', 'WRITE' => 'RATE_LIMIT_WRITE' ] as $diviskit_key => $diviskit_default ) {
@@ -2521,15 +2623,39 @@ foreach ( [ 'READ' => 'RATE_LIMIT_READ', 'WRITE' => 'RATE_LIMIT_WRITE' ] as $div
 	}
 	if ( is_numeric( $diviskit_env[ $diviskit_key ] ) ) {
 		$diviskit_value = (int) $diviskit_env[ $diviskit_key ];
-	} elseif ( defined( 'DIVIOPS_RATE_LIMIT_' . $diviskit_key ) ) {
-		$diviskit_value = (int) constant( 'DIVIOPS_RATE_LIMIT_' . $diviskit_key );
-	} elseif ( is_numeric( $diviops_env[ $diviskit_key ] ) ) {
-		$diviskit_value = (int) $diviops_env[ $diviskit_key ];
 	} else {
 		$diviskit_value = constant( 'Diviskit_Agent::' . $diviskit_default );
 	}
 	define( $diviskit_const, $diviskit_value );
 }
-unset( $diviskit_env, $diviops_env, $diviskit_disabled, $diviskit_value, $diviskit_const, $diviskit_key, $diviskit_default );
+unset( $diviskit_env, $diviskit_disabled, $diviskit_value, $diviskit_const, $diviskit_key, $diviskit_default );
+
+register_activation_hook( __FILE__, [ 'Diviskit_Agent', 'activate' ] );
+
+/**
+ * Update client — the Agent is a free product, so it registers in
+ * 'free' mode: anonymous update checks against the Diviskit store's
+ * ?vendokit-license=* API, no license key, no license admin page.
+ * Store URL: define DIVISKIT_AGENT_STORE_URL in wp-config.php to
+ * override (e.g. the local dev store), or filter
+ * diviskit_agent_store_url. item_id is the vk_product post ID on the
+ * store — filterable via diviskit_agent_license_item_id.
+ */
+if ( file_exists( __DIR__ . '/includes/class-diviskit-license-client.php' ) ) {
+	require_once __DIR__ . '/includes/class-diviskit-license-client.php';
+
+	Diviskit_License_Client::register( array(
+		'item_id'      => (int) apply_filters( 'diviskit_agent_license_item_id', 344 ),
+		'api_url'      => defined( 'DIVISKIT_AGENT_STORE_URL' )
+			? DIVISKIT_AGENT_STORE_URL
+			: apply_filters( 'diviskit_agent_store_url', 'https://diviskit.com' ),
+		'version'      => Diviskit_Agent::VERSION,
+		'file'         => __FILE__,
+		'slug'         => 'diviskit-agent',
+		'plugin_title' => 'Diviskit Agent',
+		'purchase_url' => apply_filters( 'diviskit_agent_purchase_url', 'https://diviskit.com/item/diviskit-agent/' ),
+		'free'         => true,
+	) );
+}
 
 Diviskit_Agent::init();

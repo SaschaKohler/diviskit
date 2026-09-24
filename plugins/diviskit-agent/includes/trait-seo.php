@@ -355,7 +355,7 @@ trait Diviskit_Agent_SEO {
 			return self::envelope_error(
 				'seo.metadata_drift',
 				"SEO metadata changed before post #{$post_id} could be updated.",
-				'Re-read diviops_seo_metadata_get and retry with its checksum. There is no force path.',
+				'Re-read diviskit_seo_metadata_get and retry with its checksum. There is no force path.',
 				409,
 				[
 					'post_id'           => $post_id,
@@ -537,7 +537,7 @@ trait Diviskit_Agent_SEO {
 		if ( ! is_string( $expected_checksum ) || 1 !== preg_match( '/^sha256:[a-f0-9]{64}$/', $expected_checksum ) ) {
 			return [ 'error' => [
 				'code'    => 'invalid_input',
-				'message' => 'expected_checksum must be a lowercase SHA-256 checksum from diviops_seo_metadata_get.',
+				'message' => 'expected_checksum must be a lowercase SHA-256 checksum from diviskit_seo_metadata_get.',
 				'hint'    => 'Read the target first, then pass its exact checksum.',
 				'data'    => [ 'field' => 'expected_checksum', 'mutated' => false ],
 			] ];
@@ -928,7 +928,7 @@ trait Diviskit_Agent_SEO {
 			return self::envelope_error(
 				'seo.rollback_failed',
 				'SEO metadata apply failed and request-local restoration did not verify.',
-				'Stop writes and inspect the target through diviops_seo_metadata_get before any manual recovery.',
+				'Stop writes and inspect the target through diviskit_seo_metadata_get before any manual recovery.',
 				500,
 				$data
 			);

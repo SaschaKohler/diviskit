@@ -75,7 +75,7 @@ trait Diviskit_Agent_Page {
 			return self::envelope_error(
 				'not_found',
 				"Page #{$post_id} not found.",
-				'Verify the page id via diviops_page_list.',
+				'Verify the page id via diviskit_page_list.',
 				404,
 				[ 'page_id' => $post_id ]
 			);
@@ -128,7 +128,7 @@ trait Diviskit_Agent_Page {
 			return self::envelope_error(
 				'not_found',
 				"Page #{$post_id} not found.",
-				'Verify the page id via diviops_page_list.',
+				'Verify the page id via diviskit_page_list.',
 				404,
 				[ 'page_id' => $post_id ]
 			);
@@ -201,7 +201,7 @@ trait Diviskit_Agent_Page {
 			return self::envelope_error(
 				'not_found',
 				"Page #{$post_id} not found.",
-				'Verify the page id via diviops_page_list.',
+				'Verify the page id via diviskit_page_list.',
 				404,
 				[ 'page_id' => $post_id ]
 			);
@@ -222,7 +222,7 @@ trait Diviskit_Agent_Page {
 			if ( ! is_string( $expected_checksum ) || 1 !== preg_match( '/^sha256:[a-f0-9]{64}$/', $expected_checksum ) ) {
 				return self::envelope_error(
 					'invalid_input',
-					'expected_checksum must be a lowercase SHA-256 checksum from diviops_page_get.',
+					'expected_checksum must be a lowercase SHA-256 checksum from diviskit_page_get.',
 					'Read the page, then pass its exact content_checksum. Omit only for legacy unconditional writes.',
 					400,
 					[ 'field' => 'expected_checksum', 'mutated' => false ]
@@ -233,7 +233,7 @@ trait Diviskit_Agent_Page {
 				return self::envelope_error(
 					'page.content_drift',
 					"Page #{$post_id} changed before its content could be updated.",
-					'Re-read diviops_page_get and review the new content before retrying. There is no force path.',
+					'Re-read diviskit_page_get and review the new content before retrying. There is no force path.',
 					409,
 					[
 						'page_id'           => $post_id,
@@ -248,7 +248,7 @@ trait Diviskit_Agent_Page {
 			return self::envelope_error(
 				'invalid_input',
 				'content must be a string of Divi block markup.',
-				'Pass content as a string. See diviops_page_get_layout for the expected shape.',
+				'Pass content as a string. See diviskit_page_get_layout for the expected shape.',
 				400,
 				[ 'field' => 'content', 'received_type' => gettype( $content ) ]
 			);
@@ -273,7 +273,7 @@ trait Diviskit_Agent_Page {
 		if ( $dry_run ) {
 			$old_len = strlen( (string) $post->post_content );
 			$new_len = strlen( $content );
-			$extra   = $backup ? [ 'backup' => self::rollback_snapshot_plan_for_post_write( $post, 'diviops_page_update_content', [ 'tool_operation' => 'page.update_content' ] ) ] : [];
+			$extra   = $backup ? [ 'backup' => self::rollback_snapshot_plan_for_post_write( $post, 'diviskit_page_update_content', [ 'tool_operation' => 'page.update_content' ] ) ] : [];
 			return self::dry_run_response(
 				"Would replace post_content on page #{$post_id} ('{$post->post_title}') ({$old_len}→{$new_len} bytes).",
 				[ [
@@ -299,7 +299,7 @@ trait Diviskit_Agent_Page {
 				return self::envelope_error(
 					'page.content_drift',
 					"Page #{$post_id} changed before its content could be updated.",
-					'Re-read diviops_page_get and review the new content before retrying. There is no force path.',
+					'Re-read diviskit_page_get and review the new content before retrying. There is no force path.',
 					409,
 					[
 						'page_id'           => $post_id,
@@ -315,7 +315,7 @@ trait Diviskit_Agent_Page {
 
 		$snapshot = null;
 		if ( $backup ) {
-			$snapshot = self::rollback_snapshot_create_for_post_write( $post, 'diviops_page_update_content', [ 'tool_operation' => 'page.update_content' ] );
+			$snapshot = self::rollback_snapshot_create_for_post_write( $post, 'diviskit_page_update_content', [ 'tool_operation' => 'page.update_content' ] );
 			if ( is_wp_error( $snapshot ) ) {
 				return self::envelope_from_wp_error( $snapshot );
 			}
@@ -368,7 +368,7 @@ trait Diviskit_Agent_Page {
 			return self::envelope_error(
 				'not_found',
 				"Page #{$post_id} not found.",
-				'Verify the page id via diviops_page_list.',
+				'Verify the page id via diviskit_page_list.',
 				404,
 				[ 'page_id' => $post_id ]
 			);
@@ -687,7 +687,7 @@ trait Diviskit_Agent_Page {
 			return self::envelope_error(
 				'invalid_input',
 				'content must be a string of Divi block markup.',
-				'Pass content as a string. See diviops_page_get_layout for the expected shape.',
+				'Pass content as a string. See diviskit_page_get_layout for the expected shape.',
 				400,
 				[ 'field' => 'content', 'received_type' => gettype( $content ) ]
 			);
@@ -768,7 +768,7 @@ trait Diviskit_Agent_Page {
 			return self::envelope_error(
 				'not_found',
 				"Page #{$post_id} not found.",
-				'Verify the page id via diviops_page_list.',
+				'Verify the page id via diviskit_page_list.',
 				404,
 				[ 'target_kind' => 'page', 'page_id' => $post_id ]
 			);
@@ -802,7 +802,7 @@ trait Diviskit_Agent_Page {
 		}
 
 		if ( $dry_run ) {
-			$extra = $backup ? [ 'backup' => self::rollback_snapshot_plan_for_post_write( $post, 'diviops_section_append', [ 'tool_operation' => 'section.append', 'position' => $position ] ) ] : [];
+			$extra = $backup ? [ 'backup' => self::rollback_snapshot_plan_for_post_write( $post, 'diviskit_section_append', [ 'tool_operation' => 'section.append', 'position' => $position ] ) ] : [];
 			return self::dry_run_response(
 				"Would append section to page #{$post_id} ('{$post->post_title}') at position '{$position}' (" . strlen( $content ) . " bytes).",
 				[ [
@@ -856,7 +856,7 @@ trait Diviskit_Agent_Page {
 
 		$snapshot = null;
 		if ( $backup ) {
-			$snapshot = self::rollback_snapshot_create_for_post_write( $post, 'diviops_section_append', [ 'tool_operation' => 'section.append', 'position' => $position ] );
+			$snapshot = self::rollback_snapshot_create_for_post_write( $post, 'diviskit_section_append', [ 'tool_operation' => 'section.append', 'position' => $position ] );
 			if ( is_wp_error( $snapshot ) ) {
 				return self::envelope_from_wp_error( $snapshot );
 			}
@@ -904,7 +904,7 @@ trait Diviskit_Agent_Page {
 			return self::envelope_error(
 				'not_found',
 				"Page #{$post_id} not found.",
-				'Verify the page id via diviops_page_list.',
+				'Verify the page id via diviskit_page_list.',
 				404,
 				[ 'target_kind' => 'page', 'page_id' => $post_id ]
 			);
@@ -951,7 +951,7 @@ trait Diviskit_Agent_Page {
 
 		if ( $dry_run ) {
 			$display_target = '' !== $label ? $label : "text:{$match_text}";
-			$extra          = $backup ? [ 'backup' => self::rollback_snapshot_plan_for_post_write( $post, 'diviops_section_replace', [ 'tool_operation' => 'section.replace', 'target' => $display_target, 'occurrence' => $occurrence ] ) ] : [];
+			$extra          = $backup ? [ 'backup' => self::rollback_snapshot_plan_for_post_write( $post, 'diviskit_section_replace', [ 'tool_operation' => 'section.replace', 'target' => $display_target, 'occurrence' => $occurrence ] ) ] : [];
 			return self::dry_run_response(
 				"Would replace section '{$display_target}' on page #{$post_id} ('{$post->post_title}') (occurrence {$occurrence}, {$result['total_matches']} match(es)).",
 				[ [
@@ -985,7 +985,7 @@ trait Diviskit_Agent_Page {
 		$target_for_snapshot = '' !== $label ? $label : "text:{$match_text}";
 		$snapshot = null;
 		if ( $backup ) {
-			$snapshot = self::rollback_snapshot_create_for_post_write( $post, 'diviops_section_replace', [ 'tool_operation' => 'section.replace', 'target' => $target_for_snapshot, 'occurrence' => $occurrence ] );
+			$snapshot = self::rollback_snapshot_create_for_post_write( $post, 'diviskit_section_replace', [ 'tool_operation' => 'section.replace', 'target' => $target_for_snapshot, 'occurrence' => $occurrence ] );
 			if ( is_wp_error( $snapshot ) ) {
 				return self::envelope_from_wp_error( $snapshot );
 			}
@@ -1040,7 +1040,7 @@ trait Diviskit_Agent_Page {
 			return self::envelope_error(
 				'not_found',
 				"Page #{$post_id} not found.",
-				'Verify the page id via diviops_page_list.',
+				'Verify the page id via diviskit_page_list.',
 				404,
 				[ 'target_kind' => 'page', 'page_id' => $post_id ]
 			);
@@ -1082,7 +1082,7 @@ trait Diviskit_Agent_Page {
 
 		if ( $dry_run ) {
 			$display_target = '' !== $label ? $label : "text:{$match_text}";
-			$extra          = $backup ? [ 'backup' => self::rollback_snapshot_plan_for_post_write( $post, 'diviops_section_remove', [ 'tool_operation' => 'section.remove', 'target' => $display_target, 'occurrence' => $occurrence ] ) ] : [];
+			$extra          = $backup ? [ 'backup' => self::rollback_snapshot_plan_for_post_write( $post, 'diviskit_section_remove', [ 'tool_operation' => 'section.remove', 'target' => $display_target, 'occurrence' => $occurrence ] ) ] : [];
 			return self::dry_run_response(
 				"Would remove section '{$display_target}' from page #{$post_id} ('{$post->post_title}') (occurrence {$occurrence}, {$result['total_matches']} match(es)).",
 				[ [
@@ -1115,7 +1115,7 @@ trait Diviskit_Agent_Page {
 		$target_for_snapshot = '' !== $label ? $label : "text:{$match_text}";
 		$snapshot = null;
 		if ( $backup ) {
-			$snapshot = self::rollback_snapshot_create_for_post_write( $post, 'diviops_section_remove', [ 'tool_operation' => 'section.remove', 'target' => $target_for_snapshot, 'occurrence' => $occurrence ] );
+			$snapshot = self::rollback_snapshot_create_for_post_write( $post, 'diviskit_section_remove', [ 'tool_operation' => 'section.remove', 'target' => $target_for_snapshot, 'occurrence' => $occurrence ] );
 			if ( is_wp_error( $snapshot ) ) {
 				return self::envelope_from_wp_error( $snapshot );
 			}
@@ -1172,7 +1172,7 @@ trait Diviskit_Agent_Page {
 			return self::envelope_error(
 				'not_found',
 				"Page #{$post_id} not found.",
-				'Verify the page id via diviops_page_list.',
+				'Verify the page id via diviskit_page_list.',
 				404,
 				[ 'target_kind' => 'page', 'page_id' => $post_id ]
 			);
@@ -1323,7 +1323,7 @@ trait Diviskit_Agent_Page {
 			return self::envelope_error(
 				'not_found',
 				"Page #{$post_id} not found.",
-				'Verify the page id via diviops_page_list or diviops_tb_template_list.',
+				'Verify the page id via diviskit_page_list or diviskit_tb_template_list.',
 				404,
 				[ 'target_kind' => 'page', 'page_id' => $post_id ]
 			);
@@ -1425,7 +1425,7 @@ trait Diviskit_Agent_Page {
 			return self::envelope_error(
 				'not_found',
 				"Page #{$post_id} not found.",
-				'Verify the page id via diviops_page_list.',
+				'Verify the page id via diviskit_page_list.',
 				404,
 				[ 'target_kind' => 'page', 'page_id' => $post_id ]
 			);
@@ -1574,7 +1574,7 @@ trait Diviskit_Agent_Page {
 				return self::envelope_error(
 					'not_found',
 					"No module found with admin label '{$label}' on page #{$post_id}.",
-					'Use diviops_page_get_layout to verify available admin labels.',
+					'Use diviskit_page_get_layout to verify available admin labels.',
 					404,
 					[ 'target_kind' => 'module', 'target_mode' => 'label', 'target_value' => $label, 'page_id' => $post_id ]
 				);
@@ -1604,7 +1604,7 @@ trait Diviskit_Agent_Page {
 			return self::envelope_error(
 				'not_found',
 				"No module found matching {$target_desc} on page #{$post_id}.",
-				'Use diviops_page_get_layout to verify available auto_index targets and module text.',
+				'Use diviskit_page_get_layout to verify available auto_index targets and module text.',
 				404,
 				[ 'target_kind' => 'module', 'target_mode' => $mode, 'target_value' => $mode === 'auto_index' ? $auto_index : $match_text, 'page_id' => $post_id ]
 			);
@@ -1664,7 +1664,7 @@ trait Diviskit_Agent_Page {
 			return self::envelope_error(
 				'invalid_input',
 				"Attr path '{$content_slot_mismatch['path']}' targets a content slot that does not belong to divi/{$type}.",
-				'Use diviops_module_get or diviops_page_get_layout to confirm the matched block type; prefer auto_index for generic text matches.',
+				'Use diviskit_module_get or diviskit_page_get_layout to confirm the matched block type; prefer auto_index for generic text matches.',
 				400,
 				$content_slot_mismatch
 			);
@@ -1716,7 +1716,7 @@ trait Diviskit_Agent_Page {
 					'after'  => $value,
 				];
 			}
-			$extra = $backup ? [ 'backup' => self::rollback_snapshot_plan_for_post_write( $post, 'diviops_module_update', [ 'tool_operation' => 'module.update', 'target' => $target_desc, 'updated' => array_keys( $attrs ) ] ) ] : [];
+			$extra = $backup ? [ 'backup' => self::rollback_snapshot_plan_for_post_write( $post, 'diviskit_module_update', [ 'tool_operation' => 'module.update', 'target' => $target_desc, 'updated' => array_keys( $attrs ) ] ) ] : [];
 			return self::dry_run_response(
 				"Would update " . count( $attrs ) . " attr path(s) on module '{$target_desc}' (page #{$post_id}, type {$type}).",
 				$changes,
@@ -1756,7 +1756,7 @@ trait Diviskit_Agent_Page {
 
 		$snapshot = null;
 		if ( $backup ) {
-			$snapshot = self::rollback_snapshot_create_for_post_write( $post, 'diviops_module_update', [ 'tool_operation' => 'module.update', 'target' => $target_desc, 'updated' => array_keys( $attrs ) ] );
+			$snapshot = self::rollback_snapshot_create_for_post_write( $post, 'diviskit_module_update', [ 'tool_operation' => 'module.update', 'target' => $target_desc, 'updated' => array_keys( $attrs ) ] );
 			if ( is_wp_error( $snapshot ) ) {
 				return self::envelope_from_wp_error( $snapshot );
 			}
@@ -2177,7 +2177,7 @@ trait Diviskit_Agent_Page {
 			return self::envelope_error(
 				'module.overlap',
 				$error->get_error_message(),
-				'Pick distinct source and target modules; verify with diviops_page_get_layout.',
+				'Pick distinct source and target modules; verify with diviskit_page_get_layout.',
 				400,
 				$data
 			);
@@ -2523,7 +2523,7 @@ trait Diviskit_Agent_Page {
 			return self::envelope_error(
 				'not_found',
 				"Page #{$post_id} not found.",
-				'Verify the page id via diviops_page_list.',
+				'Verify the page id via diviskit_page_list.',
 				404,
 				[ 'target_kind' => 'page', 'page_id' => $post_id ]
 			);
@@ -2627,7 +2627,7 @@ trait Diviskit_Agent_Page {
 			return self::envelope_error(
 				'module.overlap',
 				'Source and target blocks overlap — cannot move a block inside itself.',
-				'Pick distinct source and target modules; verify with diviops_page_get_layout.',
+				'Pick distinct source and target modules; verify with diviskit_page_get_layout.',
 				400,
 				[ 'page_id' => $post_id ]
 			);
@@ -2654,7 +2654,7 @@ trait Diviskit_Agent_Page {
 				|| ( 'after' === $position && $target['end'] === $source['start'] ) );
 
 		if ( $dry_run ) {
-			$extra = $backup ? [ 'backup' => self::rollback_snapshot_plan_for_post_write( $post, 'diviops_module_move', $operation ) ] : [];
+			$extra = $backup ? [ 'backup' => self::rollback_snapshot_plan_for_post_write( $post, 'diviskit_module_move', $operation ) ] : [];
 			if ( $is_noop ) {
 				return self::dry_run_response(
 					"Module '{$source['target_desc']}' ({$source['type']}) is already {$position} '{$target['target_desc']}' on page #{$post_id} — would be a no-op.",
@@ -2694,7 +2694,7 @@ trait Diviskit_Agent_Page {
 		}
 
 		if ( $is_noop ) {
-			$snapshot = $backup ? self::rollback_snapshot_noop_for_post_write( $post, 'diviops_module_move', $operation ) : null;
+			$snapshot = $backup ? self::rollback_snapshot_noop_for_post_write( $post, 'diviskit_module_move', $operation ) : null;
 			return self::envelope_success( self::rollback_snapshot_add_to_response( [
 				'success' => true,
 				'page_id' => $post_id,
@@ -2727,7 +2727,7 @@ trait Diviskit_Agent_Page {
 
 		$snapshot = null;
 		if ( $backup ) {
-			$snapshot = self::rollback_snapshot_create_for_post_write( $post, 'diviops_module_move', $operation );
+			$snapshot = self::rollback_snapshot_create_for_post_write( $post, 'diviskit_module_move', $operation );
 			if ( is_wp_error( $snapshot ) ) {
 				return self::envelope_from_wp_error( $snapshot );
 			}
@@ -3469,7 +3469,7 @@ trait Diviskit_Agent_Page {
 			return self::envelope_error(
 				'not_found',
 				sprintf( "No module found matching '%s' (mode=%s) on page #%d.", $target['needle'], $target['mode'], $loaded['post']->ID ),
-				'Use diviops_page_get_layout to verify available targets.',
+				'Use diviskit_page_get_layout to verify available targets.',
 				404,
 				[
 					'target_kind'  => 'module',
@@ -3482,7 +3482,7 @@ trait Diviskit_Agent_Page {
 
 		if ( (bool) $request->get_param( 'dry_run' ) ) {
 			$desc = $captured['admin_label'] ?: $target['needle'];
-			$extra = $backup ? [ 'backup' => self::rollback_snapshot_plan_for_post_write( $loaded['post'], 'diviops_module_lock', [ 'tool_operation' => 'module.lock', 'target' => $desc ] ) ] : [];
+			$extra = $backup ? [ 'backup' => self::rollback_snapshot_plan_for_post_write( $loaded['post'], 'diviskit_module_lock', [ 'tool_operation' => 'module.lock', 'target' => $desc ] ) ] : [];
 			return self::dry_run_response(
 				$captured['was_locked']
 					? "Module '{$desc}' ({$captured['block_name']}) is already locked — would be a no-op."
@@ -3501,7 +3501,7 @@ trait Diviskit_Agent_Page {
 		$desc = $captured['admin_label'] ?: $target['needle'];
 		$snapshot = null;
 		if ( $backup ) {
-			$snapshot = self::rollback_snapshot_create_for_post_write( $loaded['post'], 'diviops_module_lock', [ 'tool_operation' => 'module.lock', 'target' => $desc ] );
+			$snapshot = self::rollback_snapshot_create_for_post_write( $loaded['post'], 'diviskit_module_lock', [ 'tool_operation' => 'module.lock', 'target' => $desc ] );
 			if ( is_wp_error( $snapshot ) ) {
 				return self::envelope_from_wp_error( $snapshot );
 			}
@@ -3569,7 +3569,7 @@ trait Diviskit_Agent_Page {
 			return self::envelope_error(
 				'not_found',
 				sprintf( "No module found matching '%s' (mode=%s) on page #%d.", $target['needle'], $target['mode'], $loaded['post']->ID ),
-				'Use diviops_page_get_layout to verify available targets.',
+				'Use diviskit_page_get_layout to verify available targets.',
 				404,
 				[
 					'target_kind'  => 'module',
@@ -3582,7 +3582,7 @@ trait Diviskit_Agent_Page {
 
 		if ( (bool) $request->get_param( 'dry_run' ) ) {
 			$desc = $captured['admin_label'] ?: $target['needle'];
-			$extra = $backup ? [ 'backup' => self::rollback_snapshot_plan_for_post_write( $loaded['post'], 'diviops_module_unlock', [ 'tool_operation' => 'module.unlock', 'target' => $desc ] ) ] : [];
+			$extra = $backup ? [ 'backup' => self::rollback_snapshot_plan_for_post_write( $loaded['post'], 'diviskit_module_unlock', [ 'tool_operation' => 'module.unlock', 'target' => $desc ] ) ] : [];
 			return self::dry_run_response(
 				$captured['was_locked']
 					? "Would unlock module '{$desc}' ({$captured['block_name']})."
@@ -3601,7 +3601,7 @@ trait Diviskit_Agent_Page {
 		$desc = $captured['admin_label'] ?: $target['needle'];
 		$snapshot = null;
 		if ( $backup ) {
-			$snapshot = self::rollback_snapshot_create_for_post_write( $loaded['post'], 'diviops_module_unlock', [ 'tool_operation' => 'module.unlock', 'target' => $desc ] );
+			$snapshot = self::rollback_snapshot_create_for_post_write( $loaded['post'], 'diviskit_module_unlock', [ 'tool_operation' => 'module.unlock', 'target' => $desc ] );
 			if ( is_wp_error( $snapshot ) ) {
 				return self::envelope_from_wp_error( $snapshot );
 			}
@@ -3745,7 +3745,7 @@ trait Diviskit_Agent_Page {
 			return self::envelope_error(
 				'not_found',
 				sprintf( "No module found matching '%s' (mode=%s) on page #%d.", $target['needle'], $target['mode'], $loaded['post']->ID ),
-				'Use diviops_page_get_layout to verify available targets.',
+				'Use diviskit_page_get_layout to verify available targets.',
 				404,
 				[
 					'target_kind'  => 'module',
@@ -3758,7 +3758,7 @@ trait Diviskit_Agent_Page {
 
 		if ( (bool) $request->get_param( 'dry_run' ) ) {
 			$desc = $captured['admin_label'] ?: $target['needle'];
-			$extra = $backup ? [ 'backup' => self::rollback_snapshot_plan_for_post_write( $loaded['post'], 'diviops_module_clone', [ 'tool_operation' => 'module.clone', 'target' => $desc, 'position' => $position ] ) ] : [];
+			$extra = $backup ? [ 'backup' => self::rollback_snapshot_plan_for_post_write( $loaded['post'], 'diviskit_module_clone', [ 'tool_operation' => 'module.clone', 'target' => $desc, 'position' => $position ] ) ] : [];
 			return self::dry_run_response(
 				"Would clone module '{$desc}' ({$captured['block_name']}) {$position} source on page #{$loaded['post']->ID}.",
 				[ [
@@ -3774,7 +3774,7 @@ trait Diviskit_Agent_Page {
 		$desc = $captured['admin_label'] ?: $target['needle'];
 		$snapshot = null;
 		if ( $backup ) {
-			$snapshot = self::rollback_snapshot_create_for_post_write( $loaded['post'], 'diviops_module_clone', [ 'tool_operation' => 'module.clone', 'target' => $desc, 'position' => $position ] );
+			$snapshot = self::rollback_snapshot_create_for_post_write( $loaded['post'], 'diviskit_module_clone', [ 'tool_operation' => 'module.clone', 'target' => $desc, 'position' => $position ] );
 			if ( is_wp_error( $snapshot ) ) {
 				return self::envelope_from_wp_error( $snapshot );
 			}
@@ -3805,7 +3805,7 @@ trait Diviskit_Agent_Page {
 	 * Trash (or permanently delete) a page.
 	 *
 	 * Replaces the wp-cli `post delete --force=0|1` route for AI-agent callers — typed
-	 * input, deterministic envelope, dry-run preview. Backs `diviops_page_trash`.
+	 * input, deterministic envelope, dry-run preview. Backs `diviskit_page_trash`.
 	 */
 	public static function page_trash( $request ) {
 		$post_id = absint( $request['id'] );
@@ -3817,7 +3817,7 @@ trait Diviskit_Agent_Page {
 			return self::envelope_error(
 				'not_found',
 				"Page #{$post_id} not found.",
-				'Verify the page id via diviops_page_list.',
+				'Verify the page id via diviskit_page_list.',
 				404,
 				[ 'page_id' => $post_id ]
 			);

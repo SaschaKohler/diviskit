@@ -1889,7 +1889,7 @@ trait Diviskit_Agent_Variable {
 				return self::envelope_error(
 					'not_found',
 					"Variable '$id' not found.",
-					'Use diviops_variable_list to enumerate existing IDs.',
+					'Use diviskit_variable_list to enumerate existing IDs.',
 					404
 				);
 			}
@@ -1899,7 +1899,7 @@ trait Diviskit_Agent_Variable {
 				return self::envelope_error(
 					'not_found',
 					"Variable '$id' not found.",
-					'Use diviops_variable_list to enumerate existing IDs.',
+					'Use diviskit_variable_list to enumerate existing IDs.',
 					404
 				);
 			}
@@ -1914,7 +1914,7 @@ trait Diviskit_Agent_Variable {
 				return self::envelope_error(
 					'not_found',
 					"Variable '$id' not found.",
-					'Use diviops_variable_list to enumerate existing IDs.',
+					'Use diviskit_variable_list to enumerate existing IDs.',
 					404
 				);
 			}
@@ -1934,11 +1934,11 @@ trait Diviskit_Agent_Variable {
 				return self::envelope_error(
 					'conflict',
 					sprintf(
-						"Variable '%s' has %d live reference(s). Pass force=true to delete anyway; orphans will remain — run diviops_variable_scan_orphans to audit them afterwards.",
+						"Variable '%s' has %d live reference(s). Pass force=true to delete anyway; orphans will remain — run diviskit_variable_scan_orphans to audit them afterwards.",
 						$id,
 						$refs['all_ids'][ $id ]
 					),
-					'Pass force=true to override, or remove references first; run diviops_variable_scan_orphans afterwards if forced.',
+					'Pass force=true to override, or remove references first; run diviskit_variable_scan_orphans afterwards if forced.',
 					409,
 					[
 						'id'             => $id,
@@ -2088,7 +2088,7 @@ trait Diviskit_Agent_Variable {
 	 * NOTE: gvid-* only. Color variables (gcid-*) are emitted via a separate
 	 * `GlobalData` color-block path that is NOT scoped per-page in 5.4.0, so
 	 * `DetectFeature::get_page_global_variable_ids()` does not surface them and
-	 * neither does this endpoint. Use `diviops_variable_scan_orphans` for
+	 * neither does this endpoint. Use `diviskit_variable_scan_orphans` for
 	 * site-wide gcid- coverage.
 	 */
 	public static function variable_used_on_page( $request ) {
@@ -2108,7 +2108,7 @@ trait Diviskit_Agent_Variable {
 			return self::envelope_error(
 				'not_found',
 				sprintf( 'Post %d not found.', $post_id ),
-				'Use diviops_page_list to find a valid page ID.',
+				'Use diviskit_page_list to find a valid page ID.',
 				404
 			);
 		}

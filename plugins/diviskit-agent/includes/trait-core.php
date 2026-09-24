@@ -1645,7 +1645,7 @@ trait Diviskit_Agent_Core {
 			return self::envelope_error(
 				'not_found',
 				$message,
-				'Use diviops_page_get_layout to verify available admin labels and auto_index targets.',
+				'Use diviskit_page_get_layout to verify available admin labels and auto_index targets.',
 				404,
 				$err_data
 			);
@@ -1717,7 +1717,7 @@ trait Diviskit_Agent_Core {
 			return self::envelope_error(
 				'not_found',
 				"Page #{$page_id} not found.",
-				'Verify the page id via diviops_page_list.',
+				'Verify the page id via diviskit_page_list.',
 				404,
 				[ 'target_kind' => 'page', 'page_id' => $page_id ]
 			);

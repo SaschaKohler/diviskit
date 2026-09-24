@@ -1676,7 +1676,7 @@ trait Diviskit_Agent_Meta {
 	 *
 	 * Returns plugin version, API capabilities, Divi status, and (when
 	 * present) the ADR-003 / ADR-007 Pro-extension surface contributed
-	 * via the `diviops_agent_handshake_extensions` filter:
+	 * via the `diviskit_agent_handshake_extensions` filter:
 	 *   - pro_active: true when a Pro plugin (`diviskit-agent-pro`) is
 	 *     active. Pro plugins always pass this as true; absence of the
 	 *     field implies `false` at the consumer side.
@@ -1724,9 +1724,7 @@ trait Diviskit_Agent_Meta {
 			'server'         => 'diviskit',
 			'plugin_version' => self::VERSION,
 			'min_server'     => self::MIN_SERVER_VERSION,
-			'namespaces'     => self::legacy_agent_active()
-				? [ self::REST_NAMESPACE ]
-				: [ self::REST_NAMESPACE, self::REST_NAMESPACE_LEGACY ],
+			'namespaces'     => [ self::REST_NAMESPACE ],
 			'authenticated_user' => [
 				'id'    => get_current_user_id(),
 				'login' => wp_get_current_user()->user_login,
@@ -1748,11 +1746,7 @@ trait Diviskit_Agent_Meta {
 		// `available_targets`, `active_modules`, and `capabilities` with
 		// any prior callbacks' contributions (handled in
 		// Diviskit_Pro_Handshake_Contributor::contribute).
-		// Both filter names are applied: `diviskit_agent_handshake_extensions`
-		// is canonical, `diviops_agent_handshake_extensions` keeps Pro plugins
-		// written against the pre-fork contract working unchanged.
 		$extensions = apply_filters( 'diviskit_agent_handshake_extensions', [] );
-		$extensions = apply_filters( 'diviops_agent_handshake_extensions', is_array( $extensions ) ? $extensions : [] );
 
 		if ( is_array( $extensions ) && ! empty( $extensions ) ) {
 			// Whitelist the known Pro-extension keys (review-feedback

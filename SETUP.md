@@ -293,30 +293,41 @@ Verify with `What skills do you have?` — you should see `diviskit`, `diviskit-
 
 ### Codex, Devin, and other clients (install script)
 
-Clients without a plugin marketplace install skills by copying the bundle's
-`skills/` dirs. The shipped installer handles the target paths:
+The skills ship inside the WordPress plugins (`skills/` in `diviskit-agent`
+and `diviskit-pro`) and are served at `GET /wp-json/diviskit/v1/skills`.
+The installer pulls them from the site, so the synced copy is always
+version-locked to the installed plugin — sites with `diviskit-pro` also
+return the Pro skills automatically (no `--pro` flag).
+
+Credentials come from the `diviskit-mcp` entry in
+`.devin/mcp_config.local.json` (Step 3) or from `WP_URL` / `WP_USER` /
+`WP_APP_PASSWORD` env vars:
 
 ```bash
-# Devin — user scope (all projects)
-./bin/install-skills.sh --client devin --scope user
-
 # Devin — project scope (single site, run from the project root)
 ./bin/install-skills.sh --client devin --scope project
+
+# Devin — user scope (all projects sharing one site)
+./bin/install-skills.sh --client devin --scope user
 
 # Codex
 ./bin/install-skills.sh --client codex --scope user
 ```
 
-Manual equivalent for Devin user scope:
+Re-run after every plugin update. Restart the client/session so it picks
+up the skills.
+
+Manual fallback (offline, or before the MCP config exists) for Devin
+project scope:
 
 ```bash
-mkdir -p "$HOME/.config/devin/skills"
-cp -R claude/diviskit-agent/skills/* "$HOME/.config/devin/skills/"
+mkdir -p .devin/skills
+cp -R claude/diviskit-agent/skills/* .devin/skills/
 ```
 
-Restart the client/session after copying.
-
-> Manual copies do not update with WordPress or npm. Replace them from each newer distribution and restart the client. Do not leave a stale manual copy active beside the plugin-managed copy.
+> The `claude/` bundles in this distribution are built from the plugin's
+> `skills/` dirs. A manual copy does not update with WordPress or npm —
+> prefer the REST pull so the copy matches the installed plugin version.
 
 ### Project rules — `AGENTS.md` Grundtemplate
 
