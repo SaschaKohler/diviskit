@@ -116,7 +116,9 @@ class Diviskit_License_Client {
 			add_action( 'admin_post_dklc_activate_' . $this->config['slug'], [ $this, 'handle_activate' ] );
 			add_action( 'admin_post_dklc_deactivate_' . $this->config['slug'], [ $this, 'handle_deactivate' ] );
 			add_action( 'admin_post_dklc_refresh_' . $this->config['slug'], [ $this, 'handle_refresh' ] );
-			if ( 'none' !== $this->config['license_ui'] ) {
+			// 'none' still gets the plugins-list link when license_url points
+			// at a host plugin's screen (e.g. vendokit-divi → vendokit settings).
+			if ( 'none' !== $this->config['license_ui'] || '' !== (string) $this->config['license_url'] ) {
 				add_filter( 'plugin_action_links_' . $this->config['basename'], [ $this, 'plugin_action_links' ] );
 			}
 			if ( 'page' === $this->config['license_ui'] ) {
