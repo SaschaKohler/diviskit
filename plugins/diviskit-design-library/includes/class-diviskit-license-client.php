@@ -6,7 +6,8 @@
  *
  *   require_once __DIR__ . '/includes/class-diviskit-license-client.php';
  *   Diviskit_License_Client::register( [
- *       'item_id'      => 169,                              // vk_product post ID on the store
+ *       'item'         => 'sk-consent',                     // vk_product slug — store-agnostic
+ *       'item_id'      => 0,                                // optional: numeric post ID (overrides slug)
  *       'api_url'      => 'https://shop.example.com/',      // site running vendokit licensing
  *       'version'      => SK_CONSENT_VERSION,
  *       'file'         => __FILE__-of-main-plugin-file,
@@ -40,7 +41,7 @@ if ( ! class_exists( 'Diviskit_License_Client' ) ) :
 
 class Diviskit_License_Client {
 
-	const SDK_VERSION       = '1.2.0';
+	const SDK_VERSION       = '1.3.0';
 	const QUERY_VAR         = 'vendokit-license';
 
 	const STATUS_ACTIVE      = 'active';
@@ -58,6 +59,7 @@ class Diviskit_License_Client {
 
 	public static function register( array $config ): self {
 		$config = wp_parse_args( $config, [
+			'item'         => '',
 			'item_id'      => 0,
 			'api_url'      => '',
 			'version'      => '0.0.0',
@@ -69,6 +71,7 @@ class Diviskit_License_Client {
 			'query_var'    => self::QUERY_VAR,
 			'free'         => false,
 		] );
+		$config['item']         = sanitize_title( (string) $config['item'] );
 		$config['item_id']      = absint( $config['item_id'] );
 		$config['api_url']      = trailingslashit( esc_url_raw( $config['api_url'] ) );
 		$config['slug']         = sanitize_key( (string) $config['slug'] );
@@ -166,6 +169,7 @@ class Diviskit_License_Client {
 
 	public function api_request( string $action, array $payload = [] ) {
 		$body = wp_parse_args( $payload, [
+			'item'            => (string) $this->config['item'],
 			'item_id'         => $this->config['item_id'],
 			'current_version' => $this->config['version'],
 			'site_url'        => home_url(),

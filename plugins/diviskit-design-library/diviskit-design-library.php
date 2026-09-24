@@ -330,7 +330,7 @@ if ( file_exists( __DIR__ . '/includes/class-diviskit-license-client.php' ) ) {
 	require_once __DIR__ . '/includes/class-diviskit-license-client.php';
 
 	Diviskit_License_Client::register( array(
-		'item_id'      => (int) apply_filters( 'dsk_design_library_license_item_id', 319 ),
+		'item'         => (string) apply_filters( 'dsk_design_library_license_item', 'diviskit-design-library' ),
 		'api_url'      => defined( 'DSK_DESIGN_LIBRARY_STORE_URL' )
 			? DSK_DESIGN_LIBRARY_STORE_URL
 			: apply_filters( 'dsk_design_library_store_url', 'https://diviskit.com' ),

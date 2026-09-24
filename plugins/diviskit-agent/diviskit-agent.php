@@ -2638,14 +2638,14 @@ register_activation_hook( __FILE__, [ 'Diviskit_Agent', 'activate' ] );
  * ?vendokit-license=* API, no license key, no license admin page.
  * Store URL: define DIVISKIT_AGENT_STORE_URL in wp-config.php to
  * override (e.g. the local dev store), or filter
- * diviskit_agent_store_url. item_id is the vk_product post ID on the
- * store — filterable via diviskit_agent_license_item_id.
+ * diviskit_agent_store_url. 'item' is the vk_product slug on the
+ * store — filterable via diviskit_agent_license_item.
  */
 if ( file_exists( __DIR__ . '/includes/class-diviskit-license-client.php' ) ) {
 	require_once __DIR__ . '/includes/class-diviskit-license-client.php';
 
 	Diviskit_License_Client::register( array(
-		'item_id'      => (int) apply_filters( 'diviskit_agent_license_item_id', 344 ),
+		'item'         => (string) apply_filters( 'diviskit_agent_license_item', 'diviskit-agent' ),
 		'api_url'      => defined( 'DIVISKIT_AGENT_STORE_URL' )
 			? DIVISKIT_AGENT_STORE_URL
 			: apply_filters( 'diviskit_agent_store_url', 'https://diviskit.com' ),
