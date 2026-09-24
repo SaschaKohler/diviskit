@@ -464,7 +464,7 @@ class Diviskit_License_Client {
 			return;
 		}
 		$state  = $this->status_payload();
-		$action = 'dklc_' . $this->config['slug'];
+		$action = 'dklc_%s_' . $this->config['slug']; // %s = activate|refresh|deactivate — must match admin_post_dklc_{verb}_{slug}
 		$nonce  = 'dklc_nonce_' . $this->config['slug'];
 		?>
 			<?php if ( isset( $_GET['dklc_notice'] ) ) : ?>
@@ -485,19 +485,19 @@ class Diviskit_License_Client {
 
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="max-width:720px">
 				<?php wp_nonce_field( $nonce ); ?>
-				<input type="hidden" name="action" value="<?php echo esc_attr( $action ); ?>_activate">
+				<input type="hidden" name="action" value="<?php echo esc_attr( sprintf( $action, 'activate' ) ); ?>">
 				<input type="password" name="license_key" class="regular-text" autocomplete="off" placeholder="XXXX-XXXXX-XXXXX-XXXXX">
 				<?php submit_button( 'Activate License', 'primary', 'submit', false ); ?>
 			</form>
 			<p>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display:inline-block;margin-right:8px">
 				<?php wp_nonce_field( $nonce ); ?>
-				<input type="hidden" name="action" value="<?php echo esc_attr( $action ); ?>_refresh">
+				<input type="hidden" name="action" value="<?php echo esc_attr( sprintf( $action, 'refresh' ) ); ?>">
 				<?php submit_button( 'Refresh Status', 'secondary', 'submit', false ); ?>
 			</form>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display:inline-block">
 				<?php wp_nonce_field( $nonce ); ?>
-				<input type="hidden" name="action" value="<?php echo esc_attr( $action ); ?>_deactivate">
+				<input type="hidden" name="action" value="<?php echo esc_attr( sprintf( $action, 'deactivate' ) ); ?>">
 				<?php submit_button( 'Deactivate License', 'delete', 'submit', false ); ?>
 			</form>
 			</p>
