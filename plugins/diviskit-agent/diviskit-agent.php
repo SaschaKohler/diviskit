@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Diviskit Agent
  * Description: REST API bridge for Diviskit — connects AI coding agents to your Divi 5 site for page building and design management. Forked from the GPL-licensed DiviOps Agent; serves the REST contract on the canonical diviskit/v1 namespace.
- * Version: 1.7.0
+ * Version: 1.7.1
  * Author: Diviskit
  * Text Domain: diviskit-agent
  * Requires at least: 6.5
@@ -73,7 +73,7 @@ class Diviskit_Agent {
 	 * Plugin version — surfaced in /handshake for self-diagnosis only;
 	 * server no longer gates on it (capability map is the gate).
 	 */
-	const VERSION = '1.7.0';
+	const VERSION = '1.7.1';
 
 	/**
 	 * Minimum MCP server version this plugin is compatible with.
