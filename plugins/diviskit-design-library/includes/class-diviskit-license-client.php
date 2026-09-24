@@ -81,6 +81,7 @@ class Diviskit_License_Client {
 			'free'         => false,
 			'license_ui'   => 'page',
 			'license_url'  => '',
+			'download'     => '',
 		] );
 		$config['item']         = sanitize_title( (string) $config['item'] );
 		$config['item_id']      = absint( $config['item_id'] );
@@ -194,6 +195,12 @@ class Diviskit_License_Client {
 			'current_version' => $this->config['version'],
 			'site_url'        => home_url(),
 		] );
+		// Satellite plugins sharing a product select their own package
+		// (e.g. vendokit-divi asks for download 'vendokit-divi' on the
+		// 'vendokit' product/license).
+		if ( '' !== (string) $this->config['download'] ) {
+			$body['download'] = sanitize_title( (string) $this->config['download'] );
+		}
 
 		$query_var = sanitize_key( (string) ( $this->config['query_var'] ?? self::QUERY_VAR ) )
 			?: self::QUERY_VAR;
