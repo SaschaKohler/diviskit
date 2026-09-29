@@ -100,7 +100,7 @@ All namespaces have adopted the envelope as of the last wave (`module_*` + `sect
 - `diviskit_section_append` — add section to existing page (start or end)
 - `diviskit_section_replace` — replace section by admin label or text content
 - `diviskit_section_remove` — remove section by admin label or text content
-- `diviskit_module_update` — surgically update module attributes (dot notation, 3 targeting modes + occurrence)
+- `diviskit_module_update` — surgically update module attributes (dot notation, 3 targeting modes + occurrence). Two sharp edges *(verified 2026-09-29)*: writes **merge** into the existing tree — overwriting a parent path does not delete sibling keys (no key removal via parent overwrite); and string values containing `$variable()$` tokens are stored with literal `\"` escapes, corrupting the token. For token-bearing values or key deletion, write the block via `$wpdb->update` (see SKILL.md "Safe post_content I/O")
 - `diviskit_module_move` — move any block to a new position (before/after a target block). Separate source + target targeting (auto_index, label, or text). Works across sections.
 - `diviskit_preset_cleanup` — manage presets: default (spam removal), `action=remove_orphans` with `scope=spam|all`, `action=rename_strip_prefix`, `dedup=true`
 - `diviskit_preset_create` — create a new preset in the D5 registry. Required: `module_name`, `name`, `attrs`. For `type: "group"` (attribute-level preset), also requires `group_name` (e.g. `divi/font`, `divi/button`) + `group_id` (e.g. `designTitleText`, `designButton`). Returns the created UUID as `preset.id` (nested under a `preset` object in the response). See [presets.md](presets.md) for the attrs-shape difference between `module` and `group` types

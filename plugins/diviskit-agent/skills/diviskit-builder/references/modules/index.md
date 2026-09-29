@@ -1,7 +1,7 @@
 # DiviSkit Module Reference
 
-Auto-generated from Divi 5.13 schema dump.
-Schema version: `4ae1b5c8794947d76f70515881b7aa93170359fe`
+Auto-generated from Divi 5.14.0 schema dump.
+Schema version: `9497acfd86bde70cd3809f1f6ccd1ae3cae14651`
 Generated: 87 modules
 
 This reference replaces the Diviskit Pro Tier 2+3 module maps.

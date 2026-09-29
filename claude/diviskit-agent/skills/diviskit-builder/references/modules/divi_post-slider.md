@@ -2,8 +2,8 @@
 `divi/post-slider`
 
 - Category: `module`
-- Divi version: 5.13
-- Schema version: `4ae1b5c8794947d76f70515881b7aa93170359fe`
+- Divi version: 5.14.0
+- Schema version: `9497acfd86bde70cd3809f1f6ccd1ae3cae14651`
 
 ## innerContent
 
@@ -120,6 +120,6 @@
 | `image` | `{{selector}} .et_pb_slide_image img` |
 | `button` | `{{selector}}.et_pb_slider .et_pb_more_button.et_pb_button` |
 | `arrows` | `{{selector}} .et-pb-slider-arrows .et-pb-arrow-prev, {{selector}} .et-pb-slider-arrows .et-pb-arrow-next` |
-| `pagination` | `{{selector}} .et-pb-controllers a, {{selector}} .et-pb-controllers .et-pb-active-control` |
+| `pagination` | `{{selector}}:not(.et_pb_slider_bottom_controls) .et-pb-controllers a, {{selector}}:not(.et_pb_slider_bottom_controls) .e...` |
 | `slideOverlay` | `{{selector}} .et_pb_slide .et_pb_slide_overlay_container` |
 | `contentOverlay` | `{{selector}} .et_pb_slide .et_pb_text_overlay_wrapper` |

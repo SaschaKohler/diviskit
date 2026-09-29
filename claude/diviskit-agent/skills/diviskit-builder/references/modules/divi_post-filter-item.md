@@ -2,8 +2,8 @@
 `divi/post-filter-item`
 
 - Category: `child-module`
-- Divi version: 5.13
-- Schema version: `4ae1b5c8794947d76f70515881b7aa93170359fe`
+- Divi version: 5.14.0
+- Schema version: `9497acfd86bde70cd3809f1f6ccd1ae3cae14651`
 
 ## innerContent
 
@@ -16,7 +16,7 @@
 
 | Element | Type | Decoration Paths |
 |---------|------|-----------------|
-| `button` | `object` | `button.settings.decoration.background`, `button.settings.decoration.border`, `button.settings.decoration.boxShadow`, `button.settings.decoration.button`, `button.settings.decoration.button.buttonIconGroup`, `button.settings.decoration.font`, `button.settings.decoration.sizing`, `button.settings.decoration.spacing` |
+| `button` | `object` | `button.settings.decoration.background`, `button.settings.decoration.border`, `button.settings.decoration.boxShadow`, `button.settings.decoration.button`, `button.settings.decoration.font`, `button.settings.decoration.sizing`, `button.settings.decoration.spacing` |
 | `checkbox` | `object` | — |
 | `className` | `string` | — |
 | `field` | `object` | — |
@@ -35,7 +35,6 @@
 - `button.settings.decoration.border`
 - `button.settings.decoration.boxShadow`
 - `button.settings.decoration.button`
-- `button.settings.decoration.button.buttonIconGroup`
 - `button.settings.decoration.font`
 - `button.settings.decoration.sizing`
 - `button.settings.decoration.spacing`

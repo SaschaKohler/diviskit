@@ -402,7 +402,7 @@ def gen_combined_md():
     lines.append("")
     lines.append("Each entry lists **elements**, **innerContent shapes**, and **surprises** only.")
     lines.append("Standard decoration (`{element}.decoration.*`) is assumed — NOT repeated here.")
-    lines.append("Combine with Tier 1 (universal decoration) and Tier 2 (font/icon patterns) for full blocks.")
+    lines.append("Combine with [decoration-formats.md](decoration-formats.md) — Tier 1 (universal decoration) and Tier 2 (font/icon patterns) — for full blocks.")
     lines.append("")
     lines.append("Generated via `diviskit_schema_get_module` with `mode: 'dump_all'`.")
     lines.append("Re-generate with: `python3 gen_all.py`")

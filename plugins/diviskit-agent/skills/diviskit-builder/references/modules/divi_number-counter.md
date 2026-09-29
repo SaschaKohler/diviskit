@@ -2,8 +2,8 @@
 `divi/number-counter`
 
 - Category: `module`
-- Divi version: 5.13
-- Schema version: `4ae1b5c8794947d76f70515881b7aa93170359fe`
+- Divi version: 5.14.0
+- Schema version: `9497acfd86bde70cd3809f1f6ccd1ae3cae14651`
 
 ## innerContent
 

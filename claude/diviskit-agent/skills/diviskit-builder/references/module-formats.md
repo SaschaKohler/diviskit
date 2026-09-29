@@ -1,12 +1,12 @@
 # DiviSkit Module Reference (Tier 3)
 
-Auto-generated from Divi 5.13 schema dump.
-Schema version: `4ae1b5c8794947d76f70515881b7aa93170359fe`
+Auto-generated from Divi 5.14.0 schema dump.
+Schema version: `9497acfd86bde70cd3809f1f6ccd1ae3cae14651`
 Modules: 87
 
 Each entry lists **elements**, **innerContent shapes**, and **surprises** only.
 Standard decoration (`{element}.decoration.*`) is assumed — NOT repeated here.
-Combine with Tier 1 (universal decoration) and Tier 2 (font/icon patterns) for full blocks.
+Combine with [decoration-formats.md](decoration-formats.md) — Tier 1 (universal decoration) and Tier 2 (font/icon patterns) — for full blocks.
 
 Generated via `diviskit_schema_get_module` with `mode: 'dump_all'`.
 Re-generate with: `python3 gen_all.py`
@@ -448,6 +448,7 @@ Re-generate with: `python3 gen_all.py`
 - `children.decoration` limited to: background
 - VB-hidden: `title.decoration.font.headingLevel` (functional via block JSON)
 - CSS `!important` on `barProgress.font.color`
+- CSS `!important` on `barProgress.font.text-align`
 - CSS `!important` on `module`: sizing.margin-left, sizing.margin-right, spacing.margin
 - CSS `!important` on `title.font.color`
 
@@ -552,7 +553,7 @@ Re-generate with: `python3 gen_all.py`
 - CSS `!important` on `image.spacing.margin-left`
 - CSS `!important` on `image.spacing.margin-right`
 - CSS `!important` on `module`: sizing.margin-left, sizing.margin-right, spacing.margin
-- CSS `!important` on `pagination.font.color`
+- CSS `!important` on `pagination`: font.color, font.phone.text-align, font.tablet.text-align, font.text-align
 - CSS `!important` on `title.font.color`
 
 **CSS selectors**:
@@ -969,6 +970,11 @@ Re-generate with: `python3 gen_all.py`
 - `arrows.advanced.color` — element-specific advanced field
 - `arrows.advanced.enable` — element-specific advanced field
 - `pagination.advanced.enable` — element-specific advanced field
+- `pagination.advanced.style` — element-specific advanced field
+- `pagination.advanced.swipeText` — element-specific advanced field
+- `pagination.advanced.showCounter` — element-specific advanced field
+- `pagination.advanced.showSwipeLabel` — element-specific advanced field
+- `pagination.advanced.color` — element-specific advanced field
 - `pagination.decoration` limited to: background
 - `slideOverlay.advanced.use` — element-specific advanced field
 - `slideOverlay.decoration` limited to: background
@@ -1000,7 +1006,7 @@ Re-generate with: `python3 gen_all.py`
 - `image`: `{{selector}} .et_pb_slide_image img`
 - `button`: `{{selector}}.et_pb_slider .et_pb_more_button.et_pb_button`
 - `arrows`: `{{selector}} .et-pb-slider-arrows .et-pb-arrow-prev, {{selector}} .et-pb-slider-arrows .et-pb-arrow-next`
-- `pagination`: `{{selector}} .et-pb-controllers a, {{selector}} .et-pb-controllers .et-pb-active-control`
+- `pagination`: `{{selector}}:not(.et_pb_slider_bottom_controls) .et-pb-controllers a, {{selector}}:not(.et_pb_slider_bottom_controls) .e...`
 - `slideOverlay`: `{{selector}} .et_pb_slide .et_pb_slide_overlay_container`
 - `contentOverlay`: `{{selector}} .et_pb_slide .et_pb_text_overlay_wrapper`
 
@@ -2016,7 +2022,6 @@ Re-generate with: `python3 gen_all.py`
 - VB-hidden: `option.decoration.background.image.parallaxEnabled` (functional via block JSON)
 - VB-hidden: `option.decoration.background.image.parallaxMethod` (functional via block JSON)
 - VB-hidden: `multipleOrderButton.decoration.button.buttonIconGroup` (functional via block JSON)
-- VB-hidden: `button.decoration.button.buttonIconGroup` (functional via block JSON)
 - CSS `!important` on `button.spacing.margin`
 - CSS `!important` on `button.spacing.padding`
 

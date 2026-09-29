@@ -5,7 +5,7 @@ compatibility: Requires diviskit-mcp MCP server connected to a WordPress site wi
 metadata:
   author: diviskit
   version: "1.1"
-  divi-version: "5.13"
+  divi-version: "5.14.0"
 ---
 
 # DiviSkit Builder Skill
@@ -57,11 +57,12 @@ Read the right file for the task at hand — don't load everything.
 | Using MCP tools & targeting | [tools.md](references/tools.md) |
 | Creating/editing pages | [design-guide.md](references/design-guide.md) creativity level first → [module-formats.md](references/module-formats.md) |
 | Copy-paste minimum-valid block snippets | [minimal-snippets.md](references/minimal-snippets.md) (Heading, Text, Button, Blurb, Icon, Image) |
-| Module attribute paths | [module-formats.md](references/module-formats.md) — Tier 1+2+3 all included |
+| Module attribute paths | [decoration-formats.md](references/decoration-formats.md) — Tier 1 universal decoration + Tier 2 font/icon patterns → [module-formats.md](references/module-formats.md) — Tier 3 per-module reference |
 | Per-module detailed schema | [modules/](references/modules/) — 87 individual module files |
 | Adding CSS classes to modules | [design-effects.md](references/design-effects.md) — uses `module.decoration.attributes`, NOT `className` |
 | CSS effects & WebGL shaders | [design-effects.md](references/design-effects.md) |
-| Mega menus & navigation | Pro skill `diviskit-mega-menu` (`../diviskit-mega-menu/SKILL.md`) — `divi/dropdown` mega menus + zero-canvas mobile drawer + loop-driven nav links + three-canvas off-canvas panels. If the skill is not installed, use `divi/dropdown` with `parentElement` as the click trigger and `meta.meta.forceVisible: whileInBuilder`. |
+| Loop elements (query-driven modules) | [loops.md](references/loops.md) — `module.advanced.loop` + `loop_post_*` variables |
+| Mega menus & navigation | Skill [`diviskit-mega-menu`](../diviskit-mega-menu/SKILL.md) — CSS-only native `<details>` mobile menu ([mobile-menu.md](../diviskit-mega-menu/references/mobile-menu.md)), `divi/dropdown` mega menus, zero-canvas drawers, loop-driven links, and three-canvas panels. Use the `<details>` system for compact Text/Code-module headers; use `divi/dropdown` when individual modules must remain VB-editable. |
 | Presets & cleanup | [presets.md](references/presets.md) |
 | PageSpeed/performance fixes | [performance.md](references/performance.md) — fonts inline, script defer, mediaelement dequeue, viewport, SSR consent |
 | Design system setup | [SKILL.md](#design-system-lifecycle) (below) → [presets.md](references/presets.md) |
@@ -91,7 +92,7 @@ or `diviskit_validate_blocks` to catch known silent-failure patterns.
 
 **Re-generation after a Divi update**: Run the update script from anywhere
 inside the project — it searches upward for `.devin/mcp_config.local.json`
-(server key `diviskit-mcp`), or pass the project directory
+(server key `diviskit-mcp` or `diviops-mcp`), or pass the project directory
 as the first argument:
 
 ```bash
@@ -276,5 +277,8 @@ Run `diviskit_validate_blocks` to catch known silent-failure patterns before wri
 - **Image**: sizing/spacing on `module.advanced.{sizing, spacing}` — NOT `module.decoration`.
 - **Icon**: color at `icon.advanced.color.desktop.{value, hover}` — NOT `icon.decoration.color`.
 - **Image border-radius from preset alone doesn't render** — reinforce inline.
+- **`font.hover` at group level crashes the VB** *(VB-verified 2026-09-29, Divi 5.14)* — hover must live inside the breakpoint: `bodyFont.body.font.desktop.hover`, never `bodyFont.body.font.hover`. Wrong level → module shows "Oops! An Error Has Occurred" in the builder, frontend renders fine, VB save does not strip it. Font hover needs `{"style": [], "color": ...}`; `$variable` tokens need `"settings":{}` in the payload. Details: [decoration-formats.md](references/decoration-formats.md)
+- **`diviskit_module_update` merges, never replaces** — writing a parent path (e.g. `...font.desktop`) leaves sibling keys (`hover`) untouched; you cannot delete a key by overwriting its parent.
+- **`diviskit_module_update` mangles `$variable` tokens in string attrs** *(verified 2026-09-29)* — the value `...$variable({"type":"color",...})$` is stored with literal backslashes (`{\"type\"...`), corrupting the token. For attr values containing `$variable()$` tokens or for key removal, use the `$wpdb->update` byte-write path instead (see "Safe post_content I/O").
 
 See [module-formats.md](references/module-formats.md) for the full per-module reference.

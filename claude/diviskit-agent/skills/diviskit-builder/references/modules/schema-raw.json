@@ -1,6 +1,6 @@
 {
-  "schema_version": "4ae1b5c8794947d76f70515881b7aa93170359fe",
-  "divi_version": "5.13",
+  "schema_version": "9497acfd86bde70cd3809f1f6ccd1ae3cae14651",
+  "divi_version": "5.14.0",
   "modules": {
     "divi/accordion": {
       "name": "divi/accordion",
@@ -2283,7 +2283,7 @@
                 "font": {
                   "desktop": {
                     "value": {
-                      "text-align": "{{selector}} .wp-pagenavi"
+                      "text-align": "{{selector}} .wp-pagenavi, {{selector}} .pagination"
                     }
                   }
                 }
@@ -3105,7 +3105,7 @@
               "important": true
             },
             "layout": {
-              "selector": "{{selector}}, {{selector}} .et_pb_blurb_content"
+              "selector": "{{selector}} .et_pb_blurb_content"
             }
           }
         },
@@ -5367,6 +5367,36 @@
                     }
                   }
                 }
+              },
+              "showLabels": {
+                "groupType": "group-item",
+                "item": {
+                  "groupSlug": "contentElements",
+                  "priority": 11,
+                  "render": true,
+                  "attrName": "module.advanced.showLabels",
+                  "label": "Show Labels",
+                  "description": "Whether or not to show field labels in the comment form.",
+                  "category": "configuration",
+                  "features": {
+                    "responsive": false,
+                    "sticky": false,
+                    "hover": false,
+                    "preset": [
+                      "html"
+                    ]
+                  },
+                  "component": {
+                    "type": "field",
+                    "name": "divi/toggle",
+                    "props": {
+                      "options": {
+                        "off": "No",
+                        "on": "Yes"
+                      }
+                    }
+                  }
+                }
               }
             },
             "decoration": {
@@ -7378,6 +7408,11 @@
                         "groupName": "divi/background",
                         "priority": 10,
                         "render": true,
+                        "features": {
+                          "dynamicContent": {
+                            "type": "color"
+                          }
+                        },
                         "component": {
                           "type": "field",
                           "name": "divi/color-picker",
@@ -7699,10 +7734,20 @@
           },
           "styleProps": {
             "font": {
+              "propertySelectors": {
+                "font": {
+                  "desktop": {
+                    "value": {
+                      "text-align": "{{selector}}.et_pb_counters .et_pb_counter_amount"
+                    }
+                  }
+                }
+              },
               "important": {
                 "font": {
                   "desktop": {
                     "value": {
+                      "text-align": true,
                       "color": true
                     }
                   }
@@ -7734,6 +7779,11 @@
                         "groupName": "divi/background",
                         "priority": 10,
                         "render": true,
+                        "features": {
+                          "dynamicContent": {
+                            "type": "color"
+                          }
+                        },
                         "component": {
                           "type": "field",
                           "name": "divi/color-picker",
@@ -10702,7 +10752,9 @@
               "propertySelectors": {
                 "desktop": {
                   "value": {
-                    "height": "{{selector}} > .et_pb_map"
+                    "height": "{{selector}} > .et_pb_map",
+                    "min-height": "{{selector}} > .et_pb_map",
+                    "max-height": "{{selector}} > .et_pb_map"
                   }
                 }
               }
@@ -15759,6 +15811,16 @@
                     "value": {
                       "text-align": "{{selector}}.et_pb_gallery .et_pb_gallery_pagination ul"
                     }
+                  },
+                  "tablet": {
+                    "value": {
+                      "text-align": "{{selector}}.et_pb_gallery .et_pb_gallery_pagination ul"
+                    }
+                  },
+                  "phone": {
+                    "value": {
+                      "text-align": "{{selector}}.et_pb_gallery .et_pb_gallery_pagination ul"
+                    }
                   }
                 }
               },
@@ -15766,7 +15828,18 @@
                 "font": {
                   "desktop": {
                     "value": {
-                      "color": true
+                      "color": true,
+                      "text-align": true
+                    }
+                  },
+                  "tablet": {
+                    "value": {
+                      "text-align": true
+                    }
+                  },
+                  "phone": {
+                    "value": {
+                      "text-align": true
                     }
                   }
                 }
@@ -18487,6 +18560,7 @@
                   "attrName": "feed.innerContent",
                   "subName": "accountId",
                   "label": "Account",
+                  "description": "Choose a connected Instagram account for this feed. Use Add to connect a new account, Edit to update credentials, and Fetch to refresh posts.",
                   "category": "configuration",
                   "features": {
                     "responsive": false,
@@ -19736,6 +19810,8 @@
                 "desktop": {
                   "value": {
                     "height": "{{selector}} > .et_pb_map",
+                    "min-height": "{{selector}} > .et_pb_map",
+                    "max-height": "{{selector}} > .et_pb_map",
                     "margin-left": "{{selector}}.et_pb_module",
                     "margin-right": "{{selector}}.et_pb_module"
                   }
@@ -20554,6 +20630,14 @@
                   "value": "{{selector}}.et_pb_menu .et_pb_menu__menu > nav > ul > li > a",
                   "hover": "{{selector}}.et_pb_menu .et_pb_menu__menu > nav > ul > li > a",
                   "active": "{{selector}}.et_pb_menu .et_pb_menu__menu > nav > ul > li > a"
+                }
+              }
+            },
+            "boxShadow": {
+              "selectors": {
+                "desktop": {
+                  "value": "{{selector}}.et_pb_menu .et_pb_menu__menu > nav > ul > li > a",
+                  "hover": "{{selector}}.et_pb_menu .et_pb_menu__menu > nav > ul > li > a"
                 }
               }
             }
@@ -21590,7 +21674,7 @@
               "important": true
             },
             "transform": {
-              "selector": "{{wrapperSelector}} a"
+              "selector": "{{wrapperSelector}} {{baseSelector}}"
             },
             "position": {
               "selector": "{{wrapperSelector}}"
@@ -22539,6 +22623,19 @@
           "attributes": {
             "class": "pagination clearfix"
           },
+          "styleProps": {
+            "font": {
+              "propertySelectors": {
+                "font": {
+                  "desktop": {
+                    "value": {
+                      "text-align": "{{selector}} .pagination"
+                    }
+                  }
+                }
+              }
+            }
+          },
           "settings": {
             "decoration": {
               "font": {
@@ -23335,7 +23432,7 @@
                   "attrName": "field.innerContent",
                   "subName": "placeholder",
                   "label": "Field Placeholder",
-                  "description": "Sets hint text inside the control. When empty, search and number inputs use the field label (or the default Search text for search fields).",
+                  "description": "Sets hint text inside the control. For search and number inputs this is the HTML placeholder. For select fields this is the empty-state option text. When empty, search and number inputs use the field label (or the default Search text for search fields).",
                   "render": true,
                   "priority": 40,
                   "component": {
@@ -23619,20 +23716,7 @@
               "button": {
                 "component": {
                   "props": {
-                    "dynamicSubgroupHost": true,
-                    "fields": {
-                      "buttonIconGroup": {
-                        "component": {
-                          "props": {
-                            "fields": {
-                              "settings": {
-                                "render": false
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
+                    "dynamicSubgroupHost": true
                   }
                 }
               },
@@ -23828,6 +23912,16 @@
           "selector": "{{selector}} .wp-pagenavi a, {{selector}} .wp-pagenavi span, {{selector}} .pagination a, {{selectorPrefix}}.et_pb_posts_nav{{baseSelector}} span a, {{selectorPrefix}}.et_pb_posts_nav{{baseSelector}} span a span",
           "styleProps": {
             "font": {
+              "propertySelectors": {
+                "font": {
+                  "desktop": {
+                    "value": {
+                      "writing-mode": "{{selector}} .wp-pagenavi, {{selectorPrefix}}.et_pb_posts_nav{{baseSelector}} span.nav-previous a, {{selectorPrefix}}.et_pb_posts_nav{{baseSelector}} span.nav-next a",
+                      "transform": "{{selector}} .wp-pagenavi, {{selectorPrefix}}.et_pb_posts_nav{{baseSelector}} span.nav-previous a, {{selectorPrefix}}.et_pb_posts_nav{{baseSelector}} span.nav-next a"
+                    }
+                  }
+                }
+              },
               "important": {
                 "font": {
                   "desktop": {
@@ -24954,17 +25048,18 @@
         },
         "pagination": {
           "type": "object",
-          "selector": "{{selector}} .et-pb-controllers a, {{selector}} .et-pb-controllers .et-pb-active-control",
+          "selector": "{{selector}}:not(.et_pb_slider_bottom_controls) .et-pb-controllers a, {{selector}}:not(.et_pb_slider_bottom_controls) .et-pb-controllers .et-pb-active-control",
           "settings": {
             "advanced": {
               "enable": {
                 "groupType": "group-item",
                 "item": {
                   "groupSlug": "contentElements",
+                  "attrName": "pagination.advanced.enable",
                   "priority": 10,
                   "render": true,
                   "label": "Show Controls",
-                  "description": "This setting will turn on and off the circle buttons at the bottom of the slider.",
+                  "description": "This setting will turn on and off the slider controls shown at the bottom of the slider.",
                   "category": "configuration",
                   "features": {
                     "sticky": false,
@@ -24974,6 +25069,132 @@
                   },
                   "component": {
                     "name": "divi/toggle",
+                    "type": "field"
+                  }
+                }
+              },
+              "style": {
+                "groupType": "group-item",
+                "item": {
+                  "groupSlug": "contentElements",
+                  "attrName": "pagination.advanced.style",
+                  "label": "Controls Style",
+                  "description": "Choose between the new swipe controls bar or the classic dot navigation.",
+                  "category": "configuration",
+                  "priority": 11,
+                  "render": true,
+                  "features": {
+                    "sticky": false,
+                    "responsive": false,
+                    "hover": false,
+                    "preset": [
+                      "html"
+                    ]
+                  },
+                  "component": {
+                    "name": "divi/select",
+                    "type": "field",
+                    "props": {
+                      "options": {
+                        "swipe": {
+                          "label": "Swipe"
+                        },
+                        "dot": {
+                          "label": "Dot Navigation"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "swipeText": {
+                "groupType": "group-item",
+                "item": {
+                  "groupSlug": "contentElements",
+                  "attrName": "pagination.advanced.swipeText",
+                  "label": "Swipe Label",
+                  "description": "Customize the swipe indicator text shown on the right side of the controls bar.",
+                  "category": "configuration",
+                  "priority": 12,
+                  "render": true,
+                  "features": {
+                    "sticky": false,
+                    "responsive": false,
+                    "hover": false,
+                    "preset": [
+                      "html"
+                    ]
+                  },
+                  "component": {
+                    "name": "divi/text",
+                    "type": "field"
+                  }
+                }
+              },
+              "showCounter": {
+                "groupType": "group-item",
+                "item": {
+                  "groupSlug": "contentElements",
+                  "attrName": "pagination.advanced.showCounter",
+                  "label": "Show Slide Count",
+                  "description": "Turn on and off the slide count text (e.g. 01 / 04) on the controls bar.",
+                  "category": "configuration",
+                  "priority": 13,
+                  "render": true,
+                  "features": {
+                    "sticky": false,
+                    "responsive": false,
+                    "hover": false,
+                    "preset": [
+                      "html"
+                    ]
+                  },
+                  "component": {
+                    "name": "divi/toggle",
+                    "type": "field"
+                  }
+                }
+              },
+              "showSwipeLabel": {
+                "groupType": "group-item",
+                "item": {
+                  "groupSlug": "contentElements",
+                  "attrName": "pagination.advanced.showSwipeLabel",
+                  "label": "Show Swipe Label",
+                  "description": "Turn on and off the swipe indicator text on the controls bar.",
+                  "category": "configuration",
+                  "priority": 14,
+                  "render": true,
+                  "features": {
+                    "sticky": false,
+                    "responsive": false,
+                    "hover": false,
+                    "preset": [
+                      "html"
+                    ]
+                  },
+                  "component": {
+                    "name": "divi/toggle",
+                    "type": "field"
+                  }
+                }
+              },
+              "color": {
+                "groupType": "group-item",
+                "item": {
+                  "groupSlug": "designNavigation",
+                  "attrName": "pagination.advanced.color",
+                  "label": "Controls Text Color",
+                  "description": "Pick a color for the slide count and swipe label text in the swipe controls bar.",
+                  "priority": 15,
+                  "render": true,
+                  "features": {
+                    "dynamicContent": {
+                      "type": "color"
+                    }
+                  },
+                  "component": {
+                    "name": "divi/color-picker",
                     "type": "field"
                   }
                 }
@@ -25783,9 +26004,13 @@
               "propertySelectors": {
                 "desktop": {
                   "value": {
+                    "margin-top": "{{selector}}",
+                    "margin-right": "{{selector}}",
+                    "margin-bottom": "{{selector}}",
+                    "margin-left": "{{selector}}",
                     "padding-left": "{{selectorPrefix}}.et_pb_pricing {{baseSelector}} .et_pb_pricing_heading,{{selectorPrefix}}.et_pb_pricing {{baseSelector}} .et_pb_pricing_content_top,{{selectorPrefix}}.et_pb_pricing {{baseSelector}} .et_pb_pricing_content,{{selector}} .et_pb_button_wrapper",
                     "padding-right": "{{selectorPrefix}}.et_pb_pricing {{baseSelector}} .et_pb_pricing_heading,{{selectorPrefix}}.et_pb_pricing {{baseSelector}} .et_pb_pricing_content_top,{{selectorPrefix}}.et_pb_pricing {{baseSelector}} .et_pb_pricing_content,{{selector}} .et_pb_button_wrapper",
-                    "padding-bottom": "{{selectorPrefix}}.et_pb_pricing {{baseSelector}} .et_pb_pricing_heading,{{selectorPrefix}}.et_pb_pricing {{baseSelector}} .et_pb_pricing_content_top,{{selectorPrefix}}.et_pb_pricing {{baseSelector}} .et_pb_pricing_content,{{selectorPrefix}}.et_pb_pricing {{baseSelector}}"
+                    "padding-bottom": "{{selector}}"
                   }
                 }
               },
@@ -28861,7 +29086,31 @@
               "html": [],
               "link": [],
               "loop": [],
-              "text": []
+              "text": [],
+              "showLabels": {
+                "groupType": "group-item",
+                "item": {
+                  "priority": 10,
+                  "groupSlug": "contentFields",
+                  "render": true,
+                  "attrName": "module.advanced.showLabels",
+                  "label": "Show Labels",
+                  "description": "Whether or not to show field labels in the opt-in form.",
+                  "category": "configuration",
+                  "features": {
+                    "responsive": false,
+                    "sticky": false,
+                    "hover": false,
+                    "preset": [
+                      "html"
+                    ]
+                  },
+                  "component": {
+                    "name": "divi/toggle",
+                    "type": "field"
+                  }
+                }
+              }
             },
             "decoration": {
               "animation": [],
@@ -34144,6 +34393,16 @@
                   }
                 }
               }
+            },
+            "spacing": {
+              "propertySelectors": {
+                "desktop": {
+                  "value": {
+                    "padding": "{{selector}} .et_pb_tabs_controls li",
+                    "margin": "{{selector}} .et_pb_tabs_controls li"
+                  }
+                }
+              }
             }
           },
           "settings": {
@@ -34206,6 +34465,16 @@
                     "value": {
                       "color": true
                     }
+                  }
+                }
+              }
+            },
+            "spacing": {
+              "propertySelectors": {
+                "desktop": {
+                  "value": {
+                    "padding": "{{selector}} .et_pb_tabs_controls li.et_pb_tab_active",
+                    "margin": "{{selector}} .et_pb_tabs_controls li.et_pb_tab_active"
                   }
                 }
               }
@@ -34763,6 +35032,15 @@
             },
             "layout": {
               "selector": "{{selector}} .et_pb_testimonial_description"
+            },
+            "border": {
+              "propertySelectors": {
+                "desktop": {
+                  "value": {
+                    "border-radius": "{{selector}}, {{selector}} > .et-pb-parallax-wrapper"
+                  }
+                }
+              }
             }
           },
           "settings": {
