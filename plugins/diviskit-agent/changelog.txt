@@ -9,6 +9,11 @@ Policy:
 - Keep entries customer-facing. Avoid internal issue numbers unless they are needed to explain a user-visible change.
 - Do not include secrets, credentials, customer data, or environment-specific URLs.
 
+## 1.7.2
+
+- Ships the GPLv2 license text as `LICENSE` in the plugin package and adds fork/copyright attribution plus a DiviOps non-affiliation note to the plugin header and `readme.txt`.
+- Fixes stale Updates & setup dashboard copy that still described the removed `diviops/v1` compat alias; same correction in `README.md`.
+
 ## 1.7.0
 
 - **Breaking:** removes the `diviops/v1` compat alias entirely — all routes are served on the canonical `diviskit/v1` namespace only; the handshake `namespaces` field reports `[diviskit/v1]`. MCP clients still pointing at `diviops/v1` must switch to `diviskit/v1`.

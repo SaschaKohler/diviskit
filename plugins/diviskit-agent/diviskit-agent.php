@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Diviskit Agent
  * Description: REST API bridge for Diviskit — connects AI coding agents to your Divi 5 site for page building and design management. Forked from the GPL-licensed DiviOps Agent; serves the REST contract on the canonical diviskit/v1 namespace.
- * Version: 1.7.1
+ * Version: 1.7.2
  * Author: Diviskit
  * Text Domain: diviskit-agent
  * Requires at least: 6.5
@@ -10,6 +10,11 @@
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Update URI: https://diviskit.com/item/diviskit-agent/
+ *
+ * Copyright (C) 2026 Diviskit
+ * Based on DiviOps Agent 1.5.25, released under GPL v2 or later.
+ * Diviskit is not affiliated with or endorsed by the DiviOps project.
+ * See the LICENSE file for the full license text.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -73,7 +78,7 @@ class Diviskit_Agent {
 	 * Plugin version — surfaced in /handshake for self-diagnosis only;
 	 * server no longer gates on it (capability map is the gate).
 	 */
-	const VERSION = '1.7.1';
+	const VERSION = '1.7.2';
 
 	/**
 	 * Minimum MCP server version this plugin is compatible with.
@@ -2320,6 +2325,7 @@ Steps:
 		}
 		$divi_active   = function_exists( 'et_get_option' );
 		$design_system = isset( $_GET['view'] ) && is_string( $_GET['view'] ) && 'design-system' === $_GET['view'] && 'design-system' === sanitize_key( wp_unslash( $_GET['view'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Fixed read-only navigation; exact-token guard rejects normalization variants. No state change.
+		$support_view  = isset( $_GET['view'] ) && is_string( $_GET['view'] ) && 'support' === $_GET['view'] && 'support' === sanitize_key( wp_unslash( $_GET['view'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- same fixed read-only navigation token.
 		$divi_version  = $divi_active && defined( 'ET_BUILDER_PRODUCT_VERSION' ) ? ET_BUILDER_PRODUCT_VERSION : null;
 		$rest_url      = rest_url( self::REST_NAMESPACE );
 		$rate_disabled = (bool) DIVISKIT_RATE_LIMIT_DISABLED;
@@ -2379,7 +2385,7 @@ Steps:
 				return 'limit' === $key ? 8 : null;
 			}
 		};
-		$rollback_snapshots = $design_system ? [] : self::rollback_snapshot_filtered_summaries( $snapshot_request );
+		$rollback_snapshots = ( $design_system || $support_view ) ? [] : self::rollback_snapshot_filtered_summaries( $snapshot_request );
 
 		?>
 		<div class="wrap">
@@ -2396,8 +2402,9 @@ Steps:
 					<a href="<?php echo esc_url( rest_url( self::REST_NAMESPACE . '/handshake' ) ); ?>" target="_blank" rel="noopener noreferrer" class="button"><span class="dashicons dashicons-rest-api" aria-hidden="true"></span><?php esc_html_e( 'REST endpoint', 'diviskit-agent' ); ?></a>
 				</header>
 				<nav class="diviskit-nav" aria-label="<?php esc_attr_e( 'Diviskit pages', 'diviskit-agent' ); ?>">
-					<a href="<?php echo esc_url( admin_url( 'admin.php?page=diviskit' ) ); ?>"<?php if ( ! $design_system ) echo ' aria-current="page"'; ?>><?php esc_html_e( 'Overview', 'diviskit-agent' ); ?></a>
+					<a href="<?php echo esc_url( admin_url( 'admin.php?page=diviskit' ) ); ?>"<?php if ( ! $design_system && ! $support_view ) echo ' aria-current="page"'; ?>><?php esc_html_e( 'Overview', 'diviskit-agent' ); ?></a>
 					<a href="<?php echo esc_url( admin_url( 'admin.php?page=diviskit&view=design-system' ) ); ?>"<?php if ( $design_system ) echo ' aria-current="page"'; ?>><?php esc_html_e( 'Design System', 'diviskit-agent' ); ?></a>
+					<a href="<?php echo esc_url( admin_url( 'admin.php?page=diviskit&view=support' ) ); ?>"<?php if ( $support_view ) echo ' aria-current="page"'; ?>><?php esc_html_e( 'Support', 'diviskit-agent' ); ?></a>
 					<?php if ( $pro_active ) : ?>
 						<a href="<?php echo esc_url( $pro_url ); ?>"><?php esc_html_e( 'Diviskit Pro', 'diviskit-agent' ); ?></a>
 					<?php endif; ?>
@@ -2405,6 +2412,24 @@ Steps:
 				<div class="diviskit-content">
 					<?php if ( $design_system ) : ?>
 						<?php require __DIR__ . '/includes/admin-design-system.php'; ?>
+					<?php elseif ( $support_view ) : ?>
+						<section class="diviskit-card" aria-labelledby="diviskit-license-title">
+							<h2 id="diviskit-license-title"><?php esc_html_e( 'Lizenz', 'diviskit-agent' ); ?></h2>
+							<?php
+							if ( class_exists( 'Diviskit_License_Client' ) ) {
+								Diviskit_License_Client::instance( 'diviskit-agent' )?->render_license_panel();
+							}
+							?>
+						</section>
+						<section class="diviskit-card" aria-labelledby="diviskit-support-title">
+							<h2 id="diviskit-support-title"><?php esc_html_e( 'Support', 'diviskit-agent' ); ?></h2>
+							<p class="diviskit-muted"><?php esc_html_e( 'Direkter Draht zum Diviskit-Support — Tickets werden dem Diviskit-Agent-Produkt zugeordnet und enthalten automatisch Versions- und Site-Diagnose.', 'diviskit-agent' ); ?></p>
+							<?php
+							if ( class_exists( 'Diviskit_Support_Client' ) ) {
+								Diviskit_Support_Client::instance( 'diviskit-agent' )?->render_support_panel();
+							}
+							?>
+						</section>
 					<?php else : ?>
 					<?php if ( ! $divi_active ) : ?>
 						<p class="diviskit-callout"><?php esc_html_e( 'Divi is not active. Activate the Divi theme to use Divi-dependent MCP tools.', 'diviskit-agent' ); ?></p>
@@ -2518,7 +2543,7 @@ Steps:
 						<h2 id="diviskit-updates-title"><?php esc_html_e( 'Updates & setup', 'diviskit-agent' ); ?></h2>
 						<div>
 							<p><?php esc_html_e( 'Diviskit Agent is a GPL fork of DiviOps Agent. Updates ship with the Diviskit plugin bundle — replace the plugin directory to update. Your Application Password and MCP client configuration carry over unchanged.', 'diviskit-agent' ); ?></p>
-							<p><?php esc_html_e( 'The MCP server updates separately through npm or npx. Both namespaces serve the identical contract, so migrating a client is a one-line base-URL change.', 'diviskit-agent' ); ?></p>
+							<p><?php esc_html_e( 'The MCP server updates separately through npm or npx. The REST contract is unchanged since the fork — migrating a client to the canonical diviskit/v1 namespace is a one-line base-URL change.', 'diviskit-agent' ); ?></p>
 						</div>
 					</section>
 					<?php endif; ?>
@@ -2635,7 +2660,9 @@ register_activation_hook( __FILE__, [ 'Diviskit_Agent', 'activate' ] );
 /**
  * Update client — the Agent is a free product, so it registers in
  * 'free' mode: anonymous update checks against the Diviskit store's
- * ?vendokit-license=* API, no license key, no license admin page.
+ * ?vendokit-license=* API. 'optional_license' keeps the license panel
+ * alive: the free license from the shop unlocks the support year and
+ * authenticates support tickets — updates work without it.
  * Store URL: define DIVISKIT_AGENT_STORE_URL in wp-config.php to
  * override (e.g. the local dev store), or filter
  * diviskit_agent_store_url. 'item' is the vk_product slug on the
@@ -2655,6 +2682,29 @@ if ( file_exists( __DIR__ . '/includes/class-diviskit-license-client.php' ) ) {
 		'plugin_title' => 'Diviskit Agent',
 		'purchase_url' => apply_filters( 'diviskit_agent_purchase_url', 'https://diviskit.com/item/diviskit-agent/' ),
 		'free'         => true,
+		'optional_license' => true,
+		'license_ui'   => 'embed',
+		'license_url'  => admin_url( 'admin.php?page=diviskit&view=support' ),
+	) );
+}
+
+/**
+ * Support client — ticket panel on the Diviskit admin page (?view=support).
+ * Free product: no license key is stored, so tickets go out anonymously —
+ * the store accepts them because the product is flagged "free_download".
+ */
+if ( file_exists( __DIR__ . '/includes/class-diviskit-support-client.php' ) ) {
+	require_once __DIR__ . '/includes/class-diviskit-support-client.php';
+
+	Diviskit_Support_Client::register( array(
+		'item'         => (string) apply_filters( 'diviskit_agent_license_item', 'diviskit-agent' ),
+		'api_url'      => defined( 'DIVISKIT_AGENT_STORE_URL' )
+			? DIVISKIT_AGENT_STORE_URL
+			: apply_filters( 'diviskit_agent_store_url', 'https://diviskit.com' ),
+		'version'      => Diviskit_Agent::VERSION,
+		'slug'         => 'diviskit-agent',
+		'plugin_title' => 'Diviskit Agent',
+		'support_url'  => admin_url( 'admin.php?page=diviskit&view=support' ),
 	) );
 }
 

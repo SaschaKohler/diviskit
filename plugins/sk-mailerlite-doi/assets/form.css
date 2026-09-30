@@ -1,0 +1,163 @@
+/**
+ * SK MailerLite DOI — form styles (Vision design system).
+ * Colors prefer Divi global-color CSS vars (var(--gcid-*)) with fallbacks.
+ */
+
+.skml-form {
+  background: var(--gcid-vsn-surface, #2b2f31);
+  border: 1px solid var(--gcid-vsn-line, rgba(255, 255, 255, 0.12));
+  padding: 28px;
+  max-width: 560px;
+  box-sizing: border-box;
+}
+.skml-form *, .skml-form *::before, .skml-form *::after { box-sizing: border-box; }
+
+.skml-heading {
+  margin: 0 0 12px;
+  font-family: 'Anton', Impact, sans-serif;
+  font-size: 30px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  color: var(--gcid-vsn-white, #ffffff);
+}
+
+.skml-sub {
+  margin: 0 0 24px;
+  font-family: 'Geist', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--gcid-vsn-muted, rgba(255, 255, 255, 0.62));
+}
+
+/* --- input ---------------------------------------------------------- */
+.skml-input {
+  display: block;
+  width: 100%;
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  background: var(--gcid-vsn-darker, #17191a);
+  border: 1px solid var(--gcid-vsn-line, rgba(255, 255, 255, 0.12));
+  border-radius: 0;
+  font-family: 'Geist', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--gcid-vsn-white, #ffffff);
+  transition: border-color 0.15s ease;
+}
+.skml-input::placeholder { color: var(--gcid-vsn-muted-soft, rgba(255, 255, 255, 0.45)); }
+.skml-input:focus { border-color: var(--gcid-vsn-accent, #ffd400); outline: none; }
+
+/* --- consent checkbox ------------------------------------------------ */
+.skml-consent {
+  display: block;
+  position: relative;
+  margin: 0 0 20px;
+  padding-left: 28px;
+  cursor: pointer;
+}
+.skml-consent input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.skml-box {
+  position: absolute;
+  left: 0;
+  top: 1px;
+  width: 16px;
+  height: 16px;
+  background: var(--gcid-vsn-darker, #17191a);
+  border: 1px solid var(--gcid-vsn-line-strong, rgba(255, 255, 255, 0.28));
+}
+.skml-consent input:focus-visible + .skml-box {
+  border-color: var(--gcid-vsn-accent, #ffd400);
+}
+.skml-consent input:checked + .skml-box {
+  background: var(--gcid-vsn-accent, #ffd400) url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2317191a' d='M6.564.75l-3.59 3.612-1.538-1.55L0 4.26 2.974 7.25 8 2.193z'/%3e%3c/svg%3e") no-repeat center/10px;
+  border-color: var(--gcid-vsn-accent, #ffd400);
+}
+.skml-consent-text {
+  font-family: 'Geist', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--gcid-vsn-muted, rgba(255, 255, 255, 0.62));
+}
+.skml-consent-text a { color: var(--gcid-vsn-accent, #ffd400); text-decoration: underline; }
+
+/* --- honeypot --------------------------------------------------------- */
+.skml-hp {
+  position: absolute;
+  left: -9999px;
+  top: -9999px;
+  height: 0;
+  overflow: hidden;
+}
+
+/* --- recaptcha v3 note -------------------------------------------------- */
+.skml-captcha-note {
+  margin: -8px 0 20px;
+  font-family: 'Geist', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--gcid-vsn-muted-soft, rgba(255, 255, 255, 0.45));
+}
+.skml-captcha-note a { color: inherit; text-decoration: underline; }
+
+/* --- submit ------------------------------------------------------------ */
+.skml-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  margin: 0;
+  padding: 14px 28px;
+  background: var(--gcid-vsn-accent, #ffd400);
+  border: none;
+  border-radius: 0;
+  box-shadow: 5px 5px 0 var(--gcid-vsn-shadow, rgba(0, 0, 0, 0.35));
+  color: var(--gcid-vsn-darker, #17191a);
+  font-family: 'Geist Mono', 'SFMono-Regular', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  line-height: 21px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+.skml-btn:hover { background: var(--gcid-vsn-accent-deep, #e6be00); }
+.skml-btn:disabled { cursor: default; opacity: 0.85; }
+
+.skml-spinner {
+  display: none;
+  width: 11px;
+  height: 11px;
+  border: 3px solid #17191a;
+  border-color: #17191a #17191a #17191a transparent;
+  border-radius: 50%;
+  animation: skml-spin 1.2s linear infinite;
+}
+.skml-btn.is-loading .skml-spinner { display: inline-block; }
+@keyframes skml-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* --- messages ---------------------------------------------------------- */
+.skml-msg {
+  margin: 14px 0 0;
+  font-family: 'Geist', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--gcid-vsn-muted, rgba(255, 255, 255, 0.62));
+}
+.skml-msg:empty { display: none; }
+.skml-msg.is-error { color: var(--gcid-vsn-danger, #ff6b6b); }
+.skml-input.is-error { border-color: var(--gcid-vsn-danger, #ff6b6b); }
+
+/* --- done state --------------------------------------------------------- */
+.skml-done .skml-sub { margin-bottom: 0; }

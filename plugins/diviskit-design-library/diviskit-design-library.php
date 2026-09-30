@@ -346,16 +346,44 @@ add_action( 'plugins_loaded', function () {
 		'slug'         => 'diviskit-design-library',
 		'plugin_title' => 'Diviskit Design Library',
 		'purchase_url' => apply_filters( 'dsk_design_library_purchase_url', 'https://diviskit.com/item/diviskit-design-library/' ),
+		// Free product: updates run anonymously; the optional free license
+		// (free checkout in the shop) unlocks the included support year.
+		'free'         => true,
+		'optional_license' => true,
 		'license_ui'   => 'embed',
 		'license_url'  => admin_url( $agent_menu
 			? 'admin.php?page=ddl-license'
 			: 'options-general.php?page=ddl-license' ),
 	) );
 
+	// Support client — ticket panel rendered on the same admin page below
+	// the license panel; reuses the license client's stored key.
+	if ( file_exists( __DIR__ . '/includes/class-diviskit-support-client.php' ) ) {
+		require_once __DIR__ . '/includes/class-diviskit-support-client.php';
+
+		Diviskit_Support_Client::register( array(
+			'item'         => (string) apply_filters( 'dsk_design_library_license_item', 'diviskit-design-library' ),
+			'api_url'      => defined( 'DSK_DESIGN_LIBRARY_STORE_URL' )
+				? DSK_DESIGN_LIBRARY_STORE_URL
+				: apply_filters( 'dsk_design_library_store_url', 'https://diviskit.com' ),
+			'version'      => Diviskit_Design_Library::VERSION,
+			'slug'         => 'diviskit-design-library',
+			'plugin_title' => 'Diviskit Design Library',
+			'support_url'  => admin_url( $agent_menu
+				? 'admin.php?page=ddl-license'
+				: 'options-general.php?page=ddl-license' ),
+		) );
+	}
+
 	add_action( 'admin_menu', function () use ( $agent_menu ) {
 		$render = function () {
-			echo '<div class="wrap"><h1>Diviskit Design Library — License</h1>';
+			echo '<div class="wrap"><h1>Diviskit Design Library</h1>';
+			echo '<h2>' . esc_html__( 'Lizenz', 'diviskit-design-library' ) . '</h2>';
 			Diviskit_License_Client::instance( 'diviskit-design-library' )?->render_license_panel();
+			if ( class_exists( 'Diviskit_Support_Client' ) ) {
+				echo '<h2>' . esc_html__( 'Support', 'diviskit-design-library' ) . '</h2>';
+				Diviskit_Support_Client::instance( 'diviskit-design-library' )?->render_support_panel();
+			}
 			echo '</div>';
 		};
 		if ( $agent_menu ) {

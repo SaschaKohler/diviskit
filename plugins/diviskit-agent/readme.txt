@@ -3,7 +3,7 @@ Contributors: diviskit
 Tags: divi, mcp, ai, rest-api, site-builder
 Requires at least: 6.5
 Tested up to: 7.1
-Stable tag: 1.7.0
+Stable tag: 1.7.2
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -43,7 +43,7 @@ Start with a staging site, ask the agent to inspect before editing, and review t
 
 This listing distributes the Free WordPress plugin. Selected advanced workflows, including Vendokit commerce automation, require separate Pro components. Installing this plugin does not enable every Diviskit tool. The capability handshake identifies what the connected site supports.
 
-Divi is a registered trademark of Elegant Themes, Inc. Diviskit Agent is not affiliated with or endorsed by Elegant Themes.
+Diviskit Agent is a GPL-licensed fork of the free DiviOps Agent (forked at version 1.5.25). Divi is a registered trademark of Elegant Themes, Inc. Diviskit Agent is not affiliated with or endorsed by Elegant Themes or the DiviOps project.
 
 = External services and authentication =
 
@@ -115,6 +115,11 @@ Run it from anywhere inside your DDEV project (or pass the project directory as 
 2. An agent-authored page open in the Divi 5 Visual Builder, with the native Heading module content controls available for continued editing. Divi is a separate required product.
 
 == Changelog ==
+
+= 1.7.2 =
+
+* Ships the GPLv2 license text as `LICENSE` in the plugin package and adds fork and copyright attribution to the plugin header; the listing now discloses the GPL fork provenance and the DiviOps non-affiliation.
+* Fixes dashboard copy that still described the removed `diviops/v1` compat alias.
 
 = 1.7.0 =
 
@@ -251,6 +256,10 @@ Run it from anywhere inside your DDEV project (or pass the project directory as 
 * Keeps `Stable tag` aligned with the plugin header version.
 
 == Upgrade Notice ==
+
+= 1.7.2 =
+
+License-packaging and attribution update only; no REST contract or capability changes. Update normally from WordPress or by replacing the plugin ZIP.
 
 = 1.5.25 =
 

@@ -2,7 +2,7 @@
 
 **REST API bridge inside the Diviskit AI harness for WordPress — Divi-native today, WordPress-wide by design.**
 
-Forked from the GPL-licensed DiviOps Agent (1.5.25). Serves the identical REST contract on the canonical `diviskit/v1` namespace and dual-registers `diviops/v1` as a compat alias for existing `@diviops/mcp-server` clients.
+Forked from the GPL-licensed DiviOps Agent (1.5.25). Since 1.7.0 it serves the canonical `diviskit/v1` namespace only — the legacy `diviops/v1` compat alias was removed. Diviskit is not affiliated with or endorsed by the DiviOps project.
 
 The WordPress companion plugin for `@diviskit/mcp-server`. Pairs with the MCP server to expose Divi 5 page authoring, SCF management, CPT/post population, data model introspection, and site auditing as `/diviskit/v1/*` REST endpoints behind Application Password auth.
 

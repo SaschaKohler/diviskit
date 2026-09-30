@@ -21,6 +21,11 @@
  * update checks — the store must flag the product "free_download" so
  * get_license_version returns a signed package URL without a key.
  *
+ * Free products with OPTIONAL licenses (e.g. license unlocks support
+ * while updates stay anonymous): pass 'free' => true plus
+ * 'optional_license' => true. Handlers + license UI stay active, update
+ * checks keep working without a key and send it once one is stored.
+ *
  * License UI placement — 'license_ui' config:
  *   'page'  (default) own page under Settings → "<Title> License"
  *   'embed' no menu entry; the host embeds
@@ -50,7 +55,7 @@ if ( ! class_exists( 'Diviskit_License_Client' ) ) :
 
 class Diviskit_License_Client {
 
-	const SDK_VERSION       = '1.4.0';
+	const SDK_VERSION       = '1.5.0';
 	const QUERY_VAR         = 'vendokit-license';
 
 	const STATUS_ACTIVE      = 'active';
@@ -79,6 +84,7 @@ class Diviskit_License_Client {
 			'settings_key' => '',
 			'query_var'    => self::QUERY_VAR,
 			'free'         => false,
+			'optional_license' => false,
 			'license_ui'   => 'page',
 			'license_url'  => '',
 			'download'     => '',
@@ -111,8 +117,9 @@ class Diviskit_License_Client {
 		add_filter( 'plugins_api', [ $this, 'plugins_api_filter' ], 10, 3 );
 		add_filter( 'pre_update_option_' . $this->config['settings_key'], [ $this, 'sanitize_state_for_storage' ], 10, 2 );
 
-		// Free products update anonymously — no license UI or handlers.
-		if ( is_admin() && empty( $this->config['free'] ) ) {
+		// Free products update anonymously — no license UI or handlers,
+		// unless 'optional_license' keeps them for support-entitled keys.
+		if ( is_admin() && ( empty( $this->config['free'] ) || ! empty( $this->config['optional_license'] ) ) ) {
 			// Form handlers always live — embedded panels post here too.
 			add_action( 'admin_post_dklc_activate_' . $this->config['slug'], [ $this, 'handle_activate' ] );
 			add_action( 'admin_post_dklc_deactivate_' . $this->config['slug'], [ $this, 'handle_deactivate' ] );
@@ -141,6 +148,9 @@ class Diviskit_License_Client {
 			'expires'            => '',
 			'activation_hash'    => '',
 			'matched_item_label' => '',
+			'first_activated_at' => '',
+			'support_until'      => '',
+			'support_status'     => '',
 			'last_checked'       => 0,
 			'last_error_code'    => '',
 			'last_error_message' => '',
@@ -239,6 +249,9 @@ class Diviskit_License_Client {
 			'expires'            => sanitize_text_field( (string) ( $response['expiration_date'] ?? $response['expires'] ?? '' ) ),
 			'activation_hash'    => sanitize_text_field( (string) ( $response['activation_hash'] ?? '' ) ),
 			'matched_item_label' => sanitize_text_field( (string) ( $response['variation_title'] ?? '' ) ),
+			'first_activated_at' => sanitize_text_field( (string) ( $response['first_activated_at'] ?? '' ) ),
+			'support_until'      => sanitize_text_field( (string) ( $response['support_until'] ?? '' ) ),
+			'support_status'     => sanitize_key( (string) ( $response['support_status'] ?? '' ) ),
 			'last_checked'       => time(),
 			'last_error_code'    => isset( $response['error_type'] ) ? sanitize_key( (string) $response['error_type'] ) : '',
 			'last_error_message' => isset( $response['message'] ) ? sanitize_text_field( (string) $response['message'] ) : '',
@@ -305,6 +318,9 @@ class Diviskit_License_Client {
 			'status'             => self::STATUS_INACTIVE,
 			'expires'            => '',
 			'activation_hash'    => '',
+			'first_activated_at' => '',
+			'support_until'      => '',
+			'support_status'     => '',
 			'last_checked'       => time(),
 			'last_error_message' => 'License deactivated on this site.',
 		] );
@@ -476,7 +492,8 @@ class Diviskit_License_Client {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
-		if ( ! empty( $this->config['free'] ) ) {
+		$optional = ! empty( $this->config['free'] ) && ! empty( $this->config['optional_license'] );
+		if ( ! empty( $this->config['free'] ) && ! $optional ) {
 			echo '<p>' . esc_html__( 'Free product — updates enabled, no license needed.', 'diviskit' ) . '</p>';
 			return;
 		}
@@ -484,6 +501,9 @@ class Diviskit_License_Client {
 		$action = 'dklc_%s_' . $this->config['slug']; // %s = activate|refresh|deactivate — must match admin_post_dklc_{verb}_{slug}
 		$nonce  = 'dklc_nonce_' . $this->config['slug'];
 		?>
+			<?php if ( $optional ) : ?>
+				<p class="description"><?php esc_html_e( 'Updates laufen ohne Lizenz — der kostenlose Lizenzschlüssel aus dem Shop aktiviert dein Support-Jahr und wird für Support-Tickets benötigt.', 'diviskit' ); ?></p>
+			<?php endif; ?>
 			<?php if ( isset( $_GET['dklc_notice'] ) ) : ?>
 				<div class="notice notice-<?php echo 'success' === $_GET['dklc_notice'] ? 'success' : 'error'; ?> is-dismissible"><p>
 					<?php echo esc_html( sanitize_text_field( wp_unslash( $_GET['dklc_message'] ?? '' ) ) ); ?>
@@ -494,6 +514,17 @@ class Diviskit_License_Client {
 				<tr><th>License key</th><td><code><?php echo esc_html( $state['redacted_key'] ?: '—' ); ?></code></td></tr>
 				<tr><th>Plan</th><td><?php echo esc_html( $state['matched_item_label'] ?: '—' ); ?></td></tr>
 				<tr><th>Expires</th><td><?php echo esc_html( $state['expires'] ?: 'lifetime / —' ); ?></td></tr>
+				<?php if ( $state['support_status'] || $state['support_until'] ) : ?>
+				<tr><th>Support</th><td><?php
+					echo esc_html( match ( $state['support_status'] ) {
+						'pending'  => __( 'starts with first activation', 'diviskit' ),
+						'expired'  => __( 'expired', 'diviskit' ),
+						'disabled' => __( 'disabled', 'diviskit' ),
+						'active'   => $state['support_until'] ? sprintf( __( 'until %s', 'diviskit' ), substr( $state['support_until'], 0, 10 ) ) : __( 'unlimited', 'diviskit' ),
+						default    => $state['support_until'] ?: '—',
+					} );
+				?></td></tr>
+				<?php endif; ?>
 				<tr><th>Last checked</th><td><?php echo esc_html( $state['last_checked'] ? wp_date( 'Y-m-d H:i', (int) $state['last_checked'] ) : 'never' ); ?></td></tr>
 				<?php if ( $state['last_error_message'] ) : ?>
 				<tr><th>Last message</th><td><?php echo esc_html( $state['last_error_message'] ); ?></td></tr>
