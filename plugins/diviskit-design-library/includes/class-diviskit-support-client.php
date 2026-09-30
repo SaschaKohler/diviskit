@@ -12,7 +12,7 @@
  *       'api_url'           => 'https://shop.example.com/',   // site running vendokit-support
  *       'version'           => SK_CONSENT_VERSION,            // sent as diagnostic
  *       'slug'              => 'sk-consent',                  // must match the license client slug
- *       'plugin_title'      => 'SK Consent',
+ *       'plugin_title'      => 'Diviskit Consent',
  *       'license_state_key' => 'dklc_state_sk-consent',       // default: dklc_state_<slug>
  *       'support_url'       => '',                            // panel URL for redirects/notices
  *   ] );

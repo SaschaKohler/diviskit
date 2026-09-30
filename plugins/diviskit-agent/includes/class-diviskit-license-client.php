@@ -12,7 +12,7 @@
  *       'version'      => SK_CONSENT_VERSION,
  *       'file'         => __FILE__-of-main-plugin-file,
  *       'slug'         => 'sk-consent',
- *       'plugin_title' => 'SK Consent',
+ *       'plugin_title' => 'Diviskit Consent',
  *       'purchase_url' => 'https://shop.example.com/item/sk-consent/', // optional
  *   ] );
  *
