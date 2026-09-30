@@ -25,6 +25,21 @@ Devin also reads `~/.config/devin/mcp_config.json` (user scope) and
 `~/.codeium/windsurf/mcp_config.json` (legacy). Restart the session after
 changing MCP config.
 
+## Plugin code — source of truth is the suite repos
+
+Plugin code of the Diviskit suite (diviskit-agent, -pro,
+-design-library, vendokit, vendokit-divi, vendokit-support, sk-consent,
+sk-mailerlite-doi) is edited ONLY in the suite repos —
+`Active_Projects/diviskit/` (free) and `Active_Projects/diviskit-pro/`
+(payware). The copies under `wp-content/plugins/` on this site are
+deploy targets: never edit them directly — changes get overwritten by
+the next `rsync -a --delete` sync or release. Fix in the repo, sync,
+verify here.
+
+Site-level configuration stays on the site and is fine to change:
+plugin settings (e.g. the sk-consent cookie-button color), Divi
+layouts, presets, content.
+
 ## Divi 5 block authoring — never violate
 
 Violating these corrupts data or silently strips attributes.
