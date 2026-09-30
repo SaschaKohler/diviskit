@@ -35,6 +35,7 @@ function skml_create_table() {
         expires_at datetime NOT NULL,
         ml_synced_at datetime DEFAULT NULL,
         ml_error varchar(255) NOT NULL DEFAULT '',
+        interests varchar(255) NOT NULL DEFAULT '',
         PRIMARY KEY  (id),
         UNIQUE KEY email (email),
         KEY status (status),
@@ -71,7 +72,7 @@ function skml_find_by_token( $token ) {
  * email rotates the token and rewrites the consent proof.
  * Returns array( 'id' => int, 'token' => raw token ).
  */
-function skml_upsert_pending( $email, $consent_text ) {
+function skml_upsert_pending( $email, $consent_text, $interests = array() ) {
     global $wpdb;
     $token   = bin2hex( random_bytes( 32 ) );
     $ttl     = max( 1, (int) skml_opt( 'token_ttl' ) );
@@ -90,6 +91,7 @@ function skml_upsert_pending( $email, $consent_text ) {
         'expires_at'   => $expires,
         'ml_synced_at' => null,
         'ml_error'     => '',
+        'interests'    => implode( ',', skml_sanitize_interests( $interests ) ),
     ) );
 
     return array( 'id' => (int) $wpdb->insert_id, 'token' => $token );
@@ -146,14 +148,15 @@ function skml_retry_ml_sync() {
         return;
     }
     $rows = $wpdb->get_results( $wpdb->prepare(
-        "SELECT id, email FROM {$table}
+        "SELECT id, email, interests FROM {$table}
          WHERE status = 'confirmed' AND ml_synced_at IS NULL AND confirmed_at > %s
          LIMIT 20",
         gmdate( 'Y-m-d H:i:s', current_time( 'timestamp' ) - 7 * DAY_IN_SECONDS )
     ), ARRAY_A );
 
     foreach ( $rows as $row ) {
-        skml_mark_ml_result( $row['id'], skml_push_subscriber( $row['email'] ) );
+        $interests = '' !== (string) $row['interests'] ? explode( ',', $row['interests'] ) : array();
+        skml_mark_ml_result( $row['id'], skml_push_subscriber( $row['email'], $interests ) );
     }
 }
 
@@ -181,7 +184,7 @@ function skml_subscriber_entries( $limit = 100 ) {
         return array();
     }
     return $wpdb->get_results( $wpdb->prepare(
-        "SELECT id, email, status, consent_text, ip_address, created_at, confirmed_at, ml_synced_at, ml_error
+        "SELECT id, email, status, consent_text, ip_address, created_at, confirmed_at, ml_synced_at, ml_error, interests
          FROM {$table} ORDER BY created_at DESC LIMIT %d", (int) $limit
     ), ARRAY_A );
 }

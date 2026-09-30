@@ -151,6 +151,24 @@ function skml_admin_settings_page() {
           <tr><th scope="row">Impressum-URL</th><td><?php skml_field( 'imprint_url', 'text', '/impressum/' ); ?></td></tr>
         </table>
 
+        <h2>Produkt-Interessen (Warteliste)</h2>
+        <table class="form-table" role="presentation">
+          <tr><th scope="row">Checkboxen aktiv</th><td>
+            <label><input type="checkbox" name="<?php echo esc_attr( SKML_OPTION ); ?>[interests_enabled]" value="1" <?php checked( ! empty( $o['interests_enabled'] ) ); ?>>
+              Optionale Produkt-Checkboxen im Formular zeigen</label>
+          </td></tr>
+          <tr><th scope="row">Zwischenüberschrift</th><td><?php skml_field( 'interests_heading', 'text', 'Wofür interessierst du dich? (optional)' ); ?></td></tr>
+          <?php foreach ( skml_interest_registry() as $slug => $keys ) : ?>
+            <tr>
+              <th scope="row">Interesse „<?php echo esc_html( $slug ); ?>"</th>
+              <td>
+                <?php skml_field( $keys['label_key'], 'text', 'Label (leer = ausblenden)' ); ?>
+                &nbsp;ML-Group-ID:&nbsp;<?php skml_field( $keys['group_key'], 'text', 'optional', 'MailerLite-Group-ID — bestätigte Subscriber mit diesem Interesse werden zusätzlich in diese Gruppe geschrieben.' ); ?>
+              </td>
+            </tr>
+          <?php endforeach; ?>
+        </table>
+
         <h2>Formular-Texte</h2>
         <table class="form-table" role="presentation">
           <tr><th scope="row">Überschrift</th><td><?php skml_field( 'form_heading' ); ?></td></tr>
@@ -208,11 +226,11 @@ function skml_admin_subscribers_page() {
 
       <table class="widefat striped">
         <thead><tr>
-          <th>E-Mail</th><th>Status</th><th>Angemeldet</th><th>Bestätigt</th><th>ML-Sync</th><th>IP</th><th>Consent-Text</th>
+          <th>E-Mail</th><th>Status</th><th>Angemeldet</th><th>Bestätigt</th><th>ML-Sync</th><th>IP</th><th>Interessen</th><th>Consent-Text</th>
         </tr></thead>
         <tbody>
         <?php if ( ! $entries ) : ?>
-          <tr><td colspan="7"><em>Noch keine Einträge.</em></td></tr>
+          <tr><td colspan="8"><em>Noch keine Einträge.</em></td></tr>
         <?php endif; ?>
         <?php foreach ( $entries as $e ) : ?>
           <tr>
@@ -228,6 +246,7 @@ function skml_admin_subscribers_page() {
               <?php else : ?>—<?php endif; ?>
             </td>
             <td><?php echo esc_html( $e['ip_address'] ); ?></td>
+            <td><?php echo esc_html( isset( $e['interests'] ) ? str_replace( ',', ', ', (string) $e['interests'] ) : '' ); ?></td>
             <td><small><?php echo esc_html( wp_trim_words( $e['consent_text'], 15 ) ); ?></small></td>
           </tr>
         <?php endforeach; ?>
@@ -246,7 +265,7 @@ function skml_export_csv() {
     global $wpdb;
     $table = skml_table();
     $rows  = $wpdb->get_results(
-        "SELECT email, status, consent_text, ip_address, user_agent, created_at, confirmed_at, ml_synced_at FROM {$table} ORDER BY created_at DESC",
+        "SELECT email, status, consent_text, ip_address, user_agent, created_at, confirmed_at, ml_synced_at, interests FROM {$table} ORDER BY created_at DESC",
         ARRAY_A
     );
 
@@ -255,7 +274,7 @@ function skml_export_csv() {
     header( 'Content-Disposition: attachment; filename="skml-subscribers-' . gmdate( 'Y-m-d' ) . '.csv"' );
 
     $out = fopen( 'php://output', 'w' );
-    fputcsv( $out, array( 'email', 'status', 'consent_text', 'ip_address', 'user_agent', 'created_at', 'confirmed_at', 'ml_synced_at' ) );
+    fputcsv( $out, array( 'email', 'status', 'consent_text', 'ip_address', 'user_agent', 'created_at', 'confirmed_at', 'ml_synced_at', 'interests' ) );
     foreach ( $rows as $row ) {
         fputcsv( $out, $row );
     }

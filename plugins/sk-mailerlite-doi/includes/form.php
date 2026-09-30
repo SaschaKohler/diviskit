@@ -19,10 +19,11 @@ function skml_form_register_assets() {
 add_action( 'init', 'skml_form_register_assets' );
 
 function skml_form_shortcode() {
-    $o        = skml_options();
-    $captcha  = skml_recaptcha_active();
-    $sitekey  = $captcha ? trim( (string) $o['recaptcha_site_key'] ) : '';
-    $policy   = trim( (string) $o['policy_url'] );
+    $o         = skml_options();
+    $captcha   = skml_recaptcha_active();
+    $sitekey   = $captcha ? trim( (string) $o['recaptcha_site_key'] ) : '';
+    $policy    = trim( (string) $o['policy_url'] );
+    $interests = skml_interests_active() ? skml_interests() : array();
 
     wp_enqueue_style( 'skml-form' );
     wp_enqueue_script( 'skml-form' );
@@ -54,6 +55,21 @@ function skml_form_shortcode() {
                  placeholder="<?php echo esc_attr( $o['form_placeholder'] ); ?>"
                  aria-label="<?php echo esc_attr( $o['form_placeholder'] ); ?>"
                  autocomplete="email" class="skml-input">
+
+          <?php if ( $interests ) : ?>
+            <fieldset class="skml-interests">
+              <?php if ( '' !== trim( (string) $o['interests_heading'] ) ) : ?>
+                <legend class="skml-int-legend"><?php echo esc_html( $o['interests_heading'] ); ?></legend>
+              <?php endif; ?>
+              <?php foreach ( $interests as $slug => $int ) : ?>
+                <label class="skml-consent skml-interest">
+                  <input type="checkbox" name="interests[]" value="<?php echo esc_attr( $slug ); ?>">
+                  <span class="skml-box" aria-hidden="true"></span>
+                  <span class="skml-consent-text"><?php echo esc_html( $int['label'] ); ?></span>
+                </label>
+              <?php endforeach; ?>
+            </fieldset>
+          <?php endif; ?>
 
           <label class="skml-consent">
             <input type="checkbox" name="consent" required>

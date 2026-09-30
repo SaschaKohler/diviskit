@@ -63,6 +63,10 @@
           body: JSON.stringify({
             email:     emailEl.value.trim(),
             consent:   true,
+            interests: Array.prototype.map.call(
+              form.querySelectorAll('input[name="interests[]"]:checked'),
+              function (el) { return el.value; }
+            ),
             website:   form.querySelector('input[name="website"]').value,
             recaptcha: token
           })

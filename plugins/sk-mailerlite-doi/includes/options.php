@@ -24,6 +24,18 @@ function skml_defaults() {
         // Einwilligung (wording is stored per signup as legal proof)
         'consent_text'         => 'Ich möchte News und Updates per E-Mail erhalten. Mit dem Absenden bestätige ich, dass meine Angaben gemäß der Datenschutzerklärung verarbeitet werden.',
 
+        // Optionale Produkt-Interessen (Checkboxen über der Consent-Zeile).
+        // Label leer = Interesse wird nicht angezeigt. group = optionale
+        // MailerLite-Group-ID, die bestätigte Subscriber zusätzlich bekommen.
+        'interests_enabled'    => 1,
+        'interests_heading'    => 'Wofür interessierst du dich? (optional)',
+        'int_sk_consent_label' => 'Diviskit Consent — Cookie-Consent für WordPress',
+        'int_sk_consent_group' => '',
+        'int_vendokit_label'   => 'Vendokit — Lizenz-Verkauf für WP-Produkte',
+        'int_vendokit_group'   => '',
+        'int_agent_label'      => 'Diviskit Agent — MCP für Divi 5',
+        'int_agent_group'      => '',
+
         // Formular-Texte
         'form_heading'         => 'Newsletter',
         'form_subline'         => 'Updates zu neuen Releases, Features und Divi-5-Tipps — kein Spam.',
@@ -73,6 +85,55 @@ function skml_recaptcha_active() {
 }
 
 /**
+ * Interessen-Registry: slug => label + optionale Provider-Group-ID.
+ * Nur Einträge mit nicht-leerem Label werden im Formular gezeigt und
+ * serverseitig akzeptiert.
+ */
+function skml_interest_registry() {
+    return array(
+        'sk_consent' => array( 'label_key' => 'int_sk_consent_label', 'group_key' => 'int_sk_consent_group' ),
+        'vendokit'   => array( 'label_key' => 'int_vendokit_label',   'group_key' => 'int_vendokit_group' ),
+        'agent'      => array( 'label_key' => 'int_agent_label',      'group_key' => 'int_agent_group' ),
+    );
+}
+
+/**
+ * @return array slug => array( 'label' => string, 'group' => string )
+ */
+function skml_interests() {
+    $o   = skml_options();
+    $out = array();
+    foreach ( skml_interest_registry() as $slug => $keys ) {
+        $label = trim( (string) $o[ $keys['label_key'] ] );
+        if ( '' === $label ) {
+            continue;
+        }
+        $out[ $slug ] = array(
+            'label' => $label,
+            'group' => trim( (string) $o[ $keys['group_key'] ] ),
+        );
+    }
+    return $out;
+}
+
+function skml_interests_active() {
+    $o = skml_options();
+    return ! empty( $o['interests_enabled'] ) && array() !== skml_interests();
+}
+
+/**
+ * Filtert eine Nutzer-Eingabe auf die bekannten Interessen-Slugs.
+ * @return string[]
+ */
+function skml_sanitize_interests( $in ) {
+    if ( ! is_array( $in ) ) {
+        return array();
+    }
+    $known = array_keys( skml_interests() );
+    return array_values( array_intersect( $known, array_map( 'sanitize_key', $in ) ) );
+}
+
+/**
  * Whitelist sanitize for the single options array.
  */
 function skml_sanitize_options( $in ) {
@@ -92,6 +153,10 @@ function skml_sanitize_options( $in ) {
         'form_heading', 'form_subline', 'form_placeholder', 'form_button',
         'form_success', 'form_success_heading',
         'mail_subject', 'mail_heading', 'mail_intro', 'mail_button', 'mail_footer',
+        'interests_heading',
+        'int_sk_consent_label', 'int_sk_consent_group',
+        'int_vendokit_label', 'int_vendokit_group',
+        'int_agent_label', 'int_agent_group',
     );
     foreach ( $text_keys as $key ) {
         if ( isset( $in[ $key ] ) ) {
@@ -110,6 +175,7 @@ function skml_sanitize_options( $in ) {
     }
 
     $out['recaptcha_enabled'] = empty( $in['recaptcha_enabled'] ) ? 0 : 1;
+    $out['interests_enabled'] = empty( $in['interests_enabled'] ) ? 0 : 1;
 
     $out['token_ttl'] = min( 168, max( 1, (int) ( isset( $in['token_ttl'] ) ? $in['token_ttl'] : 48 ) ) );
 

@@ -20,6 +20,8 @@ durch einen eigenen Bestätigungsflow:
 * Einwilligungsnachweis: Consent-Text, Zeitstempel, IP, User-Agent pro Signup
 * Provider-Select: MailerLite oder Brevo — bestätigte Subscriber werden per
   API eingetragen; „Nur lokal" speichert ohne externen Dienst
+* Optionale Produkt-Interessen-Checkboxen: Labels konfigurierbar, Auswahl wird
+  lokal gespeichert und bei MailerLite auf konfigurierbare Group-IDs gemappt
 * Spam-Schutz: Honeypot + Rate-Limit + optionales reCAPTCHA v3 (invisible)
 * Redirects auf eigene Danke-/Fehler-Seiten konfigurierbar
 * CSV-Export aller Nachweise aus wp-admin
@@ -29,6 +31,12 @@ WICHTIG: In MailerLite unter Account settings → Subscribe settings die Option
 MailerLite zusätzlich die eigene DOI-Mail.
 
 == Changelog ==
+
+= 0.3.0 =
+* Optionale Produkt-Interessen im Formular (Checkboxen, Slug-Whitelist)
+* Neue Spalte `interests` (DB-Version 2), Anzeige + CSV-Export im Admin
+* MailerLite: pro Interesse konfigurierbare Group-ID wird beim Sync
+  zusätzlich zur Basis-Gruppe gesetzt
 
 = 0.2.0 =
 * Provider-Abstraktion: MailerLite + Brevo + „nur lokal"

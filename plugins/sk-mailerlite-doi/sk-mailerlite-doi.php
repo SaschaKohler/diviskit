@@ -2,7 +2,7 @@
 /**
  * Plugin Name: SK MailerLite DOI
  * Description: Eigenes Double-Opt-In für Newsletter-Signups: gebrandete deutsche Bestätigungsmail, DSGVO-Einwilligungsnachweis mit Consent-Text, reCAPTCHA v3 + Honeypot. Bestätigte Subscriber werden per API an den gewählten Provider (MailerLite, Brevo) übergeben.
- * Version: 0.2.0
+ * Version: 0.3.0
  * Author: Sascha Kohler
  * License: GPLv2 or later
  * Text Domain: sk-mailerlite-doi
@@ -15,10 +15,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! defined( 'SKML_VERSION' ) ) {
-    define( 'SKML_VERSION', '0.2.0' );
+    define( 'SKML_VERSION', '0.3.0' );
 }
 if ( ! defined( 'SKML_DB_VERSION' ) ) {
-    define( 'SKML_DB_VERSION', '1' );
+    define( 'SKML_DB_VERSION', '2' );
 }
 if ( ! defined( 'SKML_PATH' ) ) {
     define( 'SKML_PATH', plugin_dir_path( __FILE__ ) );

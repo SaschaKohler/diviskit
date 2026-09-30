@@ -87,6 +87,33 @@
 }
 .skml-consent-text a { color: var(--gcid-vsn-accent, #ffd400); text-decoration: underline; }
 
+/* --- optional interest checkboxes -------------------------------------- */
+.skml-interests {
+  margin: 0 0 18px;
+  padding: 0;
+  border: none;
+}
+.skml-int-legend {
+  margin: 0 0 8px;
+  padding: 0;
+  font-family: 'Geist Mono', 'SFMono-Regular', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--gcid-vsn-muted-soft, rgba(255, 255, 255, 0.45));
+}
+.skml-interest {
+  display: block;
+  position: relative;
+  margin: 0 0 6px;
+  padding-left: 28px;
+  cursor: pointer;
+}
+.skml-interest .skml-consent-text {
+  color: var(--gcid-vsn-text-soft, rgba(255, 255, 255, 0.85));
+}
+
 /* --- honeypot --------------------------------------------------------- */
 .skml-hp {
   position: absolute;

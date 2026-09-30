@@ -50,9 +50,12 @@ function skml_providers() {
 /* ------------------------------------------------------------------ */
 
 /**
+ * @param string   $email
+ * @param string[] $interests  Gewählte Interessen-Slugs (aus skml_interests()).
  * @return true|WP_Error
  */
-function skml_push_subscriber( $email ) {
+function skml_push_subscriber( $email, $interests = array() ) {
+    $interests = skml_sanitize_interests( $interests );
     switch ( skml_opt( 'provider' ) ) {
         case 'brevo':
             return skml_brevo_add_subscriber( $email );
@@ -60,7 +63,7 @@ function skml_push_subscriber( $email ) {
             return true;
         case 'mailerlite':
         default:
-            return skml_ml_add_subscriber( $email );
+            return skml_ml_add_subscriber( $email, $interests );
     }
 }
 
@@ -100,7 +103,7 @@ function skml_ml_headers( $token ) {
 /**
  * @return true|WP_Error
  */
-function skml_ml_add_subscriber( $email ) {
+function skml_ml_add_subscriber( $email, $interests = array() ) {
     $token = trim( (string) skml_opt( 'ml_api_token' ) );
     if ( '' === $token ) {
         return new WP_Error( 'skml_ml_no_token', 'MailerLite API-Token fehlt (Einstellungen).' );
@@ -113,6 +116,15 @@ function skml_ml_add_subscriber( $email ) {
     );
 
     $groups = array_filter( array_map( 'trim', explode( ',', (string) skml_opt( 'ml_group_id' ) ) ) );
+
+    // Gewählte Produkt-Interessen → deren konfigurierte ML-Group-IDs dazu.
+    $interest_map = skml_interests();
+    foreach ( $interests as $slug ) {
+        if ( isset( $interest_map[ $slug ] ) && '' !== $interest_map[ $slug ]['group'] ) {
+            $groups[] = $interest_map[ $slug ]['group'];
+        }
+    }
+    $groups = array_unique( $groups );
     if ( $groups ) {
         $body['groups'] = array_values( $groups );
     }

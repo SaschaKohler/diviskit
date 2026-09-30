@@ -22,6 +22,7 @@ function skml_rest_init() {
         'args'                => array(
             'email'     => array( 'required' => true, 'type' => 'string' ),
             'consent'   => array( 'required' => true, 'type' => 'boolean' ),
+            'interests' => array( 'type' => 'array', 'default' => array(), 'items' => array( 'type' => 'string' ) ),
             'website'   => array( 'type' => 'string', 'default' => '' ), // honeypot
             'recaptcha' => array( 'type' => 'string', 'default' => '' ),
         ),
@@ -79,7 +80,9 @@ function skml_rest_subscribe( WP_REST_Request $req ) {
         return $success;
     }
 
-    $row = skml_upsert_pending( $email, (string) skml_opt( 'consent_text' ) );
+    $interests = skml_sanitize_interests( (array) $req->get_param( 'interests' ) );
+
+    $row = skml_upsert_pending( $email, (string) skml_opt( 'consent_text' ), $interests );
     if ( ! $row['id'] ) {
         return new WP_Error( 'skml_store', 'Speichern fehlgeschlagen. Bitte später erneut versuchen.', array( 'status' => 500 ) );
     }
@@ -168,7 +171,10 @@ function skml_rest_confirm( WP_REST_Request $req ) {
 
     // Push to the configured provider; failures are stored on the row and
     // retried by the daily cron.
-    skml_mark_ml_result( (int) $row['id'], skml_push_subscriber( $row['email'] ) );
+    $interests = isset( $row['interests'] ) && '' !== (string) $row['interests']
+        ? explode( ',', $row['interests'] )
+        : array();
+    skml_mark_ml_result( (int) $row['id'], skml_push_subscriber( $row['email'], $interests ) );
 
     wp_safe_redirect( $ok_url );
     exit;
