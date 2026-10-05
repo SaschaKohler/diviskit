@@ -3,8 +3,8 @@ Contributors: diviskit
 Tags: divi, mcp, ai, rest-api, site-builder
 Requires at least: 6.5
 Tested up to: 7.1
-Stable tag: 1.7.2
-Requires PHP: 7.4
+Stable tag: 1.7.4
+Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -22,6 +22,7 @@ Diviskit is in public beta. It targets Divi 5 today, with WordPress as the wider
 * Inspect module schemas and validate block structures before applying supported changes.
 * Inspect and manage supported Divi presets and design variables, including preset audits.
 * Work with supported Divi Library and Theme Builder operations.
+* Read and update SEO title and meta description through The SEO Framework — the agent drives the installed plugin (5.1.4+), it does not ship its own SEO engine.
 * Inspect site capabilities and diagnose the connected setup.
 * Inspect saved layout snapshots and use supported guarded restore operations. These are not full-site backups.
 
@@ -69,7 +70,7 @@ The plugin does not add analytics or tracking. It exposes authenticated REST end
 2. Activate **Diviskit Agent** and confirm Divi 5 is active on the site.
 3. Create a WordPress Application Password from **Users > Profile > Application Passwords**.
 4. Configure the separately installed Diviskit MCP server in your compatible AI client with your site URL, WordPress username and Application Password.
-5. Follow the setup guide to add the Diviskit authoring skills where supported, then ask your agent to inspect the site's capabilities before editing.
+5. Install the Diviskit authoring skills: the plugin ships `bin/install-skills.sh`, downloadable from the Diviskit dashboard (or directly at `wp-content/plugins/diviskit-agent/bin/install-skills.sh`). It syncs version-locked skill copies into Devin, Codex, Claude Code, Cursor, or any custom directory. Then ask your agent to inspect the site's capabilities before editing.
 
 See the [Diviskit setup guide](https://diviskit.com/docs/) for client configuration and connection checks.
 
@@ -115,6 +116,15 @@ Run it from anywhere inside your DDEV project (or pass the project directory as 
 2. An agent-authored page open in the Divi 5 Visual Builder, with the native Heading module content controls available for continued editing. Divi is a separate required product.
 
 == Changelog ==
+
+= 1.7.4 =
+
+* Ships `bin/install-skills.sh` inside the plugin — downloadable from the Diviskit dashboard — supporting Devin, Codex, Claude Code, Cursor (generated rules), and generic target directories for skill installation.
+* The generated AGENTS.md and setup prompt now include the skill-install step.
+
+= 1.7.3 =
+
+* Bundles the license + support client SDK (update delivery, support ticket panel) and German translations.
 
 = 1.7.2 =
 

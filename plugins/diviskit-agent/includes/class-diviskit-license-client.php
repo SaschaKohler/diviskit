@@ -6,14 +6,14 @@
  *
  *   require_once __DIR__ . '/includes/class-diviskit-license-client.php';
  *   Diviskit_License_Client::register( [
- *       'item'         => 'sk-consent',                     // vk_product slug — store-agnostic
+ *       'item'         => 'diviskit-consent',                     // vk_product slug — store-agnostic
  *       'item_id'      => 0,                                // optional: numeric post ID (overrides slug)
  *       'api_url'      => 'https://shop.example.com/',      // site running vendokit licensing
- *       'version'      => SK_CONSENT_VERSION,
+ *       'version'      => DIVISKIT_CONSENT_VERSION,
  *       'file'         => __FILE__-of-main-plugin-file,
- *       'slug'         => 'sk-consent',
+ *       'slug'         => 'diviskit-consent',
  *       'plugin_title' => 'Diviskit Consent',
- *       'purchase_url' => 'https://shop.example.com/item/sk-consent/', // optional
+ *       'purchase_url' => 'https://shop.example.com/item/diviskit-consent/', // optional
  *   ] );
  *
  * Free products (no license required): pass 'free' => true. The client
@@ -226,11 +226,15 @@ class Diviskit_License_Client {
 		$code = (int) wp_remote_retrieve_response_code( $response );
 		$data = json_decode( (string) wp_remote_retrieve_body( $response ), true );
 		if ( 200 !== $code ) {
-			$message = is_array( $data ) && ! empty( $data['message'] ) ? (string) $data['message'] : sprintf( 'License API request failed with HTTP %d.', $code );
+			$message = is_array( $data ) && ! empty( $data['message'] ) ? (string) $data['message'] : sprintf(
+				/* translators: %d: HTTP status code. */
+				__( 'License API request failed with HTTP %d.', 'diviskit' ),
+				$code
+			);
 			return new WP_Error( 'api_error', $message, [ 'status' => $code ] );
 		}
 		if ( ! is_array( $data ) ) {
-			return new WP_Error( 'malformed_response', 'The license server returned a malformed response.' );
+			return new WP_Error( 'malformed_response', __( 'The license server returned a malformed response.', 'diviskit' ) );
 		}
 		return $data;
 	}
@@ -283,7 +287,7 @@ class Diviskit_License_Client {
 	public function activate( string $license_key ) {
 		$license_key = sanitize_text_field( trim( $license_key ) );
 		if ( '' === $license_key ) {
-			return new WP_Error( 'license_key_missing', 'Enter a license key to activate.' );
+			return new WP_Error( 'license_key_missing', __( 'Enter a license key to activate.', 'diviskit' ) );
 		}
 		$response = $this->api_request( 'activate_license', [ 'license_key' => $license_key ] );
 		if ( is_wp_error( $response ) ) {
@@ -300,7 +304,7 @@ class Diviskit_License_Client {
 		if ( self::STATUS_ACTIVE !== $state['status'] ) {
 			return new WP_Error(
 				$state['last_error_code'] ?: 'activation_failed',
-				$state['last_error_message'] ?: 'The license could not be activated.'
+				$state['last_error_message'] ?: __( 'The license could not be activated.', 'diviskit' )
 			);
 		}
 		$this->clear_update_cache();
@@ -322,7 +326,7 @@ class Diviskit_License_Client {
 			'support_until'      => '',
 			'support_status'     => '',
 			'last_checked'       => time(),
-			'last_error_message' => 'License deactivated on this site.',
+			'last_error_message' => __( 'License deactivated on this site.', 'diviskit' ),
 		] );
 		$this->clear_update_cache();
 	}
@@ -395,7 +399,7 @@ class Diviskit_License_Client {
 			return $data;
 		}
 		$info = $this->version_info();
-		return $info ?: new WP_Error( 'no_data', 'No update information is available.' );
+		return $info ?: new WP_Error( 'no_data', __( 'No update information is available.', 'diviskit' ) );
 	}
 
 	private function version_info() {
@@ -450,8 +454,10 @@ class Diviskit_License_Client {
 
 	public function add_page(): void {
 		add_options_page(
-			sprintf( '%s License', $this->config['plugin_title'] ),
-			sprintf( '%s License', $this->config['plugin_title'] ),
+			/* translators: %s: plugin title. */
+			sprintf( __( '%s License', 'diviskit' ), $this->config['plugin_title'] ),
+			/* translators: %s: plugin title. */
+			sprintf( __( '%s License', 'diviskit' ), $this->config['plugin_title'] ),
 			'manage_options',
 			'dklc-license-' . $this->config['slug'],
 			[ $this, 'render_page' ]
@@ -467,17 +473,17 @@ class Diviskit_License_Client {
 	}
 
 	public function plugin_action_links( array $links ): array {
-		$links[] = '<a href="' . esc_url( $this->license_url() ) . '">License</a>';
+		$links[] = '<a href="' . esc_url( $this->license_url() ) . '">' . esc_html__( 'License', 'diviskit' ) . '</a>';
 		return $links;
 	}
 
 	public function render_page(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( 'forbidden' );
+			wp_die( esc_html__( 'Forbidden.', 'diviskit' ) );
 		}
 		?>
 		<div class="wrap">
-			<h1><?php echo esc_html( $this->config['plugin_title'] ); ?> — License</h1>
+			<h1><?php echo esc_html( $this->config['plugin_title'] ); ?> — <?php esc_html_e( 'License', 'diviskit' ); ?></h1>
 			<?php $this->render_license_panel(); ?>
 		</div>
 		<?php
@@ -502,7 +508,7 @@ class Diviskit_License_Client {
 		$nonce  = 'dklc_nonce_' . $this->config['slug'];
 		?>
 			<?php if ( $optional ) : ?>
-				<p class="description"><?php esc_html_e( 'Updates laufen ohne Lizenz — der kostenlose Lizenzschlüssel aus dem Shop aktiviert dein Support-Jahr und wird für Support-Tickets benötigt.', 'diviskit' ); ?></p>
+				<p class="description"><?php esc_html_e( 'Updates work without a license — the free license key from the shop activates your support year and is required for support tickets.', 'diviskit' ); ?></p>
 			<?php endif; ?>
 			<?php if ( isset( $_GET['dklc_notice'] ) ) : ?>
 				<div class="notice notice-<?php echo 'success' === $_GET['dklc_notice'] ? 'success' : 'error'; ?> is-dismissible"><p>
@@ -510,24 +516,25 @@ class Diviskit_License_Client {
 				</p></div>
 			<?php endif; ?>
 			<table class="widefat striped" style="max-width:720px;margin:16px 0"><tbody>
-				<tr><th>Status</th><td><strong><?php echo esc_html( $state['status'] ); ?></strong></td></tr>
-				<tr><th>License key</th><td><code><?php echo esc_html( $state['redacted_key'] ?: '—' ); ?></code></td></tr>
-				<tr><th>Plan</th><td><?php echo esc_html( $state['matched_item_label'] ?: '—' ); ?></td></tr>
-				<tr><th>Expires</th><td><?php echo esc_html( $state['expires'] ?: 'lifetime / —' ); ?></td></tr>
+				<tr><th><?php esc_html_e( 'Status', 'diviskit' ); ?></th><td><strong><?php echo esc_html( $state['status'] ); ?></strong></td></tr>
+				<tr><th><?php esc_html_e( 'License key', 'diviskit' ); ?></th><td><code><?php echo esc_html( $state['redacted_key'] ?: '—' ); ?></code></td></tr>
+				<tr><th><?php esc_html_e( 'Plan', 'diviskit' ); ?></th><td><?php echo esc_html( $state['matched_item_label'] ?: '—' ); ?></td></tr>
+				<tr><th><?php esc_html_e( 'Expires', 'diviskit' ); ?></th><td><?php echo esc_html( $state['expires'] ?: __( 'lifetime / —', 'diviskit' ) ); ?></td></tr>
 				<?php if ( $state['support_status'] || $state['support_until'] ) : ?>
-				<tr><th>Support</th><td><?php
+				<tr><th><?php esc_html_e( 'Support', 'diviskit' ); ?></th><td><?php
 					echo esc_html( match ( $state['support_status'] ) {
 						'pending'  => __( 'starts with first activation', 'diviskit' ),
 						'expired'  => __( 'expired', 'diviskit' ),
 						'disabled' => __( 'disabled', 'diviskit' ),
+						/* translators: %s: support expiry date. */
 						'active'   => $state['support_until'] ? sprintf( __( 'until %s', 'diviskit' ), substr( $state['support_until'], 0, 10 ) ) : __( 'unlimited', 'diviskit' ),
 						default    => $state['support_until'] ?: '—',
 					} );
 				?></td></tr>
 				<?php endif; ?>
-				<tr><th>Last checked</th><td><?php echo esc_html( $state['last_checked'] ? wp_date( 'Y-m-d H:i', (int) $state['last_checked'] ) : 'never' ); ?></td></tr>
+				<tr><th><?php esc_html_e( 'Last checked', 'diviskit' ); ?></th><td><?php echo esc_html( $state['last_checked'] ? wp_date( 'Y-m-d H:i', (int) $state['last_checked'] ) : __( 'never', 'diviskit' ) ); ?></td></tr>
 				<?php if ( $state['last_error_message'] ) : ?>
-				<tr><th>Last message</th><td><?php echo esc_html( $state['last_error_message'] ); ?></td></tr>
+				<tr><th><?php esc_html_e( 'Last message', 'diviskit' ); ?></th><td><?php echo esc_html( $state['last_error_message'] ); ?></td></tr>
 				<?php endif; ?>
 			</tbody></table>
 
@@ -535,29 +542,29 @@ class Diviskit_License_Client {
 				<?php wp_nonce_field( $nonce ); ?>
 				<input type="hidden" name="action" value="<?php echo esc_attr( sprintf( $action, 'activate' ) ); ?>">
 				<input type="password" name="license_key" class="regular-text" autocomplete="off" placeholder="XXXX-XXXXX-XXXXX-XXXXX">
-				<?php submit_button( 'Activate License', 'primary', 'submit', false ); ?>
+				<?php submit_button( __( 'Activate License', 'diviskit' ), 'primary', 'submit', false ); ?>
 			</form>
 			<p>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display:inline-block;margin-right:8px">
 				<?php wp_nonce_field( $nonce ); ?>
 				<input type="hidden" name="action" value="<?php echo esc_attr( sprintf( $action, 'refresh' ) ); ?>">
-				<?php submit_button( 'Refresh Status', 'secondary', 'submit', false ); ?>
+				<?php submit_button( __( 'Refresh Status', 'diviskit' ), 'secondary', 'submit', false ); ?>
 			</form>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display:inline-block">
 				<?php wp_nonce_field( $nonce ); ?>
 				<input type="hidden" name="action" value="<?php echo esc_attr( sprintf( $action, 'deactivate' ) ); ?>">
-				<?php submit_button( 'Deactivate License', 'delete', 'submit', false ); ?>
+				<?php submit_button( __( 'Deactivate License', 'diviskit' ), 'delete', 'submit', false ); ?>
 			</form>
 			</p>
 			<?php if ( $this->config['purchase_url'] ) : ?>
-				<p><a href="<?php echo esc_url( $this->config['purchase_url'] ); ?>" target="_blank" rel="noopener">Purchase / manage license</a></p>
+				<p><a href="<?php echo esc_url( $this->config['purchase_url'] ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Purchase / manage license', 'diviskit' ); ?></a></p>
 			<?php endif; ?>
 		<?php
 	}
 
 	private function check_request(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( 'forbidden' );
+			wp_die( esc_html__( 'Forbidden.', 'diviskit' ) );
 		}
 		check_admin_referer( 'dklc_nonce_' . $this->config['slug'] );
 	}
@@ -577,19 +584,19 @@ class Diviskit_License_Client {
 		if ( is_wp_error( $result ) ) {
 			$this->redirect( 'error', $result->get_error_message() );
 		}
-		$this->redirect( 'success', 'License activated.' );
+		$this->redirect( 'success', __( 'License activated.', 'diviskit' ) );
 	}
 
 	public function handle_deactivate(): void {
 		$this->check_request();
 		$this->deactivate();
-		$this->redirect( 'success', 'License deactivated.' );
+		$this->redirect( 'success', __( 'License deactivated.', 'diviskit' ) );
 	}
 
 	public function handle_refresh(): void {
 		$this->check_request();
 		$this->refresh();
-		$this->redirect( 'success', 'License status refreshed.' );
+		$this->redirect( 'success', __( 'License status refreshed.', 'diviskit' ) );
 	}
 }
 

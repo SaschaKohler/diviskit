@@ -1,0 +1,765 @@
+# Copyright (C) 2026 Diviskit
+# This file is distributed under the GPL v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Diviskit Agent 1.7.2\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/diviskit-agent\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-10-03T16:36:08+02:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: diviskit-agent\n"
+
+#. Plugin Name of the plugin
+#: diviskit-agent.php
+#: diviskit-agent.php:2503
+msgid "Diviskit Agent"
+msgstr ""
+
+#. Description of the plugin
+#: diviskit-agent.php
+msgid "REST API bridge for Diviskit — connects AI coding agents to your Divi 5 site for page building and design management. Forked from the GPL-licensed DiviOps Agent; serves the REST contract on the canonical diviskit/v1 namespace."
+msgstr ""
+
+#. Author of the plugin
+#: diviskit-agent.php
+#: diviskit-agent.php:2508
+msgid "Diviskit"
+msgstr ""
+
+#: diviskit-agent.php:2202
+#: diviskit-agent.php:2402
+#: diviskit-agent.php:2424
+msgid "Not recorded"
+msgstr ""
+
+#: diviskit-agent.php:2203
+#: includes/admin-design-system.php:21
+msgid "Not loaded."
+msgstr ""
+
+#: diviskit-agent.php:2204
+msgid "Stale snapshot."
+msgstr ""
+
+#: diviskit-agent.php:2205
+msgid "Snapshot."
+msgstr ""
+
+#: diviskit-agent.php:2206
+msgid "Fetched"
+msgstr ""
+
+#. translators: %s: localized fetch time.
+#: diviskit-agent.php:2208
+#, php-format
+msgid "Fetched %s."
+msgstr ""
+
+#: diviskit-agent.php:2209
+#: includes/admin-design-system.php:25
+msgid "No entry selected."
+msgstr ""
+
+#. translators: %s: registry view label (presets or variables).
+#: diviskit-agent.php:2211
+#, php-format
+msgid "Loading %s…"
+msgstr ""
+
+#. translators: 1: entry count, 2: registry view label (presets or variables).
+#: diviskit-agent.php:2213
+#, php-format
+msgid "%1$d %2$s."
+msgstr ""
+
+#: diviskit-agent.php:2214
+msgid "presets"
+msgstr ""
+
+#: diviskit-agent.php:2215
+msgid "variables"
+msgstr ""
+
+#: diviskit-agent.php:2216
+msgid "REST endpoint must be same-origin."
+msgstr ""
+
+#: diviskit-agent.php:2217
+msgid "Invalid server response."
+msgstr ""
+
+#. translators: %d: HTTP status code.
+#: diviskit-agent.php:2219
+#, php-format
+msgid "Request failed (%d)."
+msgstr ""
+
+#: diviskit-agent.php:2220
+msgid "Missing response data."
+msgstr ""
+
+#: diviskit-agent.php:2221
+msgid "Missing preset registry."
+msgstr ""
+
+#: diviskit-agent.php:2222
+msgid "Missing variable registry."
+msgstr ""
+
+#: diviskit-agent.php:2223
+msgid "No matching entries."
+msgstr ""
+
+#: diviskit-agent.php:2224
+msgid "No entries in this registry."
+msgstr ""
+
+#: diviskit-agent.php:2225
+msgid "Registry unavailable."
+msgstr ""
+
+#: diviskit-agent.php:2226
+msgid "Coordinates unavailable"
+msgstr ""
+
+#. translators: %s: registry error message.
+#: diviskit-agent.php:2228
+#, php-format
+msgid "%s Refresh to retry."
+msgstr ""
+
+#. translators: %d: number of storage warnings.
+#: diviskit-agent.php:2230
+#, php-format
+msgid "Storage notices (%d)"
+msgstr ""
+
+#: diviskit-agent.php:2231
+msgid "Registry source / coverage"
+msgstr ""
+
+#: diviskit-agent.php:2232
+msgid "Registry snapshot only. No consumer scan performed for this list."
+msgstr ""
+
+#: diviskit-agent.php:2233
+msgid "ID"
+msgstr ""
+
+#: diviskit-agent.php:2234
+msgid "Type"
+msgstr ""
+
+#: diviskit-agent.php:2235
+msgid "Provenance"
+msgstr ""
+
+#: diviskit-agent.php:2236
+#: diviskit-agent.php:2373
+#: diviskit-agent.php:2404
+msgid "Status"
+msgstr ""
+
+#: diviskit-agent.php:2237
+msgid "Last updated (stored)"
+msgstr ""
+
+#: diviskit-agent.php:2238
+msgid "Registry freshness"
+msgstr ""
+
+#: diviskit-agent.php:2239
+msgid "Native WordPress / Divi customizer color"
+msgstr ""
+
+#: diviskit-agent.php:2240
+msgid "Stored variable; author provenance not recorded"
+msgstr ""
+
+#: diviskit-agent.php:2241
+msgid "Variable usage was not scanned. This value is stored data, not a computed result."
+msgstr ""
+
+#: diviskit-agent.php:2242
+msgid "Registry provenance"
+msgstr ""
+
+#: diviskit-agent.php:2243
+msgid "Type / bucket"
+msgstr ""
+
+#: diviskit-agent.php:2244
+msgid "Module"
+msgstr ""
+
+#: diviskit-agent.php:2245
+msgid "Group / slot"
+msgstr ""
+
+#: diviskit-agent.php:2246
+msgid "Bucket key"
+msgstr ""
+
+#: diviskit-agent.php:2247
+msgid "Bucket default"
+msgstr ""
+
+#: diviskit-agent.php:2248
+msgid "Yes"
+msgstr ""
+
+#: diviskit-agent.php:2249
+msgid "No"
+msgstr ""
+
+#: diviskit-agent.php:2250
+msgid "Unknown"
+msgstr ""
+
+#: diviskit-agent.php:2251
+msgid "Unavailable"
+msgstr ""
+
+#: diviskit-agent.php:2252
+msgid "Storage provenance"
+msgstr ""
+
+#: diviskit-agent.php:2253
+msgid "Referenced variables"
+msgstr ""
+
+#: diviskit-agent.php:2254
+msgid "Variable reference coverage unavailable."
+msgstr ""
+
+#. translators: %s: registry freshness sentence.
+#: diviskit-agent.php:2256
+#, php-format
+msgid "Variable registry: %s"
+msgstr ""
+
+#. translators: %s: registry error message.
+#: diviskit-agent.php:2258
+#, php-format
+msgid "Variable lookup unavailable: %s"
+msgstr ""
+
+#: diviskit-agent.php:2259
+msgid "No direct variable IDs found within this coverage."
+msgstr ""
+
+#: diviskit-agent.php:2260
+msgid "Unresolved in the current variable-list snapshot."
+msgstr ""
+
+#: diviskit-agent.php:2261
+msgid "Known consumers"
+msgstr ""
+
+#. translators: %s: consumer reference count.
+#: diviskit-agent.php:2263
+#, php-format
+msgid "%s explicit references found within partial coverage."
+msgstr ""
+
+#: diviskit-agent.php:2264
+msgid "Consumer coverage unavailable or incomplete; counts are not conclusive."
+msgstr ""
+
+#: diviskit-agent.php:2265
+msgid "Block references (covered scope)"
+msgstr ""
+
+#: diviskit-agent.php:2266
+msgid "Preset-chain references (covered scope)"
+msgstr ""
+
+#: diviskit-agent.php:2267
+msgid "Zero references never means safe to delete."
+msgstr ""
+
+#: diviskit-agent.php:2268
+msgid "Scan coverage"
+msgstr ""
+
+#: diviskit-agent.php:2269
+msgid "Sample consumers (up to 10)"
+msgstr ""
+
+#. translators: %d: number of inspection warnings.
+#: diviskit-agent.php:2271
+#, php-format
+msgid "Inspection notices (%d)"
+msgstr ""
+
+#: diviskit-agent.php:2272
+msgid "Stored definitions"
+msgstr ""
+
+#. translators: %s: preset ID.
+#: diviskit-agent.php:2274
+#, php-format
+msgid "Loading preset %s…"
+msgstr ""
+
+#: diviskit-agent.php:2275
+msgid "Preset identity mismatch; response not displayed."
+msgstr ""
+
+#: diviskit-agent.php:2276
+msgid "Refresh selected preset"
+msgstr ""
+
+#. translators: 1: preset ID, 2: JavaScript error message.
+#: diviskit-agent.php:2278
+#, php-format
+msgid "Could not inspect %1$s: %2$s"
+msgstr ""
+
+#: diviskit-agent.php:2279
+msgid "Retry inspection"
+msgstr ""
+
+#: diviskit-agent.php:2325
+#: diviskit-agent.php:2397
+msgid "deleted"
+msgstr ""
+
+#: diviskit-agent.php:2328
+#: diviskit-agent.php:2394
+msgid "restored"
+msgstr ""
+
+#: diviskit-agent.php:2331
+msgid "expired"
+msgstr ""
+
+#: diviskit-agent.php:2334
+msgid "interrupted"
+msgstr ""
+
+#: diviskit-agent.php:2360
+msgid "Rollback Backups"
+msgstr ""
+
+#. translators: %d: number of snapshots visible to the current user.
+#: diviskit-agent.php:2363
+#, php-format
+msgid "%d visible / latest 8 maximum"
+msgstr ""
+
+#: diviskit-agent.php:2366
+msgid "Temporary rollback snapshots created by backup-enabled Diviskit content writes. These are not full site backups and this dashboard is read-only."
+msgstr ""
+
+#: diviskit-agent.php:2368
+msgid "No rollback snapshots are currently visible for this user."
+msgstr ""
+
+#: diviskit-agent.php:2371
+msgid "Target / snapshot"
+msgstr ""
+
+#: diviskit-agent.php:2372
+#: diviskit-agent.php:2406
+msgid "Created"
+msgstr ""
+
+#: diviskit-agent.php:2388
+msgid "target missing"
+msgstr ""
+
+#: diviskit-agent.php:2391
+msgid "restorable"
+msgstr ""
+
+#: diviskit-agent.php:2400
+msgid "Snapshot ID"
+msgstr ""
+
+#: diviskit-agent.php:2401
+msgid "Target"
+msgstr ""
+
+#: diviskit-agent.php:2402
+msgid "Operation"
+msgstr ""
+
+#: diviskit-agent.php:2403
+msgid "Tool"
+msgstr ""
+
+#: diviskit-agent.php:2405
+msgid "State"
+msgstr ""
+
+#: diviskit-agent.php:2405
+msgid "active"
+msgstr ""
+
+#: diviskit-agent.php:2407
+msgid "Expires"
+msgstr ""
+
+#: diviskit-agent.php:2408
+msgid "Created by"
+msgstr ""
+
+#: diviskit-agent.php:2409
+msgid "Before checksum"
+msgstr ""
+
+#: diviskit-agent.php:2410
+msgid "After checksum"
+msgstr ""
+
+#: diviskit-agent.php:2435
+msgid "You do not have permission to view this dashboard."
+msgstr ""
+
+#: diviskit-agent.php:2509
+msgid "Free + Pro"
+msgstr ""
+
+#: diviskit-agent.php:2509
+#: diviskit-agent.php:2600
+msgid "Free"
+msgstr ""
+
+#: diviskit-agent.php:2511
+msgid "AI agent bridge for Divi 5"
+msgstr ""
+
+#: diviskit-agent.php:2513
+#: diviskit-agent.php:2684
+msgid "REST endpoint"
+msgstr ""
+
+#: diviskit-agent.php:2515
+msgid "Diviskit pages"
+msgstr ""
+
+#: diviskit-agent.php:2516
+msgid "Overview"
+msgstr ""
+
+#: diviskit-agent.php:2517
+#: includes/admin-design-system.php:7
+msgid "Design System"
+msgstr ""
+
+#: diviskit-agent.php:2518
+#: diviskit-agent.php:2536
+msgid "Support"
+msgstr ""
+
+#: diviskit-agent.php:2520
+#: diviskit-agent.php:2613
+msgid "Diviskit Pro"
+msgstr ""
+
+#: diviskit-agent.php:2528
+msgid "License"
+msgstr ""
+
+#: diviskit-agent.php:2537
+msgid "Direct line to Diviskit support — tickets are filed under the Diviskit Agent product and automatically include version and site diagnostics."
+msgstr ""
+
+#: diviskit-agent.php:2546
+msgid "Divi is not active. Activate the Divi theme to use Divi-dependent MCP tools."
+msgstr ""
+
+#: diviskit-agent.php:2551
+msgid "Connect your agent"
+msgstr ""
+
+#: diviskit-agent.php:2552
+msgid "Run handshake self-test"
+msgstr ""
+
+#: diviskit-agent.php:2554
+msgid "Point your MCP client at the diviskit/v1 namespace below."
+msgstr ""
+
+#: diviskit-agent.php:2555
+msgid "Running handshake…"
+msgstr ""
+
+#: diviskit-agent.php:2555
+msgid "Self-test has not run yet."
+msgstr ""
+
+#. translators: %d: number of registered REST routes.
+#: diviskit-agent.php:2563
+#, php-format
+msgid "canonical · %d routes"
+msgstr ""
+
+#: diviskit-agent.php:2567
+#: diviskit-agent.php:2578
+#: diviskit-agent.php:2587
+#: diviskit-agent.php:2690
+msgid "Copied"
+msgstr ""
+
+#: diviskit-agent.php:2567
+msgid "Copy URL"
+msgstr ""
+
+#: diviskit-agent.php:2571
+msgid "MCP client configuration"
+msgstr ""
+
+#. translators: %s: file name of the MCP client config.
+#: diviskit-agent.php:2574
+#, php-format
+msgid "Paste into your MCP client config (e.g. %s) and replace the placeholder with a WordPress Application Password."
+msgstr ""
+
+#: diviskit-agent.php:2578
+msgid "Copy config"
+msgstr ""
+
+#: diviskit-agent.php:2580
+msgid "Create an Application Password on your profile"
+msgstr ""
+
+#: diviskit-agent.php:2583
+msgid "AI editor setup prompt"
+msgstr ""
+
+#: diviskit-agent.php:2584
+msgid "Paste this prompt into your AI editor (Devin, Claude Code, Codex, …). The agent reads the AGENTS.md this plugin wrote to your site root, then runs the full MCP setup — application password, client config, handshake check and smoke test."
+msgstr ""
+
+#: diviskit-agent.php:2587
+msgid "Copy prompt"
+msgstr ""
+
+#. translators: %s: absolute path of the generated AGENTS.md.
+#: diviskit-agent.php:2591
+#, php-format
+msgid "Setup instructions live in %s — regenerated automatically on plugin updates."
+msgstr ""
+
+#: diviskit-agent.php:2598
+msgid "Site status"
+msgstr ""
+
+#: diviskit-agent.php:2600
+msgid "Plugin version"
+msgstr ""
+
+#: diviskit-agent.php:2601
+msgid "Divi theme"
+msgstr ""
+
+#: diviskit-agent.php:2601
+#: diviskit-agent.php:2602
+#: diviskit-agent.php:2613
+#: diviskit-agent.php:2629
+msgid "Active"
+msgstr ""
+
+#: diviskit-agent.php:2601
+#: diviskit-agent.php:2613
+#: diviskit-agent.php:2629
+msgid "Not active"
+msgstr ""
+
+#: diviskit-agent.php:2602
+msgid "Rate limiting"
+msgstr ""
+
+#: diviskit-agent.php:2602
+msgid "Disabled"
+msgstr ""
+
+#: diviskit-agent.php:2602
+msgid "per min (read/write)"
+msgstr ""
+
+#: diviskit-agent.php:2603
+msgid "WP-CLI"
+msgstr ""
+
+#: diviskit-agent.php:2603
+msgid "configured"
+msgstr ""
+
+#: diviskit-agent.php:2603
+msgid "not configured"
+msgstr ""
+
+#. translators: 1: read limit constant, 2: write limit constant, 3: filter name.
+#: diviskit-agent.php:2607
+#, php-format
+msgid "Rate limits: %1$s / %2$s constants or the %3$s filter."
+msgstr ""
+
+#: diviskit-agent.php:2611
+msgid "Add-ons & modules"
+msgstr ""
+
+#. translators: %s: installed plugin version.
+#: diviskit-agent.php:2615
+#: diviskit-agent.php:2631
+#, php-format
+msgid "Version %s"
+msgstr ""
+
+#: diviskit-agent.php:2620
+msgid "on"
+msgstr ""
+
+#: diviskit-agent.php:2620
+msgid "off"
+msgstr ""
+
+#: diviskit-agent.php:2625
+msgid "Manage Diviskit Pro"
+msgstr ""
+
+#: diviskit-agent.php:2629
+msgid "Design Library"
+msgstr ""
+
+#: diviskit-agent.php:2633
+msgid "CSS animations, glass effects, Three.js WebGL shaders."
+msgstr ""
+
+#: diviskit-agent.php:2633
+msgid "Optional plugin for CSS entrance animations and Three.js WebGL shader backgrounds."
+msgstr ""
+
+#: diviskit-agent.php:2639
+msgid "Exposed capabilities"
+msgstr ""
+
+#. translators: %d: total number of capability keys advertised in the handshake.
+#: diviskit-agent.php:2642
+#, php-format
+msgid "%d capability keys advertised in the handshake, grouped by surface."
+msgstr ""
+
+#: diviskit-agent.php:2654
+msgid "Updates & setup"
+msgstr ""
+
+#: diviskit-agent.php:2656
+msgid "Diviskit Agent is a GPL fork of DiviOps Agent. Updates ship with the Diviskit plugin bundle — replace the plugin directory to update. Your Application Password and MCP client configuration carry over unchanged."
+msgstr ""
+
+#: diviskit-agent.php:2657
+msgid "The MCP server updates separately through npm or npx. The REST contract is unchanged since the fork — migrating a client to the canonical diviskit/v1 namespace is a one-line base-URL change."
+msgstr ""
+
+#: diviskit-agent.php:2662
+msgid "Divi is a registered trademark of Elegant Themes, Inc. Diviskit Agent is not affiliated with or endorsed by Elegant Themes."
+msgstr ""
+
+#: diviskit-agent.php:2679
+msgid "Schema dump"
+msgstr ""
+
+#: diviskit-agent.php:2680
+msgid "The full Divi module schema feeds the local diviskit-builder skill references. After a Divi theme update the schema fingerprint changes — re-run the refresh command to regenerate them."
+msgstr ""
+
+#: diviskit-agent.php:2682
+msgid "Divi version"
+msgstr ""
+
+#: diviskit-agent.php:2683
+msgid "Schema fingerprint"
+msgstr ""
+
+#: diviskit-agent.php:2686
+msgid "Refresh skill references"
+msgstr ""
+
+#: diviskit-agent.php:2687
+msgid "Run this from anywhere inside the DDEV project. The script reads WP_URL and credentials from .devin/mcp_config.local.json, fetches the dump itself, and regenerates the module references:"
+msgstr ""
+
+#: diviskit-agent.php:2690
+msgid "Copy command"
+msgstr ""
+
+#: diviskit-agent.php:2692
+msgid "Optional: pass the project directory as the first argument, or grab the raw JSON yourself:"
+msgstr ""
+
+#: diviskit-agent.php:2696
+msgid "Download schema dump (JSON)"
+msgstr ""
+
+#: diviskit-agent.php:2704
+msgid "Fetching…"
+msgstr ""
+
+#. translators: 1: schema fingerprint prefix, 2: module count.
+#: diviskit-agent.php:2706
+#, php-format
+msgid "Done — schema: %1$s, %2$s modules"
+msgstr ""
+
+#. translators: %s: JavaScript error message.
+#: diviskit-agent.php:2708
+#, php-format
+msgid "Error: %s"
+msgstr ""
+
+#: diviskit-agent.php:2709
+msgid "Response not ok"
+msgstr ""
+
+#: includes/admin-design-system.php:8
+msgid "Saved presets and variables on this site. Read-only; stored definitions are not a computed-style or visual-correctness guarantee."
+msgstr ""
+
+#: includes/admin-design-system.php:11
+msgid "Design System unavailable: Divi is not active. No preset or variable registries have been requested."
+msgstr ""
+
+#: includes/admin-design-system.php:14
+msgid "Design System view"
+msgstr ""
+
+#: includes/admin-design-system.php:15
+msgid "Presets"
+msgstr ""
+
+#: includes/admin-design-system.php:16
+msgid "Variables"
+msgstr ""
+
+#: includes/admin-design-system.php:18
+msgid "Search name, ID or type"
+msgstr ""
+
+#: includes/admin-design-system.php:19
+msgid "Refresh registry"
+msgstr ""
+
+#: includes/admin-design-system.php:24
+msgid "Registry entries"
+msgstr ""
+
+#: includes/admin-design-system.php:24
+msgid "Show more"
+msgstr ""
+
+#: includes/admin-design-system.php:25
+msgid "Selected entry"
+msgstr ""
+
+#: includes/admin-design-system.php:27
+msgid "JavaScript is required for on-demand inspection. The same data is available through the Diviskit preset and variable tools."
+msgstr ""

@@ -9,6 +9,12 @@
     const list = find('[data-list]');
     const status = find('[data-status]');
     const notices = find('[data-notices]');
+    // Translations keyed by the English source string; missing keys fall
+    // back to the source so a partial map never breaks the UI.
+    const i18n = config.i18n || {};
+    const t = key => (typeof i18n[key] === 'string' ? i18n[key] : key);
+    const tf = (key, ...args) => { let i = 0; return t(key).replace(/%(\d+\$)?[sdif]/g, () => String(args[i++] ?? '')); };
+    const viewLabel = name => t(name);
     const stores = {
         presets: { rows: [], at: 0, state: 'idle', epoch: 0 },
         variables: { rows: [], at: 0, state: 'idle', epoch: 0 }
@@ -30,14 +36,14 @@
     }
     function raw(target, title, value) {
         const disclosure = el('details');
-        disclosure.append(el('summary', title), el('pre', value == null ? 'Not recorded' : text(value)));
+        disclosure.append(el('summary', title), el('pre', value == null ? t('Not recorded') : text(value)));
         target.append(disclosure);
     }
     function facts(target, entries) {
         const dl = el('dl', undefined, 'diviskit-facts');
         entries.forEach(([label, value]) => {
             const row = el('div');
-            row.append(el('dt', label), el('dd', value == null || value === '' ? 'Not recorded' : value));
+            row.append(el('dt', label), el('dd', value == null || value === '' ? t('Not recorded') : value));
             dl.append(row);
         });
         target.append(dl);
@@ -59,24 +65,24 @@
     }
     async function request(path) {
         const url = new URL(config.root + path, location.href);
-        if (url.origin !== location.origin) throw new Error('REST endpoint must be same-origin.');
+        if (url.origin !== location.origin) throw new Error(t('REST endpoint must be same-origin.'));
         const response = await fetch(url.href, { method: 'GET', credentials: 'same-origin', cache: 'no-store', headers: { 'X-WP-Nonce': config.nonce, Accept: 'application/json' } });
         let body;
-        try { body = await response.json(); } catch (_) { throw new Error('Invalid server response.'); }
-        if (!response.ok || body.ok !== true) throw new Error(body.error?.message || body.message || 'Request failed (' + response.status + ').');
-        if (!body.data || typeof body.data !== 'object') throw new Error('Missing response data.');
+        try { body = await response.json(); } catch (_) { throw new Error(t('Invalid server response.')); }
+        if (!response.ok || body.ok !== true) throw new Error(body.error?.message || body.message || tf('Request failed (%d).', response.status));
+        if (!body.data || typeof body.data !== 'object') throw new Error(t('Missing response data.'));
         return body;
     }
     function freshness(store) {
-        if (!store.at) return 'Not loaded.';
+        if (!store.at) return t('Not loaded.');
         const age = Date.now() - store.at;
-        return (age >= 300000 || store.state === 'error' ? 'Stale snapshot. ' : 'Snapshot. ') + 'Fetched ' + new Date(store.at).toLocaleTimeString() + '.';
+        return (age >= 300000 || store.state === 'error' ? t('Stale snapshot.') : t('Snapshot.')) + ' ' + tf('Fetched %s.', new Date(store.at).toLocaleTimeString());
     }
     function clearSelection() {
         selectionEpoch++;
         selected = null;
         detail.setAttribute('aria-busy', 'false');
-        message(detail, 'No entry selected.');
+        message(detail, t('No entry selected.'));
     }
     function listCoordinates(row) {
         if (view !== 'presets') return row;
@@ -94,7 +100,7 @@
     }
     function renderStatus() {
         const store = stores[view];
-        status.textContent = (store.state === 'loading' ? 'Loading ' + view + '... ' : filteredCount + ' ' + view + '. ') + freshness(store);
+        status.textContent = (store.state === 'loading' ? tf('Loading %s…', viewLabel(view)) + ' ' : tf('%1$d %2$s.', filteredCount, viewLabel(view)) + ' ') + freshness(store);
     }
     function renderList() {
         const store = stores[view];
@@ -113,19 +119,19 @@
             if (chip) control.append(chip);
             const label = el('span');
             const coordinates = listCoordinates(row);
-            label.append(el('strong', row.name || row.label || row.id), el('small', [coordinates.type, coordinates.moduleName || coordinates.groupName].filter(Boolean).join(' / ') || 'Coordinates unavailable'), el('code', row.id));
+            label.append(el('strong', row.name || row.label || row.id), el('small', [coordinates.type, coordinates.moduleName || coordinates.groupName].filter(Boolean).join(' / ') || t('Coordinates unavailable')), el('code', row.id));
             control.append(label);
             item.append(control);
             list.append(item);
         });
-        if (!rows.length && store.state !== 'loading') list.append(el('li', store.at ? (query ? 'No matching entries.' : 'No entries in this registry.') : 'Registry unavailable.'));
+        if (!rows.length && store.state !== 'loading') list.append(el('li', store.at ? (query ? t('No matching entries.') : t('No entries in this registry.')) : t('Registry unavailable.')));
         renderStatus();
         list.setAttribute('aria-busy', String(store.state === 'loading'));
         find('[data-more]').hidden = rows.length <= limit;
         notices.replaceChildren();
-        if (store.error) notices.append(el('p', store.error + ' Refresh to retry.', 'diviskit-callout diviskit-callout--error'));
-        if (store.meta?.warnings?.length) raw(notices, 'Storage notices (' + store.meta.warnings.length + ')', store.meta.warnings);
-        if (store.at) raw(notices, 'Registry source / coverage', { ...store.meta, coverage: 'Registry snapshot only. No consumer scan performed for this list.' });
+        if (store.error) notices.append(el('p', tf('%s Refresh to retry.', store.error), 'diviskit-callout diviskit-callout--error'));
+        if (store.meta?.warnings?.length) raw(notices, tf('Storage notices (%d)', store.meta.warnings.length), store.meta.warnings);
+        if (store.at) raw(notices, t('Registry source / coverage'), { ...store.meta, coverage: t('Registry snapshot only. No consumer scan performed for this list.') });
     }
     async function load(kind, force = false) {
         const store = stores[kind];
@@ -140,10 +146,10 @@
                 const body = await request(kind === 'presets' ? 'preset/audit-storage' : 'variable/list');
                 if (epoch !== store.epoch) return;
                 if (kind === 'presets') {
-                    if (!body.data.aggregated || typeof body.data.aggregated !== 'object') throw new Error('Missing preset registry.');
+                    if (!body.data.aggregated || typeof body.data.aggregated !== 'object') throw new Error(t('Missing preset registry.'));
                     store.rows = Object.entries(body.data.aggregated).map(([id, entry]) => ({ ...entry, id }));
                 } else {
-                    if (!Array.isArray(body.data.variables)) throw new Error('Missing variable registry.');
+                    if (!Array.isArray(body.data.variables)) throw new Error(t('Missing variable registry.'));
                     store.rows = body.data.variables;
                 }
                 store.meta = body._meta || {};
@@ -165,44 +171,44 @@
     function renderVariable(item) {
         detail.append(el('h3', item.label || item.id));
         const nativeColor = /^gcid-(primary|secondary|heading|body|link)-color$/.test(item.id) && item.type === 'colors';
-        facts(detail, [['ID', item.id], ['Type', item.type], ['Provenance', nativeColor ? 'Native WordPress / Divi customizer color' : 'Stored variable; author provenance not recorded'], ['Status', item.status], ['Last updated (stored)', item.lastUpdated], ['Registry freshness', freshness(stores.variables)]]);
+        facts(detail, [[t('ID'), item.id], [t('Type'), item.type], [t('Provenance'), nativeColor ? t('Native WordPress / Divi customizer color') : t('Stored variable; author provenance not recorded')], [t('Status'), item.status], [t('Last updated (stored)'), item.lastUpdated], [t('Registry freshness'), freshness(stores.variables)]]);
         variableValue(detail, item);
-        detail.append(el('p', 'Variable usage was not scanned. This value is stored data, not a computed result.', 'diviskit-muted'));
-        raw(detail, 'Registry provenance', stores.variables.meta);
+        detail.append(el('p', t('Variable usage was not scanned. This value is stored data, not a computed result.'), 'diviskit-muted'));
+        raw(detail, t('Registry provenance'), stores.variables.meta);
     }
     function renderPreset(data) {
         detail.append(el('h3', data.name || data.preset_id));
         const coordinates = data.coordinates || {};
-        facts(detail, [['ID', data.preset_id], ['Type / bucket', coordinates.type || coordinates.bucket], ['Module', coordinates.module_name], ['Group / slot', [coordinates.group_name, coordinates.group_id].filter(Boolean).join(' / ')], ['Bucket key', coordinates.bucket_key], ['Bucket default', coordinates.is_default === true ? 'Yes' : coordinates.is_default === false ? 'No' : 'Unknown'], ['Fetched', new Date().toLocaleTimeString()]]);
-        raw(detail, 'Storage provenance', data.storage);
-        detail.append(el('h4', 'Referenced variables'));
+        facts(detail, [[t('ID'), data.preset_id], [t('Type / bucket'), coordinates.type || coordinates.bucket], [t('Module'), coordinates.module_name], [t('Group / slot'), [coordinates.group_name, coordinates.group_id].filter(Boolean).join(' / ')], [t('Bucket key'), coordinates.bucket_key], [t('Bucket default'), coordinates.is_default === true ? t('Yes') : coordinates.is_default === false ? t('No') : t('Unknown')], [t('Fetched'), new Date().toLocaleTimeString()]]);
+        raw(detail, t('Storage provenance'), data.storage);
+        detail.append(el('h4', t('Referenced variables')));
         const refs = data.variable_references;
-        if (!refs || !Array.isArray(refs.ids)) messageAppend('Variable reference coverage unavailable.');
+        if (!refs || !Array.isArray(refs.ids)) messageAppend(t('Variable reference coverage unavailable.'));
         else {
             messageAppend(refs.coverage);
-            messageAppend('Variable registry: ' + freshness(stores.variables));
-            if (stores.variables.error) messageAppend('Variable lookup unavailable: ' + stores.variables.error);
-            if (!refs.ids.length) messageAppend('No direct variable IDs found within this coverage.');
+            messageAppend(tf('Variable registry: %s', freshness(stores.variables)));
+            if (stores.variables.error) messageAppend(tf('Variable lookup unavailable: %s', stores.variables.error));
+            if (!refs.ids.length) messageAppend(t('No direct variable IDs found within this coverage.'));
             refs.ids.forEach(id => {
                 const matches = stores.variables.rows.filter(variable => variable.id === id);
                 detail.append(el('code', id));
-                if (!matches.length) messageAppend('Unresolved in the current variable-list snapshot.');
+                if (!matches.length) messageAppend(t('Unresolved in the current variable-list snapshot.'));
                 matches.forEach(item => {
                     detail.append(button(item.label || item.id, () => { switchView('variables'); select(item); }));
                     variableValue(detail, item);
                 });
             });
         }
-        detail.append(el('h4', 'Known consumers'));
+        detail.append(el('h4', t('Known consumers')));
         const refsData = data.references || {};
         const coverage = data.coverage;
-        messageAppend(coverage?.block_scan === 'complete_within_scope' ? String(refsData.total ?? 'Unknown') + ' explicit references found within partial coverage.' : 'Consumer coverage unavailable or incomplete; counts are not conclusive.');
-        facts(detail, [['Block references (covered scope)', coverage?.block_scan === 'complete_within_scope' ? refsData.block_ref_count : 'Unavailable'], ['Preset-chain references (covered scope)', coverage ? refsData.preset_ref_count : 'Unavailable']]);
-        messageAppend('Zero references never means safe to delete.');
-        raw(detail, 'Scan coverage', coverage || 'Unavailable');
-        raw(detail, 'Sample consumers (up to 10)', refsData.sample_consumers || []);
-        if (data.warnings?.length) raw(detail, 'Inspection notices (' + data.warnings.length + ')', data.warnings);
-        detail.append(el('h4', 'Stored definitions'));
+        messageAppend(coverage?.block_scan === 'complete_within_scope' ? tf('%s explicit references found within partial coverage.', String(refsData.total ?? t('Unknown'))) : t('Consumer coverage unavailable or incomplete; counts are not conclusive.'));
+        facts(detail, [[t('Block references (covered scope)'), coverage?.block_scan === 'complete_within_scope' ? refsData.block_ref_count : t('Unavailable')], [t('Preset-chain references (covered scope)'), coverage ? refsData.preset_ref_count : t('Unavailable')]]);
+        messageAppend(t('Zero references never means safe to delete.'));
+        raw(detail, t('Scan coverage'), coverage || t('Unavailable'));
+        raw(detail, t('Sample consumers (up to 10)'), refsData.sample_consumers || []);
+        if (data.warnings?.length) raw(detail, tf('Inspection notices (%d)', data.warnings.length), data.warnings);
+        detail.append(el('h4', t('Stored definitions')));
         ['attrs', 'styleAttrs', 'renderAttrs'].forEach(bag => raw(detail, bag, data[bag]));
         function messageAppend(value) { detail.append(el('p', value, 'diviskit-muted')); }
     }
@@ -213,22 +219,22 @@
         renderList();
         detail.replaceChildren();
         if (kind === 'variables') { renderVariable(item); detail.focus(); return; }
-        message(detail, 'Loading preset ' + item.id + '...');
+        message(detail, tf('Loading preset %s…', item.id));
         detail.setAttribute('aria-busy', 'true');
         detail.focus();
         try {
             const body = await request('preset/inspect/' + encodeURIComponent(item.id));
             if (epoch !== selectionEpoch) return;
-            if (body.data.preset_id !== item.id) throw new Error('Preset identity mismatch; response not displayed.');
+            if (body.data.preset_id !== item.id) throw new Error(t('Preset identity mismatch; response not displayed.'));
             await load('variables');
             if (epoch !== selectionEpoch || view !== kind) return;
             detail.replaceChildren();
             renderPreset(body.data);
-            detail.append(button('Refresh selected preset', () => select(item)));
+            detail.append(button(t('Refresh selected preset'), () => select(item)));
         } catch (error) {
             if (epoch !== selectionEpoch) return;
-            message(detail, 'Could not inspect ' + item.id + ': ' + error.message);
-            detail.append(button('Retry inspection', () => select(item)));
+            message(detail, tf('Could not inspect %1$s: %2$s', item.id, error.message));
+            detail.append(button(t('Retry inspection'), () => select(item)));
         } finally {
             if (epoch === selectionEpoch) detail.setAttribute('aria-busy', 'false');
         }

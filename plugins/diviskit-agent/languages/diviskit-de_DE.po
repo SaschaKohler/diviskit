@@ -1,0 +1,205 @@
+# German translations for the shared Diviskit client SDK (license + support client).
+# Shipped byte-identical inside every plugin that bundles vendokit/client-sdk/.
+# Copyright (C) 2026 Diviskit
+# This file is distributed under the GPL v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Diviskit client SDK\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/diviskit\n"
+"PO-Revision-Date: 2026-10-03 17:00+0200\n"
+"Last-Translator: Diviskit <support@diviskit.com>\n"
+"Language-Team: Deutsch\n"
+"Language: de_DE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Domain: diviskit\n"
+
+# Plugin header entries (make-pot emits the host plugin's headers into this
+# domain as well — kept translated here so the shared file stays complete).
+msgid "Diviskit Agent"
+msgstr "Diviskit Agent"
+
+msgid "REST API bridge for Diviskit — connects AI coding agents to your Divi 5 site for page building and design management. Forked from the GPL-licensed DiviOps Agent; serves the REST contract on the canonical diviskit/v1 namespace."
+msgstr "REST-API-Bridge für Diviskit — verbindet AI-Coding-Agents mit deiner Divi-5-Website für Pagebuilding und Design-Management. Geforkt vom GPL-lizenzierten DiviOps Agent; stellt den REST-Vertrag auf dem kanonischen Namespace diviskit/v1 bereit."
+
+msgid "Diviskit Pro"
+msgstr "Diviskit Pro"
+
+msgid "Pro coverage slice for Diviskit — Vendokit commerce + licensing automation. Requires the diviskit-agent plugin. Updates require a license key (entered on the Diviskit Pro admin page)."
+msgstr "Pro-Coverage-Slice für Diviskit — Vendokit-Commerce- und Lizenz-Automatisierung. Benötigt das diviskit-agent-Plugin. Updates erfordern einen Lizenzschlüssel (einzugeben auf der Diviskit-Pro-Admin-Seite)."
+
+msgid "Diviskit"
+msgstr "Diviskit"
+
+msgid "Updates enabled."
+msgstr "Updates aktiviert."
+
+msgid "Activate a license to enable updates."
+msgstr "Aktiviere eine Lizenz, um Updates zu erhalten."
+
+msgid "License API request failed with HTTP %d."
+msgstr "Lizenz-API-Anfrage fehlgeschlagen mit HTTP %d."
+
+msgid "The license server returned a malformed response."
+msgstr "Der Lizenz-Server hat eine fehlerhafte Antwort geliefert."
+
+msgid "Enter a license key to activate."
+msgstr "Gib einen Lizenzschlüssel zur Aktivierung ein."
+
+msgid "The license could not be activated."
+msgstr "Die Lizenz konnte nicht aktiviert werden."
+
+msgid "License deactivated on this site."
+msgstr "Lizenz auf dieser Website deaktiviert."
+
+msgid "No update information is available."
+msgstr "Keine Update-Informationen verfügbar."
+
+msgid "%s License"
+msgstr "%s-Lizenz"
+
+msgid "License"
+msgstr "Lizenz"
+
+msgid "Forbidden."
+msgstr "Verboten."
+
+msgid "Free product — updates enabled, no license needed."
+msgstr "Free-Produkt — Updates aktiviert, keine Lizenz nötig."
+
+msgid "Updates work without a license — the free license key from the shop activates your support year and is required for support tickets."
+msgstr "Updates laufen ohne Lizenz — der kostenlose Lizenzschlüssel aus dem Shop aktiviert dein Support-Jahr und wird für Support-Tickets benötigt."
+
+msgid "Status"
+msgstr "Status"
+
+msgid "License key"
+msgstr "Lizenzschlüssel"
+
+msgid "Plan"
+msgstr "Plan"
+
+msgid "Expires"
+msgstr "Läuft ab"
+
+msgid "lifetime / —"
+msgstr "lebenslang / —"
+
+msgid "Support"
+msgstr "Support"
+
+msgid "starts with first activation"
+msgstr "beginnt mit der ersten Aktivierung"
+
+msgid "expired"
+msgstr "abgelaufen"
+
+msgid "disabled"
+msgstr "deaktiviert"
+
+msgid "until %s"
+msgstr "bis %s"
+
+msgid "unlimited"
+msgstr "unbegrenzt"
+
+msgid "Last checked"
+msgstr "Zuletzt geprüft"
+
+msgid "never"
+msgstr "nie"
+
+msgid "Last message"
+msgstr "Letzte Meldung"
+
+msgid "Activate License"
+msgstr "Lizenz aktivieren"
+
+msgid "Refresh Status"
+msgstr "Status aktualisieren"
+
+msgid "Deactivate License"
+msgstr "Lizenz deaktivieren"
+
+msgid "Purchase / manage license"
+msgstr "Lizenz kaufen / verwalten"
+
+msgid "License activated."
+msgstr "Lizenz aktiviert."
+
+msgid "License deactivated."
+msgstr "Lizenz deaktiviert."
+
+msgid "License status refreshed."
+msgstr "Lizenzstatus aktualisiert."
+
+msgid "Support API request failed with HTTP %d."
+msgstr "Support-API-Anfrage fehlgeschlagen mit HTTP %d."
+
+msgid "The support server returned an error."
+msgstr "Der Support-Server hat einen Fehler zurückgegeben."
+
+msgid "Bad nonce."
+msgstr "Ungültige Nonce."
+
+msgid "Ticket for %s created — you will receive a confirmation by email."
+msgstr "Ticket für %s erstellt — du erhältst eine Bestätigung per E-Mail."
+
+msgid "Reply sent."
+msgstr "Antwort gesendet."
+
+msgid "Please fill in both subject and message."
+msgstr "Bitte Betreff und Nachricht ausfüllen."
+
+msgid "The support server could not be reached — please try again later."
+msgstr "Der Support-Server konnte nicht erreicht werden — bitte später erneut versuchen."
+
+msgid "New ticket"
+msgstr "Neues Ticket"
+
+msgid "Without an active license this is only possible for free products — an email address is then required."
+msgstr "Ohne aktive Lizenz nur für Free-Produkte möglich — E-Mail ist dann Pflicht."
+
+msgid "Email"
+msgstr "E-Mail"
+
+msgid "Subject"
+msgstr "Betreff"
+
+msgid "Message"
+msgstr "Nachricht"
+
+msgid "Automatically attached: %1$s version %2$s, WordPress %3$s, PHP %4$s, site URL."
+msgstr "Automatisch angehängt: %1$s-Version %2$s, WordPress %3$s, PHP %4$s, Site-URL."
+
+msgid "Create ticket"
+msgstr "Ticket erstellen"
+
+msgid "Your tickets"
+msgstr "Deine Tickets"
+
+msgid "Refresh"
+msgstr "Aktualisieren"
+
+msgid "No tickets yet."
+msgstr "Noch keine Tickets."
+
+msgid "Ticket"
+msgstr "Ticket"
+
+msgid "Updated"
+msgstr "Aktualisiert"
+
+msgid "Back to overview"
+msgstr "Zur Übersicht"
+
+msgid "You"
+msgstr "Du"
+
+msgid "This ticket is closed."
+msgstr "Dieses Ticket ist geschlossen."
+
+msgid "Send reply"
+msgstr "Antwort senden"

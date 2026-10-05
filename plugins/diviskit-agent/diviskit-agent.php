@@ -2,14 +2,15 @@
 /**
  * Plugin Name: Diviskit Agent
  * Description: REST API bridge for Diviskit — connects AI coding agents to your Divi 5 site for page building and design management. Forked from the GPL-licensed DiviOps Agent; serves the REST contract on the canonical diviskit/v1 namespace.
- * Version: 1.7.2
+ * Version: 1.7.4
  * Author: Diviskit
  * Text Domain: diviskit-agent
+ * Domain Path: /languages
  * Requires at least: 6.5
- * Requires PHP: 7.4
+ * Requires PHP: 8.0
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Update URI: https://diviskit.com/item/diviskit-agent/
+ * Update URI: https://shop.diviskit.com/item/diviskit-agent/
  *
  * Copyright (C) 2026 Diviskit
  * Based on DiviOps Agent 1.5.25, released under GPL v2 or later.
@@ -78,7 +79,7 @@ class Diviskit_Agent {
 	 * Plugin version — surfaced in /handshake for self-diagnosis only;
 	 * server no longer gates on it (capability map is the gate).
 	 */
-	const VERSION = '1.7.2';
+	const VERSION = '1.7.4';
 
 	/**
 	 * Minimum MCP server version this plugin is compatible with.
@@ -223,6 +224,7 @@ class Diviskit_Agent {
 	];
 
 	public static function init() {
+		add_action( 'init', [ __CLASS__, 'register_textdomain_paths' ] );
 		add_action( 'rest_api_init', [ __CLASS__, 'register_routes' ] );
 		add_filter( 'rest_endpoints', [ __CLASS__, 'repair_divi_post_filter_price_permission' ] );
 		add_filter( 'rest_pre_dispatch', [ __CLASS__, 'check_rate_limit' ], 10, 3 );
@@ -230,6 +232,24 @@ class Diviskit_Agent {
 		add_action( 'admin_menu', [ __CLASS__, 'register_admin_page' ] );
 		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_admin_styles' ] );
 		add_action( 'admin_init', [ __CLASS__, 'maybe_write_agents_md' ] );
+	}
+
+	/**
+	 * Register the shared 'diviskit' textdomain path for JIT loading.
+	 *
+	 * The plugin's own 'diviskit-agent' domain resolves automatically via
+	 * the Domain Path header — WordPress registers it for every active
+	 * plugin during bootstrap, so languages/diviskit-agent-*.mo is picked
+	 * up just-in-time without an explicit load call.
+	 *
+	 * The bundled license/support client SDK (byte-identical copies of
+	 * vendokit/client-sdk/, do not edit here) uses the shared 'diviskit'
+	 * domain instead. Its path is not covered by this plugin's header, so
+	 * it is registered explicitly — languages/diviskit-*.mo ships the
+	 * SDK translations inside this plugin's package.
+	 */
+	public static function register_textdomain_paths() {
+		load_plugin_textdomain( 'diviskit', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 	}
 
 	/**
@@ -311,11 +331,24 @@ class Diviskit_Agent {
 	 * the verification procedure an AI agent follows for the connection
 	 * setup. Wrapped in BEGIN/END markers by write_project_agents_md().
 	 */
+	/**
+	 * Download URL for the bundled install-skills.sh. plugins_url() derives
+	 * its scheme from is_ssl() — false under WP-CLI — so force the scheme
+	 * declared by siteurl; that is what the REST base advertises too.
+	 */
+	private static function installer_script_url() {
+		return set_url_scheme(
+			plugins_url( 'bin/install-skills.sh', __FILE__ ),
+			(string) wp_parse_url( get_site_url(), PHP_URL_SCHEME )
+		);
+	}
+
 	private static function agents_md_section() {
 		$rest_base  = rest_url( self::REST_NAMESPACE );
 		$config     = wp_json_encode( self::mcp_client_config(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
 		$min_server = self::MIN_SERVER_VERSION;
 		$prompt     = self::mcp_setup_prompt();
+		$installer  = self::installer_script_url();
 
 		ob_start();
 ?>
@@ -359,6 +392,24 @@ curl -s -X POST "<?php echo esc_url( $rest_base ); ?>/handshake" \
 Expect `"compatible": true` and a `capabilities` map. Then restart the AI
 client and smoke-test: `tools/list` exposes `diviskit_*` tools and a
 read-only call like `diviskit_page_list` returns `{ "ok": true, ... }`.
+
+### Install the authoring skills
+
+The plugin bundles the Diviskit skills and serves them at
+`GET <?php echo esc_url( $rest_base ); ?>/skills` (manifest with per-file
+sha256, Pro bundles included automatically when diviskit-pro is active).
+The installer script ships inside this plugin — download it, then sync
+version-locked copies into your client:
+
+```bash
+curl -fsSL -o install-skills.sh "<?php echo esc_url( $installer ); ?>"
+chmod +x install-skills.sh
+./install-skills.sh --client devin --scope project   # or: codex | claude | cursor | generic --target <dir>
+```
+
+Credentials come from the `diviskit-mcp` entry in the MCP config or the
+`WP_URL` / `WP_USER` / `WP_APP_PASSWORD` env vars. Re-run after every
+plugin update; restart the client session afterwards.
 
 ### Ready-to-paste setup prompt
 
@@ -418,7 +469,8 @@ Steps:
 2. Write the MCP config from AGENTS.md to `.devin/mcp_config.local.json`, replacing `<application-password>`, and add the file to `.gitignore`.
 3. Verify the handshake with the curl command from AGENTS.md — expect `"compatible": true` and a `capabilities` map.
 4. Smoke-test the server over stdio with the env vars from the config: send `initialize`, then `tools/list` (expect diviskit_* tools), then one read-only `tools/call` such as `diviskit_page_list` (expect `{"ok":true,...}`).
-5. Tell me to restart the AI client or reload the MCP session, then confirm the diviskit_* tools registered.
+5. Install the authoring skills: download `install-skills.sh` from the plugin (URL in AGENTS.md's "Install the authoring skills" section) and run it for my client — `devin`, `codex`, `claude`, `cursor`, or `generic --target <dir>` — then confirm the diviskit skills are available.
+6. Tell me to restart the AI client or reload the MCP session, then confirm the diviskit_* tools registered.
 <?php
 		return (string) ob_get_clean();
 	}
@@ -2165,8 +2217,99 @@ Steps:
 		if ( current_user_can( 'manage_options' ) && function_exists( 'et_get_option' ) && isset( $_GET['view'] ) && is_string( $_GET['view'] ) && 'design-system' === $_GET['view'] && 'design-system' === sanitize_key( wp_unslash( $_GET['view'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Fixed read-only navigation; exact-token guard rejects normalization variants. No state change.
 			wp_enqueue_style( 'diviskit-design-system', plugins_url( 'assets/design-system.css', __FILE__ ), [ 'diviskit-agent-admin' ], self::VERSION );
 			wp_enqueue_script( 'diviskit-design-system', plugins_url( 'assets/design-system.js', __FILE__ ), [], self::VERSION, true );
-			wp_localize_script( 'diviskit-design-system', 'diviskitDesignSystem', [ 'root' => rest_url( self::REST_NAMESPACE . '/' ), 'nonce' => wp_create_nonce( 'wp_rest' ) ] );
+			wp_localize_script( 'diviskit-design-system', 'diviskitDesignSystem', [
+				'root'  => rest_url( self::REST_NAMESPACE . '/' ),
+				'nonce' => wp_create_nonce( 'wp_rest' ),
+				'i18n'  => self::design_system_i18n(),
+			] );
 		}
+	}
+
+	/**
+	 * Translation map for assets/design-system.js — keys are the English
+	 * source strings so missing entries fall back to the original text.
+	 */
+	private static function design_system_i18n(): array {
+		return [
+			'Not recorded'                                                            => __( 'Not recorded', 'diviskit-agent' ),
+			'Not loaded.'                                                             => __( 'Not loaded.', 'diviskit-agent' ),
+			'Stale snapshot.'                                                         => __( 'Stale snapshot.', 'diviskit-agent' ),
+			'Snapshot.'                                                               => __( 'Snapshot.', 'diviskit-agent' ),
+			'Fetched'                                                                 => __( 'Fetched', 'diviskit-agent' ),
+			/* translators: %s: localized fetch time. */
+			'Fetched %s.'                                                             => __( 'Fetched %s.', 'diviskit-agent' ),
+			'No entry selected.'                                                      => __( 'No entry selected.', 'diviskit-agent' ),
+			/* translators: %s: registry view label (presets or variables). */
+			'Loading %s…'                                                             => __( 'Loading %s…', 'diviskit-agent' ),
+			/* translators: 1: entry count, 2: registry view label (presets or variables). */
+			'%1$d %2$s.'                                                              => __( '%1$d %2$s.', 'diviskit-agent' ),
+			'presets'                                                                 => __( 'presets', 'diviskit-agent' ),
+			'variables'                                                               => __( 'variables', 'diviskit-agent' ),
+			'REST endpoint must be same-origin.'                                      => __( 'REST endpoint must be same-origin.', 'diviskit-agent' ),
+			'Invalid server response.'                                                => __( 'Invalid server response.', 'diviskit-agent' ),
+			/* translators: %d: HTTP status code. */
+			'Request failed (%d).'                                                    => __( 'Request failed (%d).', 'diviskit-agent' ),
+			'Missing response data.'                                                  => __( 'Missing response data.', 'diviskit-agent' ),
+			'Missing preset registry.'                                                => __( 'Missing preset registry.', 'diviskit-agent' ),
+			'Missing variable registry.'                                              => __( 'Missing variable registry.', 'diviskit-agent' ),
+			'No matching entries.'                                                    => __( 'No matching entries.', 'diviskit-agent' ),
+			'No entries in this registry.'                                            => __( 'No entries in this registry.', 'diviskit-agent' ),
+			'Registry unavailable.'                                                   => __( 'Registry unavailable.', 'diviskit-agent' ),
+			'Coordinates unavailable'                                                 => __( 'Coordinates unavailable', 'diviskit-agent' ),
+			/* translators: %s: registry error message. */
+			'%s Refresh to retry.'                                                    => __( '%s Refresh to retry.', 'diviskit-agent' ),
+			/* translators: %d: number of storage warnings. */
+			'Storage notices (%d)'                                                    => __( 'Storage notices (%d)', 'diviskit-agent' ),
+			'Registry source / coverage'                                              => __( 'Registry source / coverage', 'diviskit-agent' ),
+			'Registry snapshot only. No consumer scan performed for this list.'       => __( 'Registry snapshot only. No consumer scan performed for this list.', 'diviskit-agent' ),
+			'ID'                                                                      => __( 'ID', 'diviskit-agent' ),
+			'Type'                                                                    => __( 'Type', 'diviskit-agent' ),
+			'Provenance'                                                              => __( 'Provenance', 'diviskit-agent' ),
+			'Status'                                                                  => __( 'Status', 'diviskit-agent' ),
+			'Last updated (stored)'                                                   => __( 'Last updated (stored)', 'diviskit-agent' ),
+			'Registry freshness'                                                      => __( 'Registry freshness', 'diviskit-agent' ),
+			'Native WordPress / Divi customizer color'                                => __( 'Native WordPress / Divi customizer color', 'diviskit-agent' ),
+			'Stored variable; author provenance not recorded'                         => __( 'Stored variable; author provenance not recorded', 'diviskit-agent' ),
+			'Variable usage was not scanned. This value is stored data, not a computed result.' => __( 'Variable usage was not scanned. This value is stored data, not a computed result.', 'diviskit-agent' ),
+			'Registry provenance'                                                     => __( 'Registry provenance', 'diviskit-agent' ),
+			'Type / bucket'                                                           => __( 'Type / bucket', 'diviskit-agent' ),
+			'Module'                                                                  => __( 'Module', 'diviskit-agent' ),
+			'Group / slot'                                                            => __( 'Group / slot', 'diviskit-agent' ),
+			'Bucket key'                                                              => __( 'Bucket key', 'diviskit-agent' ),
+			'Bucket default'                                                          => __( 'Bucket default', 'diviskit-agent' ),
+			'Yes'                                                                     => __( 'Yes', 'diviskit-agent' ),
+			'No'                                                                      => __( 'No', 'diviskit-agent' ),
+			'Unknown'                                                                 => __( 'Unknown', 'diviskit-agent' ),
+			'Unavailable'                                                             => __( 'Unavailable', 'diviskit-agent' ),
+			'Storage provenance'                                                      => __( 'Storage provenance', 'diviskit-agent' ),
+			'Referenced variables'                                                    => __( 'Referenced variables', 'diviskit-agent' ),
+			'Variable reference coverage unavailable.'                                => __( 'Variable reference coverage unavailable.', 'diviskit-agent' ),
+			/* translators: %s: registry freshness sentence. */
+			'Variable registry: %s'                                                   => __( 'Variable registry: %s', 'diviskit-agent' ),
+			/* translators: %s: registry error message. */
+			'Variable lookup unavailable: %s'                                          => __( 'Variable lookup unavailable: %s', 'diviskit-agent' ),
+			'No direct variable IDs found within this coverage.'                      => __( 'No direct variable IDs found within this coverage.', 'diviskit-agent' ),
+			'Unresolved in the current variable-list snapshot.'                       => __( 'Unresolved in the current variable-list snapshot.', 'diviskit-agent' ),
+			'Known consumers'                                                         => __( 'Known consumers', 'diviskit-agent' ),
+			/* translators: %s: consumer reference count. */
+			'%s explicit references found within partial coverage.'                   => __( '%s explicit references found within partial coverage.', 'diviskit-agent' ),
+			'Consumer coverage unavailable or incomplete; counts are not conclusive.' => __( 'Consumer coverage unavailable or incomplete; counts are not conclusive.', 'diviskit-agent' ),
+			'Block references (covered scope)'                                        => __( 'Block references (covered scope)', 'diviskit-agent' ),
+			'Preset-chain references (covered scope)'                                 => __( 'Preset-chain references (covered scope)', 'diviskit-agent' ),
+			'Zero references never means safe to delete.'                             => __( 'Zero references never means safe to delete.', 'diviskit-agent' ),
+			'Scan coverage'                                                           => __( 'Scan coverage', 'diviskit-agent' ),
+			'Sample consumers (up to 10)'                                             => __( 'Sample consumers (up to 10)', 'diviskit-agent' ),
+			/* translators: %d: number of inspection warnings. */
+			'Inspection notices (%d)'                                                 => __( 'Inspection notices (%d)', 'diviskit-agent' ),
+			'Stored definitions'                                                      => __( 'Stored definitions', 'diviskit-agent' ),
+			/* translators: %s: preset ID. */
+			'Loading preset %s…'                                                      => __( 'Loading preset %s…', 'diviskit-agent' ),
+			'Preset identity mismatch; response not displayed.'                       => __( 'Preset identity mismatch; response not displayed.', 'diviskit-agent' ),
+			'Refresh selected preset'                                                 => __( 'Refresh selected preset', 'diviskit-agent' ),
+			/* translators: 1: preset ID, 2: JavaScript error message. */
+			'Could not inspect %1$s: %2$s'                                            => __( 'Could not inspect %1$s: %2$s', 'diviskit-agent' ),
+			'Retry inspection'                                                        => __( 'Retry inspection', 'diviskit-agent' ),
+		];
 	}
 
 	private static function admin_menu_icon(): string {
@@ -2414,7 +2557,7 @@ Steps:
 						<?php require __DIR__ . '/includes/admin-design-system.php'; ?>
 					<?php elseif ( $support_view ) : ?>
 						<section class="diviskit-card" aria-labelledby="diviskit-license-title">
-							<h2 id="diviskit-license-title"><?php esc_html_e( 'Lizenz', 'diviskit-agent' ); ?></h2>
+							<h2 id="diviskit-license-title"><?php esc_html_e( 'License', 'diviskit-agent' ); ?></h2>
 							<?php
 							if ( class_exists( 'Diviskit_License_Client' ) ) {
 								Diviskit_License_Client::instance( 'diviskit-agent' )?->render_license_panel();
@@ -2423,7 +2566,7 @@ Steps:
 						</section>
 						<section class="diviskit-card" aria-labelledby="diviskit-support-title">
 							<h2 id="diviskit-support-title"><?php esc_html_e( 'Support', 'diviskit-agent' ); ?></h2>
-							<p class="diviskit-muted"><?php esc_html_e( 'Direkter Draht zum Diviskit-Support — Tickets werden dem Diviskit-Agent-Produkt zugeordnet und enthalten automatisch Versions- und Site-Diagnose.', 'diviskit-agent' ); ?></p>
+							<p class="diviskit-muted"><?php esc_html_e( 'Direct line to Diviskit support — tickets are filed under the Diviskit Agent product and automatically include version and site diagnostics.', 'diviskit-agent' ); ?></p>
 							<?php
 							if ( class_exists( 'Diviskit_Support_Client' ) ) {
 								Diviskit_Support_Client::instance( 'diviskit-agent' )?->render_support_panel();
@@ -2479,6 +2622,21 @@ Steps:
 								/* translators: %s: absolute path of the generated AGENTS.md. */
 								echo esc_html( sprintf( __( 'Setup instructions live in %s — regenerated automatically on plugin updates.', 'diviskit-agent' ), '<code>' . ABSPATH . 'AGENTS.md</code>' ) );
 							?></p>
+						</details>
+						<details class="diviskit-mcp-config">
+							<summary><?php esc_html_e( 'Install the authoring skills', 'diviskit-agent' ); ?></summary>
+							<p class="diviskit-muted"><?php esc_html_e( 'The bundled skills teach your client the verified Divi 5 block formats and tool contracts. This installer pulls them from the site with checksum verification — Pro bundles are included automatically when Diviskit Pro is active.', 'diviskit-agent' ); ?></p>
+							<div class="diviskit-config-block">
+								<pre id="diviskit-skills-cmd"><?php echo esc_html( sprintf(
+									"curl -fsSL -o install-skills.sh \"%s\"\nchmod +x install-skills.sh\n./install-skills.sh --client devin --scope project   # or: codex | claude | cursor | generic --target <dir>",
+									self::installer_script_url()
+								) ); ?></pre>
+								<button type="button" class="button button-small" data-diviskit-copy="diviskit-skills-cmd" data-copied="<?php esc_attr_e( 'Copied', 'diviskit-agent' ); ?>"><?php esc_html_e( 'Copy commands', 'diviskit-agent' ); ?></button>
+							</div>
+							<p class="diviskit-muted">
+								<a href="<?php echo esc_url( self::installer_script_url() ); ?>" download><?php esc_html_e( 'Download install-skills.sh', 'diviskit-agent' ); ?></a>
+								&middot; <?php esc_html_e( 're-run after every plugin update', 'diviskit-agent' ); ?>
+							</p>
 						</details>
 					</section>
 
@@ -2537,6 +2695,7 @@ Steps:
 						</ul>
 					</section>
 
+					<?php self::render_skills_card(); ?>
 					<?php self::render_schema_dump_card( $divi_version ); ?>
 					<?php self::render_admin_rollback_snapshots_card( $rollback_snapshots ); ?>
 					<section class="diviskit-updates" aria-labelledby="diviskit-updates-title">
@@ -2551,6 +2710,60 @@ Steps:
 				<footer class="diviskit-footer"><?php esc_html_e( 'Divi is a registered trademark of Elegant Themes, Inc. Diviskit Agent is not affiliated with or endorsed by Elegant Themes.', 'diviskit-agent' ); ?></footer>
 			</div>
 		</div>
+		<?php
+	}
+
+	/**
+	 * Skill bundles card — lists every skill the /skills endpoint serves
+	 * with its source bundle, so add-on contributions (diviskit-pro, …)
+	 * are visible next to the Free skills.
+	 */
+	private static function render_skills_card(): void {
+		$skills = [];
+		foreach ( self::skills_index() as $name => $meta ) {
+			$desc = '';
+			$md   = $meta['dir'] . '/SKILL.md';
+			if ( is_readable( $md ) ) {
+				foreach ( array_slice( (array) file( $md, FILE_IGNORE_NEW_LINES ), 0, 12 ) as $line ) {
+					if ( preg_match( '/^description:\s*(.+?)\s*$/', (string) $line, $m ) ) {
+						$desc = $m[1];
+						break;
+					}
+				}
+			}
+			$skills[] = [
+				'name'   => $name,
+				'bundle' => $meta['bundle'],
+				'files'  => count( self::skills_files( $meta['dir'] ) ),
+				'desc'   => $desc,
+			];
+		}
+		?>
+		<section class="diviskit-card" aria-labelledby="diviskit-skills-title">
+			<h2 id="diviskit-skills-title"><?php esc_html_e( 'Skill bundles', 'diviskit-agent' ); ?></h2>
+			<p class="diviskit-muted"><?php
+				/* translators: %s: REST skills endpoint URL. */
+				echo esc_html( sprintf( __( 'Served at %s — sync into your client with install-skills.sh (see "Connect your agent" above).', 'diviskit-agent' ), 'GET ' . rest_url( self::REST_NAMESPACE . '/skills' ) ) );
+			?></p>
+			<?php if ( empty( $skills ) ) : ?>
+				<p><?php esc_html_e( 'No skill bundles found — the skills/ directory is missing from this install.', 'diviskit-agent' ); ?></p>
+			<?php else : ?>
+				<ul class="diviskit-skill-list">
+					<?php foreach ( $skills as $skill ) : ?>
+						<li>
+							<div class="diviskit-skill-head">
+								<code><?php echo esc_html( $skill['name'] ); ?></code>
+								<span class="diviskit-status <?php echo 'diviskit-agent' === $skill['bundle'] ? 'diviskit-status--success' : 'diviskit-status--neutral'; ?>"><?php echo esc_html( $skill['bundle'] ); ?></span>
+								<span class="diviskit-skill-meta"><?php echo esc_html( sprintf( _n( '%d file', '%d files', $skill['files'], 'diviskit-agent' ), $skill['files'] ) ); ?></span>
+							</div>
+							<?php if ( '' !== $skill['desc'] ) : ?>
+								<p class="diviskit-skill-desc"><?php echo esc_html( wp_trim_words( $skill['desc'], 32 ) ); ?></p>
+							<?php endif; ?>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+			<?php endif; ?>
+		</section>
 		<?php
 	}
 
@@ -2589,18 +2802,30 @@ Steps:
 		</section>
 		<script>
 		(function() {
+			var strings = <?php echo wp_json_encode( [
+				'fetching' => __( 'Fetching…', 'diviskit-agent' ),
+				/* translators: 1: schema fingerprint prefix, 2: module count. */
+				'done'     => __( 'Done — schema: %1$s, %2$s modules', 'diviskit-agent' ),
+				/* translators: %s: JavaScript error message. */
+				'error'    => __( 'Error: %s', 'diviskit-agent' ),
+				'notOk'    => __( 'Response not ok', 'diviskit-agent' ),
+			] ); ?>;
+			var fmt = function(tpl) {
+				var i = 0, args = Array.prototype.slice.call(arguments, 1);
+				return tpl.replace(/%(\d+)\$?s/g, function(m, n) { return String(n ? args[parseInt(n, 10) - 1] : args[i++]); });
+			};
 			var btn = document.getElementById('diviskit-schema-download');
 			var status = document.getElementById('diviskit-schema-status');
 			if (!btn) return;
 			btn.addEventListener('click', function() {
 				btn.disabled = true;
-				status.textContent = 'Fetching...';
+				status.textContent = strings.fetching;
 				fetch('<?php echo esc_js( $dump_url ); ?>', {
 					headers: { 'X-WP-Nonce': '<?php echo esc_js( $rest_nonce ); ?>' }
 				})
 				.then(function(r) { return r.json(); })
 				.then(function(data) {
-					if (!data.ok) throw new Error('Response not ok');
+					if (!data.ok) throw new Error(strings.notOk);
 					var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
 					var url = URL.createObjectURL(blob);
 					var a = document.createElement('a');
@@ -2612,11 +2837,17 @@ Steps:
 					URL.revokeObjectURL(url);
 					var sv = (data.data && data.data.schema_version) ? String(data.data.schema_version).substring(0,12) : '—';
 					var mc = (data.data && data.data.modules) ? Object.keys(data.data.modules).length : 0;
-					status.innerHTML = '<span class="diviskit-status diviskit-status--success">Done — schema: <code>' + sv + '</code>, ' + mc + ' modules</span>';
+					var msg = document.createElement('span');
+					msg.className = 'diviskit-status diviskit-status--success';
+					msg.textContent = fmt(strings.done, sv, mc);
+					status.replaceChildren(msg);
 					btn.disabled = false;
 				})
 				.catch(function(err) {
-					status.innerHTML = '<span class="diviskit-status diviskit-status--error">Error: ' + err.message + '</span>';
+					var msg = document.createElement('span');
+					msg.className = 'diviskit-status diviskit-status--error';
+					msg.textContent = fmt(strings.error, err.message);
+					status.replaceChildren(msg);
 					btn.disabled = false;
 				});
 			});
@@ -2675,12 +2906,12 @@ if ( file_exists( __DIR__ . '/includes/class-diviskit-license-client.php' ) ) {
 		'item'         => (string) apply_filters( 'diviskit_agent_license_item', 'diviskit-agent' ),
 		'api_url'      => defined( 'DIVISKIT_AGENT_STORE_URL' )
 			? DIVISKIT_AGENT_STORE_URL
-			: apply_filters( 'diviskit_agent_store_url', 'https://diviskit.com' ),
+			: apply_filters( 'diviskit_agent_store_url', 'https://shop.diviskit.com' ),
 		'version'      => Diviskit_Agent::VERSION,
 		'file'         => __FILE__,
 		'slug'         => 'diviskit-agent',
 		'plugin_title' => 'Diviskit Agent',
-		'purchase_url' => apply_filters( 'diviskit_agent_purchase_url', 'https://diviskit.com/item/diviskit-agent/' ),
+		'purchase_url' => apply_filters( 'diviskit_agent_purchase_url', 'https://shop.diviskit.com/item/diviskit-agent/' ),
 		'free'         => true,
 		'optional_license' => true,
 		'license_ui'   => 'embed',
@@ -2700,7 +2931,7 @@ if ( file_exists( __DIR__ . '/includes/class-diviskit-support-client.php' ) ) {
 		'item'         => (string) apply_filters( 'diviskit_agent_license_item', 'diviskit-agent' ),
 		'api_url'      => defined( 'DIVISKIT_AGENT_STORE_URL' )
 			? DIVISKIT_AGENT_STORE_URL
-			: apply_filters( 'diviskit_agent_store_url', 'https://diviskit.com' ),
+			: apply_filters( 'diviskit_agent_store_url', 'https://shop.diviskit.com' ),
 		'version'      => Diviskit_Agent::VERSION,
 		'slug'         => 'diviskit-agent',
 		'plugin_title' => 'Diviskit Agent',

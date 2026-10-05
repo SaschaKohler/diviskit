@@ -7,22 +7,23 @@
  *
  *   require_once __DIR__ . '/includes/class-diviskit-support-client.php';
  *   Diviskit_Support_Client::register( [
- *       'item'              => 'sk-consent',                  // vk_product slug
+ *       'item'              => 'diviskit-consent',                  // vk_product slug
  *       'item_id'           => 0,                             // optional, overrides slug
  *       'api_url'           => 'https://shop.example.com/',   // site running vendokit-support
- *       'version'           => SK_CONSENT_VERSION,            // sent as diagnostic
- *       'slug'              => 'sk-consent',                  // must match the license client slug
+ *       'version'           => DIVISKIT_CONSENT_VERSION,            // sent as diagnostic
+ *       'slug'              => 'diviskit-consent',                  // must match the license client slug
  *       'plugin_title'      => 'Diviskit Consent',
- *       'license_state_key' => 'dklc_state_sk-consent',       // default: dklc_state_<slug>
+ *       'license_state_key' => 'dklc_state_diviskit-consent',       // default: dklc_state_<slug>
  *       'support_url'       => '',                            // panel URL for redirects/notices
  *   ] );
  *
  * The client reuses the license client's stored state — no separate
  * credential handling: the license_key saved by
  * Diviskit_License_Client in `license_state_key` is the auth token for
- * every request. Licensed products send the key implicitly; free
- * products (no key stored) submit anonymously — the store accepts
- * anonymous tickets only for products flagged "free_download".
+ * every request. Every support action requires an activated license —
+ * without a stored key the panel prompts for activation instead of
+ * rendering the ticket form (free products included: the free license
+ * from the store is what unlocks support).
  *
  * What the host product gets:
  *   - render_support_panel(): new-ticket form + ticket list + thread
@@ -146,11 +147,15 @@ class Diviskit_Support_Client {
 		$code = (int) wp_remote_retrieve_response_code( $response );
 		$data = json_decode( (string) wp_remote_retrieve_body( $response ), true );
 		if ( 200 !== $code ) {
-			$message = is_array( $data ) && ! empty( $data['message'] ) ? (string) $data['message'] : sprintf( 'Support API request failed with HTTP %d.', $code );
+			$message = is_array( $data ) && ! empty( $data['message'] ) ? (string) $data['message'] : sprintf(
+				/* translators: %d: HTTP status code. */
+				__( 'Support API request failed with HTTP %d.', 'diviskit' ),
+				$code
+			);
 			return new WP_Error( 'api_error', $message, [ 'status' => $code ] );
 		}
 		if ( ! is_array( $data ) || empty( $data['success'] ) ) {
-			$message = is_array( $data ) && ! empty( $data['message'] ) ? (string) $data['message'] : 'The support server returned an error.';
+			$message = is_array( $data ) && ! empty( $data['message'] ) ? (string) $data['message'] : __( 'The support server returned an error.', 'diviskit' );
 			return new WP_Error( is_array( $data ) && ! empty( $data['error_type'] ) ? (string) $data['error_type'] : 'api_error', $message );
 		}
 		return $data;
@@ -186,7 +191,10 @@ class Diviskit_Support_Client {
 
 	public function handle_create(): void {
 		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'dks_' . $this->config['slug'], 'dks_nonce' ) ) {
-			wp_die( 'Bad nonce.' );
+			wp_die( esc_html__( 'Bad nonce.', 'diviskit' ) );
+		}
+		if ( '' === $this->license_key() ) {
+			$this->back_with( 'license_required' );
 		}
 		$subject = sanitize_text_field( (string) ( $_POST['dks_subject'] ?? '' ) );
 		$message = trim( (string) ( $_POST['dks_message'] ?? '' ) );
@@ -211,7 +219,7 @@ class Diviskit_Support_Client {
 
 	public function handle_reply(): void {
 		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'dks_' . $this->config['slug'], 'dks_nonce' ) ) {
-			wp_die( 'Bad nonce.' );
+			wp_die( esc_html__( 'Bad nonce.', 'diviskit' ) );
 		}
 		$ticket_id = absint( $_POST['dks_ticket'] ?? 0 );
 		$message   = trim( (string) ( $_POST['dks_message'] ?? '' ) );
@@ -229,10 +237,15 @@ class Diviskit_Support_Client {
 	public function notice(): void {
 		$msg = sanitize_key( (string) ( $_GET['dks-msg'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- display only.
 		$map = [
-			'created' => [ 'success', sprintf( __( 'Ticket für %s erstellt — du erhältst eine Bestätigung per E-Mail.', 'diviskit' ), $this->config['plugin_title'] ) ],
-			'replied' => [ 'success', __( 'Antwort gesendet.', 'diviskit' ) ],
-			'invalid' => [ 'error', __( 'Bitte Betreff und Nachricht ausfüllen.', 'diviskit' ) ],
-			'error'   => [ 'error', __( 'Der Support-Server konnte nicht erreicht werden — bitte später erneut versuchen.', 'diviskit' ) ],
+			'created' => [ 'success', sprintf(
+				/* translators: %s: plugin title. */
+				__( 'Ticket for %s created — you will receive a confirmation by email.', 'diviskit' ),
+				$this->config['plugin_title']
+			) ],
+			'replied' => [ 'success', __( 'Reply sent.', 'diviskit' ) ],
+			'invalid' => [ 'error', __( 'Please fill in both subject and message.', 'diviskit' ) ],
+			'license_required' => [ 'error', __( 'Activate a license to use support.', 'diviskit' ) ],
+			'error'   => [ 'error', __( 'The support server could not be reached — please try again later.', 'diviskit' ) ],
 		];
 		if ( isset( $map[ $msg ] ) ) {
 			printf( '<div class="notice notice-%s is-dismissible"><p>%s</p></div>', esc_attr( $map[ $msg ][0] ), esc_html( $map[ $msg ][1] ) );
@@ -245,11 +258,16 @@ class Diviskit_Support_Client {
 
 	public function render_support_panel(): void {
 		$slug = $this->config['slug'];
+		echo '<div class="dks-panel dks-panel-' . esc_attr( $slug ) . '">';
+		if ( '' === $this->license_key() ) {
+			$this->render_license_required();
+			echo '</div>';
+			return;
+		}
 		if ( ! empty( $_GET['dks-refresh'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- manual refresh.
 			$this->tickets( true );
 		}
 		$ticket_id = absint( $_GET['dks-ticket'] ?? 0 ); // phpcs:ignore WordPress.Security.NonceVerification -- view only.
-		echo '<div class="dks-panel dks-panel-' . esc_attr( $slug ) . '">';
 		if ( $ticket_id ) {
 			$this->render_thread( $ticket_id );
 		} else {
@@ -259,43 +277,42 @@ class Diviskit_Support_Client {
 		echo '</div>';
 	}
 
+	private function render_license_required(): void {
+		echo '<p class="description">' . esc_html__( 'Support requires an activated license — enter your license key in the license panel first.', 'diviskit' ) . '</p>';
+	}
+
 	private function render_form(): void {
-		echo '<h3>' . esc_html__( 'Neues Ticket', 'diviskit' ) . '</h3>';
-		if ( '' === $this->license_key() ) {
-			echo '<p class="description">' . esc_html__( 'Ohne aktive Lizenz nur für Free-Produkte möglich — E-Mail ist dann Pflicht.', 'diviskit' ) . '</p>';
-		}
+		echo '<h3>' . esc_html__( 'New ticket', 'diviskit' ) . '</h3>';
 		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
 		wp_nonce_field( 'dks_' . $this->config['slug'], 'dks_nonce' );
 		echo '<input type="hidden" name="action" value="dks_create_' . esc_attr( $this->config['slug'] ) . '">';
-		if ( '' === $this->license_key() ) {
-			echo '<p><label>' . esc_html__( 'E-Mail', 'diviskit' ) . '<br><input type="email" name="dks_email" class="regular-text" required></label></p>';
-		}
-		echo '<p><label>' . esc_html__( 'Betreff', 'diviskit' ) . '<br><input type="text" name="dks_subject" class="regular-text" maxlength="200" required></label></p>';
-		echo '<p><label>' . esc_html__( 'Nachricht', 'diviskit' ) . '<br><textarea name="dks_message" rows="6" class="large-text" required></textarea></label></p>';
+		echo '<p><label>' . esc_html__( 'Subject', 'diviskit' ) . '<br><input type="text" name="dks_subject" class="regular-text" maxlength="200" required></label></p>';
+		echo '<p><label>' . esc_html__( 'Message', 'diviskit' ) . '<br><textarea name="dks_message" rows="6" class="large-text" required></textarea></label></p>';
 		echo '<p class="description">' . esc_html( sprintf(
-			__( 'Automatisch angehängt: %s-Version %s, WordPress %s, PHP %s, Site-URL.', 'diviskit' ),
+			/* translators: 1: plugin title, 2: plugin version, 3: WordPress version, 4: PHP version. */
+			__( 'Automatically attached: %1$s version %2$s, WordPress %3$s, PHP %4$s, site URL.', 'diviskit' ),
 			$this->config['plugin_title'],
 			$this->config['version'],
 			get_bloginfo( 'version' ),
 			PHP_VERSION
 		) ) . '</p>';
-		echo '<p><button type="submit" class="button button-primary">' . esc_html__( 'Ticket erstellen', 'diviskit' ) . '</button></p>';
+		echo '<p><button type="submit" class="button button-primary">' . esc_html__( 'Create ticket', 'diviskit' ) . '</button></p>';
 		echo '</form>';
 	}
 
 	private function render_list(): void {
 		$tickets = $this->tickets();
-		echo '<h3>' . esc_html__( 'Deine Tickets', 'diviskit' ) . ' '
-			. '<a href="' . esc_url( add_query_arg( 'dks-refresh', 1, $this->back_url() ) ) . '" class="button button-small">' . esc_html__( 'Aktualisieren', 'diviskit' ) . '</a></h3>';
+		echo '<h3>' . esc_html__( 'Your tickets', 'diviskit' ) . ' '
+			. '<a href="' . esc_url( add_query_arg( 'dks-refresh', 1, $this->back_url() ) ) . '" class="button button-small">' . esc_html__( 'Refresh', 'diviskit' ) . '</a></h3>';
 		if ( is_wp_error( $tickets ) ) {
 			echo '<p class="description">' . esc_html( $tickets->get_error_message() ) . '</p>';
 			return;
 		}
 		if ( ! $tickets ) {
-			echo '<p class="description">' . esc_html__( 'Noch keine Tickets.', 'diviskit' ) . '</p>';
+			echo '<p class="description">' . esc_html__( 'No tickets yet.', 'diviskit' ) . '</p>';
 			return;
 		}
-		echo '<table class="widefat striped"><thead><tr><th>' . esc_html__( 'Ticket', 'diviskit' ) . '</th><th>' . esc_html__( 'Betreff', 'diviskit' ) . '</th><th>' . esc_html__( 'Status', 'diviskit' ) . '</th><th>' . esc_html__( 'Aktualisiert', 'diviskit' ) . '</th></tr></thead><tbody>';
+		echo '<table class="widefat striped"><thead><tr><th>' . esc_html__( 'Ticket', 'diviskit' ) . '</th><th>' . esc_html__( 'Subject', 'diviskit' ) . '</th><th>' . esc_html__( 'Status', 'diviskit' ) . '</th><th>' . esc_html__( 'Updated', 'diviskit' ) . '</th></tr></thead><tbody>';
 		foreach ( $tickets as $t ) {
 			$url = add_query_arg( 'dks-ticket', (int) $t['id'], remove_query_arg( 'dks-refresh', $this->back_url() ) );
 			echo '<tr><td><a href="' . esc_url( $url ) . '">' . esc_html( $t['ticket_number'] ) . '</a></td>'
@@ -308,7 +325,7 @@ class Diviskit_Support_Client {
 
 	private function render_thread( int $ticket_id ): void {
 		$ticket = $this->ticket( $ticket_id );
-		echo '<p><a href="' . esc_url( remove_query_arg( 'dks-ticket', $this->back_url() ) ) . '">← ' . esc_html__( 'Zur Übersicht', 'diviskit' ) . '</a></p>';
+		echo '<p><a href="' . esc_url( remove_query_arg( 'dks-ticket', $this->back_url() ) ) . '">← ' . esc_html__( 'Back to overview', 'diviskit' ) . '</a></p>';
 		if ( is_wp_error( $ticket ) ) {
 			echo '<p class="description">' . esc_html( $ticket->get_error_message() ) . '</p>';
 			return;
@@ -317,12 +334,12 @@ class Diviskit_Support_Client {
 		foreach ( (array) ( $ticket['replies'] ?? [] ) as $reply ) {
 			$admin = 'admin' === ( $reply['author_type'] ?? '' );
 			echo '<div style="max-width:640px;margin:12px 0;padding:12px 16px;border:1px solid #dcdcde;border-radius:6px;' . ( $admin ? 'background:#f0f6fb;border-color:#c5d9ed;' : '' ) . '">';
-			echo '<p style="margin:0 0 6px;color:#646970;font-size:12px">' . esc_html( ( $admin ? 'Support' : ( $reply['author_name'] ?: 'Du' ) ) . ' · ' . ( $reply['created_at'] ?? '' ) ) . '</p>';
+			echo '<p style="margin:0 0 6px;color:#646970;font-size:12px">' . esc_html( ( $admin ? __( 'Support', 'diviskit' ) : ( $reply['author_name'] ?: __( 'You', 'diviskit' ) ) ) . ' · ' . ( $reply['created_at'] ?? '' ) ) . '</p>';
 			echo wp_kses_post( wpautop( (string) ( $reply['message'] ?? '' ) ) );
 			echo '</div>';
 		}
 		if ( 'closed' === ( $ticket['status'] ?? '' ) ) {
-			echo '<p class="description">' . esc_html__( 'Dieses Ticket ist geschlossen.', 'diviskit' ) . '</p>';
+			echo '<p class="description">' . esc_html__( 'This ticket is closed.', 'diviskit' ) . '</p>';
 			return;
 		}
 		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
@@ -330,7 +347,7 @@ class Diviskit_Support_Client {
 		echo '<input type="hidden" name="action" value="dks_reply_' . esc_attr( $this->config['slug'] ) . '">';
 		echo '<input type="hidden" name="dks_ticket" value="' . esc_attr( (string) $ticket_id ) . '">';
 		echo '<p><textarea name="dks_message" rows="5" class="large-text" required></textarea></p>';
-		echo '<p><button type="submit" class="button button-primary">' . esc_html__( 'Antwort senden', 'diviskit' ) . '</button></p>';
+		echo '<p><button type="submit" class="button button-primary">' . esc_html__( 'Send reply', 'diviskit' ) . '</button></p>';
 		echo '</form>';
 	}
 }

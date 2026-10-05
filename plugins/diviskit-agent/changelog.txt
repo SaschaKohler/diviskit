@@ -9,6 +9,19 @@ Policy:
 - Keep entries customer-facing. Avoid internal issue numbers unless they are needed to explain a user-visible change.
 - Do not include secrets, credentials, customer data, or environment-specific URLs.
 
+## 1.7.5
+
+- New "Skill bundles" dashboard card: lists every skill the `/skills` endpoint serves — name, source bundle (`diviskit-agent`, `diviskit-pro`, future add-ons), file count, and the skill's frontmatter description — making Pro skill contributions visible in the Free dashboard.
+
+## 1.7.4
+
+- Ships `bin/install-skills.sh` inside the plugin package: downloadable directly at `wp-content/plugins/diviskit-agent/bin/install-skills.sh`, linked from the dashboard's new "Install the authoring skills" block, and referenced in the generated AGENTS.md and setup prompt. The installer now supports `devin`, `codex`, `claude` (local skills dir; marketplace still preferred), `cursor` (skills tree + generated `.cursor/rules/*.mdc`), and `generic --target <dir>` for any other client.
+- `installer_script_url()` forces the siteurl scheme so the generated download URL stays correct under WP-CLI (where `is_ssl()` is false).
+
+## 1.7.3
+
+- Bundles the shared license + support client SDK (update delivery against the Diviskit store, support ticket panel on the new Support admin view) and ships German translations for the plugin and the SDK's shared `diviskit` textdomain.
+
 ## 1.7.2
 
 - Ships the GPLv2 license text as `LICENSE` in the plugin package and adds fork/copyright attribution plus a DiviOps non-affiliation note to the plugin header and `readme.txt`.

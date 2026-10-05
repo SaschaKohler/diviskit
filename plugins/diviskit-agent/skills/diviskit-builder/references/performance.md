@@ -131,7 +131,7 @@ function jzl_accessible_viewport_meta() {
 ## 5. Consent banner without the Speed Index / CLS penalty
 
 A JS-injected banner paints late and covers the mobile viewport. Pattern that
-fixes it (implemented in the reusable `sk-consent` plugin):
+fixes it (implemented in the reusable `diviskit-consent` plugin):
 
 - Render the full banner markup **server-side in `wp_footer`** — visible from
   first paint for new visitors, zero layout shift (position:fixed).

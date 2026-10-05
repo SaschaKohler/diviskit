@@ -1,0 +1,278 @@
+# Copyright (C) 2026 Diviskit
+# This file is distributed under the GPL v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Diviskit Agent 1.7.2\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/diviskit-agent\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-10-03T16:35:40+02:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: diviskit\n"
+
+#. Plugin Name of the plugin
+#: diviskit-agent.php
+msgid "Diviskit Agent"
+msgstr ""
+
+#. Description of the plugin
+#: diviskit-agent.php
+msgid "REST API bridge for Diviskit — connects AI coding agents to your Divi 5 site for page building and design management. Forked from the GPL-licensed DiviOps Agent; serves the REST contract on the canonical diviskit/v1 namespace."
+msgstr ""
+
+#. Author of the plugin
+#: diviskit-agent.php
+msgid "Diviskit"
+msgstr ""
+
+#: includes/class-diviskit-license-client.php:176
+msgid "Updates enabled."
+msgstr ""
+
+#: includes/class-diviskit-license-client.php:177
+msgid "Activate a license to enable updates."
+msgstr ""
+
+#. translators: %d: HTTP status code.
+#: includes/class-diviskit-license-client.php:231
+#, php-format
+msgid "License API request failed with HTTP %d."
+msgstr ""
+
+#: includes/class-diviskit-license-client.php:237
+msgid "The license server returned a malformed response."
+msgstr ""
+
+#: includes/class-diviskit-license-client.php:290
+msgid "Enter a license key to activate."
+msgstr ""
+
+#: includes/class-diviskit-license-client.php:307
+msgid "The license could not be activated."
+msgstr ""
+
+#: includes/class-diviskit-license-client.php:329
+msgid "License deactivated on this site."
+msgstr ""
+
+#: includes/class-diviskit-license-client.php:402
+msgid "No update information is available."
+msgstr ""
+
+#. translators: %s: plugin title.
+#: includes/class-diviskit-license-client.php:458
+#: includes/class-diviskit-license-client.php:460
+#, php-format
+msgid "%s License"
+msgstr ""
+
+#: includes/class-diviskit-license-client.php:476
+#: includes/class-diviskit-license-client.php:486
+msgid "License"
+msgstr ""
+
+#: includes/class-diviskit-license-client.php:482
+#: includes/class-diviskit-license-client.php:567
+msgid "Forbidden."
+msgstr ""
+
+#: includes/class-diviskit-license-client.php:503
+msgid "Free product — updates enabled, no license needed."
+msgstr ""
+
+#: includes/class-diviskit-license-client.php:511
+msgid "Updates work without a license — the free license key from the shop activates your support year and is required for support tickets."
+msgstr ""
+
+#: includes/class-diviskit-license-client.php:519
+#: includes/class-diviskit-support-client.php:307
+msgid "Status"
+msgstr ""
+
+#: includes/class-diviskit-license-client.php:520
+msgid "License key"
+msgstr ""
+
+#: includes/class-diviskit-license-client.php:521
+msgid "Plan"
+msgstr ""
+
+#: includes/class-diviskit-license-client.php:522
+msgid "Expires"
+msgstr ""
+
+#: includes/class-diviskit-license-client.php:522
+msgid "lifetime / —"
+msgstr ""
+
+#: includes/class-diviskit-license-client.php:524
+#: includes/class-diviskit-support-client.php:329
+msgid "Support"
+msgstr ""
+
+#: includes/class-diviskit-license-client.php:526
+msgid "starts with first activation"
+msgstr ""
+
+#: includes/class-diviskit-license-client.php:527
+msgid "expired"
+msgstr ""
+
+#: includes/class-diviskit-license-client.php:528
+msgid "disabled"
+msgstr ""
+
+#. translators: %s: support expiry date.
+#: includes/class-diviskit-license-client.php:530
+#, php-format
+msgid "until %s"
+msgstr ""
+
+#. translators: %s: support expiry date.
+#: includes/class-diviskit-license-client.php:530
+msgid "unlimited"
+msgstr ""
+
+#: includes/class-diviskit-license-client.php:535
+msgid "Last checked"
+msgstr ""
+
+#: includes/class-diviskit-license-client.php:535
+msgid "never"
+msgstr ""
+
+#: includes/class-diviskit-license-client.php:537
+msgid "Last message"
+msgstr ""
+
+#: includes/class-diviskit-license-client.php:545
+msgid "Activate License"
+msgstr ""
+
+#: includes/class-diviskit-license-client.php:551
+msgid "Refresh Status"
+msgstr ""
+
+#: includes/class-diviskit-license-client.php:556
+msgid "Deactivate License"
+msgstr ""
+
+#: includes/class-diviskit-license-client.php:560
+msgid "Purchase / manage license"
+msgstr ""
+
+#: includes/class-diviskit-license-client.php:587
+msgid "License activated."
+msgstr ""
+
+#: includes/class-diviskit-license-client.php:593
+msgid "License deactivated."
+msgstr ""
+
+#: includes/class-diviskit-license-client.php:599
+msgid "License status refreshed."
+msgstr ""
+
+#. translators: %d: HTTP status code.
+#: includes/class-diviskit-support-client.php:151
+#, php-format
+msgid "Support API request failed with HTTP %d."
+msgstr ""
+
+#: includes/class-diviskit-support-client.php:157
+msgid "The support server returned an error."
+msgstr ""
+
+#: includes/class-diviskit-support-client.php:193
+#: includes/class-diviskit-support-client.php:218
+msgid "Bad nonce."
+msgstr ""
+
+#. translators: %s: plugin title.
+#: includes/class-diviskit-support-client.php:238
+#, php-format
+msgid "Ticket for %s created — you will receive a confirmation by email."
+msgstr ""
+
+#: includes/class-diviskit-support-client.php:241
+msgid "Reply sent."
+msgstr ""
+
+#: includes/class-diviskit-support-client.php:242
+msgid "Please fill in both subject and message."
+msgstr ""
+
+#: includes/class-diviskit-support-client.php:243
+msgid "The support server could not be reached — please try again later."
+msgstr ""
+
+#: includes/class-diviskit-support-client.php:271
+msgid "New ticket"
+msgstr ""
+
+#: includes/class-diviskit-support-client.php:273
+msgid "Without an active license this is only possible for free products — an email address is then required."
+msgstr ""
+
+#: includes/class-diviskit-support-client.php:279
+msgid "Email"
+msgstr ""
+
+#: includes/class-diviskit-support-client.php:281
+#: includes/class-diviskit-support-client.php:307
+msgid "Subject"
+msgstr ""
+
+#: includes/class-diviskit-support-client.php:282
+msgid "Message"
+msgstr ""
+
+#. translators: 1: plugin title, 2: plugin version, 3: WordPress version, 4: PHP version.
+#: includes/class-diviskit-support-client.php:285
+#, php-format
+msgid "Automatically attached: %1$s version %2$s, WordPress %3$s, PHP %4$s, site URL."
+msgstr ""
+
+#: includes/class-diviskit-support-client.php:291
+msgid "Create ticket"
+msgstr ""
+
+#: includes/class-diviskit-support-client.php:297
+msgid "Your tickets"
+msgstr ""
+
+#: includes/class-diviskit-support-client.php:298
+msgid "Refresh"
+msgstr ""
+
+#: includes/class-diviskit-support-client.php:304
+msgid "No tickets yet."
+msgstr ""
+
+#: includes/class-diviskit-support-client.php:307
+msgid "Ticket"
+msgstr ""
+
+#: includes/class-diviskit-support-client.php:307
+msgid "Updated"
+msgstr ""
+
+#: includes/class-diviskit-support-client.php:320
+msgid "Back to overview"
+msgstr ""
+
+#: includes/class-diviskit-support-client.php:329
+msgid "You"
+msgstr ""
+
+#: includes/class-diviskit-support-client.php:334
+msgid "This ticket is closed."
+msgstr ""
+
+#: includes/class-diviskit-support-client.php:342
+msgid "Send reply"
+msgstr ""
