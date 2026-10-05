@@ -1,13 +1,13 @@
 <?php
 /**
- * SK MailerLite DOI — options, defaults, sanitization.
+ * Diviskit Optin — options, defaults, sanitization.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-function skml_defaults() {
+function dkopt_defaults() {
     return array(
         // Provider
         'provider'             => 'mailerlite',
@@ -44,18 +44,23 @@ function skml_defaults() {
         'form_success'         => 'Fast geschafft! Bitte bestätige deine Anmeldung über den Link in der E-Mail, die wir dir gerade gesendet haben.',
         'form_success_heading' => 'Fast geschafft!',
 
-        // Bestätigungs-Mail
+        // Bestätigungs-Mail — Texte stehen den Mail-Templates als
+        // {{subject}}, {{heading}}, {{intro}}, {{button_text}}, {{footer}}
+        // zur Verfügung; das Layout kommt aus dem aktiven Template.
         'mail_subject'         => 'Bitte bestätige deine Newsletter-Anmeldung',
         'mail_heading'         => 'Fast geschafft!',
         'mail_intro'           => 'Bitte bestätige deine Anmeldung zu unserem Newsletter mit einem Klick auf den Button.',
         'mail_button'          => 'Anmeldung bestätigen',
         'mail_footer'          => 'Du hast dich nicht angemeldet? Dann kannst du diese E-Mail einfach ignorieren — es wird nichts weiter passieren.',
 
+        // Aktives Mail-Template (ID aus dkopt_templates())
+        'active_template'      => 'default',
+
         // Rechtsseiten (erscheinen in Mail + Formular)
         'policy_url'           => '/datenschutz/',
         'imprint_url'          => '/impressum/',
 
-        // Redirects nach Klick auf den Bestätigungslink (leer = Startseite + ?skml=…)
+        // Redirects nach Klick auf den Bestätigungslink (leer = Startseite + ?optin=…)
         'redirect_confirm'     => '',
         'redirect_error'       => '',
 
@@ -64,12 +69,12 @@ function skml_defaults() {
     );
 }
 
-function skml_options() {
-    return wp_parse_args( get_option( SKML_OPTION, array() ), skml_defaults() );
+function dkopt_options() {
+    return wp_parse_args( get_option( DIVISKIT_OPTIN_OPTION, array() ), dkopt_defaults() );
 }
 
-function skml_opt( $key ) {
-    $o = skml_options();
+function dkopt_opt( $key ) {
+    $o = dkopt_options();
     return isset( $o[ $key ] ) ? $o[ $key ] : '';
 }
 
@@ -77,8 +82,8 @@ function skml_opt( $key ) {
  * reCAPTCHA is active only when the toggle is on AND both keys are set —
  * lets you keep prod keys stored while disabling the check on DDEV.
  */
-function skml_recaptcha_active() {
-    $o = skml_options();
+function dkopt_recaptcha_active() {
+    $o = dkopt_options();
     return ! empty( $o['recaptcha_enabled'] )
         && '' !== trim( (string) $o['recaptcha_site_key'] )
         && '' !== trim( (string) $o['recaptcha_secret_key'] );
@@ -89,7 +94,7 @@ function skml_recaptcha_active() {
  * Nur Einträge mit nicht-leerem Label werden im Formular gezeigt und
  * serverseitig akzeptiert.
  */
-function skml_interest_registry() {
+function dkopt_interest_registry() {
     return array(
         'sk_consent' => array( 'label_key' => 'int_sk_consent_label', 'group_key' => 'int_sk_consent_group' ),
         'vendokit'   => array( 'label_key' => 'int_vendokit_label',   'group_key' => 'int_vendokit_group' ),
@@ -100,10 +105,10 @@ function skml_interest_registry() {
 /**
  * @return array slug => array( 'label' => string, 'group' => string )
  */
-function skml_interests() {
-    $o   = skml_options();
+function dkopt_interests() {
+    $o   = dkopt_options();
     $out = array();
-    foreach ( skml_interest_registry() as $slug => $keys ) {
+    foreach ( dkopt_interest_registry() as $slug => $keys ) {
         $label = trim( (string) $o[ $keys['label_key'] ] );
         if ( '' === $label ) {
             continue;
@@ -116,34 +121,34 @@ function skml_interests() {
     return $out;
 }
 
-function skml_interests_active() {
-    $o = skml_options();
-    return ! empty( $o['interests_enabled'] ) && array() !== skml_interests();
+function dkopt_interests_active() {
+    $o = dkopt_options();
+    return ! empty( $o['interests_enabled'] ) && array() !== dkopt_interests();
 }
 
 /**
  * Filtert eine Nutzer-Eingabe auf die bekannten Interessen-Slugs.
  * @return string[]
  */
-function skml_sanitize_interests( $in ) {
+function dkopt_sanitize_interests( $in ) {
     if ( ! is_array( $in ) ) {
         return array();
     }
-    $known = array_keys( skml_interests() );
+    $known = array_keys( dkopt_interests() );
     return array_values( array_intersect( $known, array_map( 'sanitize_key', $in ) ) );
 }
 
 /**
  * Whitelist sanitize for the single options array.
  */
-function skml_sanitize_options( $in ) {
-    $out = skml_options();
+function dkopt_sanitize_options( $in ) {
+    $out = dkopt_options();
     if ( ! is_array( $in ) ) {
         return $out;
     }
 
     $provider = isset( $in['provider'] ) ? sanitize_key( $in['provider'] ) : '';
-    if ( isset( skml_providers()[ $provider ] ) ) {
+    if ( isset( dkopt_providers()[ $provider ] ) ) {
         $out['provider'] = $provider;
     }
 
@@ -162,6 +167,10 @@ function skml_sanitize_options( $in ) {
         if ( isset( $in[ $key ] ) ) {
             $out[ $key ] = sanitize_text_field( $in[ $key ] );
         }
+    }
+
+    if ( isset( $in['active_template'] ) && null !== dkopt_template( sanitize_key( $in['active_template'] ) ) ) {
+        $out['active_template'] = sanitize_key( $in['active_template'] );
     }
 
     if ( isset( $in['consent_text'] ) ) {

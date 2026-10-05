@@ -1,0 +1,191 @@
+/* Keep this presentation asset identical in Free and Pro; each plugin enqueues its own copy. */
+.diviskit-admin {
+	--diviskit-background: #fff;
+	--diviskit-foreground: #18181b;
+	--diviskit-primary: #3854f4;
+	--diviskit-primary-foreground: #fff;
+	--diviskit-muted: #f4f4f5;
+	--diviskit-muted-foreground: #61616b;
+	--diviskit-border: #e4e4e7;
+	--diviskit-ring: #3854f4;
+	--diviskit-radius: 6px;
+	clear: both;
+	max-width: 1180px;
+	margin: 20px 0;
+	background: var(--diviskit-background);
+	color: var(--diviskit-foreground);
+	font-size: 13px;
+	line-height: 1.55;
+}
+.diviskit-admin *,
+.diviskit-admin *::before,
+.diviskit-admin *::after { box-sizing: border-box; letter-spacing: 0; }
+.diviskit-admin h2 { margin: 0 0 12px; font-size: 17px; line-height: 1.4; font-weight: 600; }
+.diviskit-admin h3 { margin: 0; font-size: 14px; font-weight: 600; }
+.diviskit-admin p { margin: 0 0 12px; font-size: inherit; }
+.diviskit-admin a { color: var(--diviskit-primary); text-underline-offset: 3px; }
+.diviskit-admin code { padding: 0; background: transparent; font-size: 12px; }
+.diviskit-admin small,
+.diviskit-admin .diviskit-muted { color: var(--diviskit-muted-foreground); }
+.diviskit-admin small { font-size: 12px; }
+.diviskit-admin :focus-visible { outline: 2px solid var(--diviskit-ring); outline-offset: 3px; }
+.diviskit-admin .button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 7px;
+	min-height: 36px;
+	max-width: 100%;
+	padding: 6px 13px;
+	border: 1px solid var(--diviskit-border);
+	border-radius: var(--diviskit-radius);
+	background: var(--diviskit-background);
+	color: var(--diviskit-foreground);
+	box-shadow: 0 1px 2px #18181b08;
+	font-size: 13px;
+	line-height: 1.5;
+	text-decoration: none;
+	white-space: normal;
+	cursor: pointer;
+}
+.diviskit-admin .button:hover { background: var(--diviskit-muted); border-color: #a1a1aa; }
+.diviskit-admin .button-primary { background: var(--diviskit-primary); border-color: var(--diviskit-primary); color: var(--diviskit-primary-foreground); }
+.diviskit-admin .button-primary:hover { background: #2943d5; border-color: #2943d5; color: var(--diviskit-primary-foreground); }
+.diviskit-admin .button.delete { color: #9b252a; }
+.diviskit-admin .dashicons { flex-shrink: 0; }
+/* Override core button line-height so flex centers the glyph inside its 20px box. */
+.wp-core-ui .diviskit-admin .button .dashicons { line-height: 1; }
+.diviskit-admin .diviskit-header { padding: 18px 28px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; border-bottom: 1px solid var(--diviskit-border); }
+.diviskit-admin .diviskit-brand { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.diviskit-admin .diviskit-brand img { display: block; width: 166px; max-width: 100%; height: auto; }
+.diviskit-admin .diviskit-edition { padding: 4px 7px; border: 1px solid var(--diviskit-border); border-radius: 4px; background: var(--diviskit-muted); color: var(--diviskit-muted-foreground); font-size: 11px; font-weight: 600; text-transform: uppercase; }
+.diviskit-admin .diviskit-header p { margin: 3px 0 0; font-size: 12px; color: var(--diviskit-muted-foreground); }
+.diviskit-admin .diviskit-nav { display: flex; flex-wrap: wrap; gap: 4px; width: fit-content; max-width: calc(100% - 56px); margin: 18px 28px 0; padding: 4px; background: var(--diviskit-muted); border-radius: var(--diviskit-radius); }
+.diviskit-admin .diviskit-nav a { padding: 6px 13px; min-height: 34px; border-radius: 4px; color: var(--diviskit-muted-foreground); text-decoration: none; font-weight: 500; }
+.diviskit-admin .diviskit-nav a[aria-current="page"] { background: var(--diviskit-background); color: var(--diviskit-primary); box-shadow: 0 1px 3px #18181b1a; }
+.diviskit-admin .diviskit-nav a:hover { color: var(--diviskit-foreground); }
+.diviskit-admin .diviskit-content { padding: 22px 28px 0; }
+.diviskit-admin .diviskit-intro { margin-bottom: 20px; }
+.diviskit-admin .diviskit-intro h2 { margin-bottom: 5px; font-size: 22px; }
+.diviskit-admin .diviskit-intro p { max-width: 740px; color: var(--diviskit-muted-foreground); }
+.diviskit-admin .diviskit-callout { padding: 12px 14px; margin-bottom: 20px; border: 1px solid #e9d7a7; border-radius: var(--diviskit-radius); background: #fffbeb; color: #78540b; }
+.diviskit-admin .diviskit-callout--error { border-color: #efc6ca; background: #fff5f5; color: #902329; }
+.diviskit-admin .diviskit-callout p { margin: 3px 0 0; }
+.diviskit-admin .diviskit-facts { margin: 0; }
+.diviskit-admin .diviskit-facts > div { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--diviskit-border); }
+.diviskit-admin dt { color: var(--diviskit-muted-foreground); }
+.diviskit-admin dd { margin: 0; }
+.diviskit-admin .diviskit-installation-facts { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 32px; margin-bottom: 20px; }
+.diviskit-admin .diviskit-installation-facts > div { grid-template-columns: 115px minmax(0, 1fr); }
+.diviskit-admin .diviskit-status { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; }
+.diviskit-admin .diviskit-status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+.diviskit-admin .diviskit-status--success { color: #166534; }
+.diviskit-admin .diviskit-status--neutral { color: var(--diviskit-muted-foreground); }
+.diviskit-admin .diviskit-status--warning { color: #795600; }
+.diviskit-admin .diviskit-status--error { color: #9b252a; }
+.diviskit-admin .diviskit-status--info { color: #174ea6; }
+.diviskit-admin .diviskit-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+.diviskit-admin .diviskit-section-heading h2 { margin: 0; }
+.diviskit-admin .diviskit-snapshots { padding: 20px 0; border-top: 1px solid var(--diviskit-border); }
+.diviskit-admin .diviskit-snapshots > summary { display: block; list-style: none; cursor: pointer; }
+.diviskit-admin .diviskit-snapshots > summary::-webkit-details-marker { display: none; }
+.diviskit-admin .diviskit-snapshots > summary h2 { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 0; }
+.diviskit-admin .diviskit-snapshots > summary h2 > span { display: inline-flex; align-items: center; gap: 8px; }
+.diviskit-admin .diviskit-snapshots[open] > summary { margin-bottom: 12px; }
+.diviskit-admin .diviskit-snapshots[open] > summary .dashicons { transform: rotate(90deg); }
+.diviskit-admin .diviskit-snapshot-columns { display: grid; grid-template-columns: minmax(0, 1fr) 160px 155px; gap: 16px; padding: 9px 12px; border-bottom: 1px solid var(--diviskit-border); background: var(--diviskit-muted); font-size: 11px; text-transform: uppercase; color: var(--diviskit-muted-foreground); }
+.diviskit-admin .diviskit-snapshot { border-bottom: 1px solid var(--diviskit-border); }
+.diviskit-admin .diviskit-snapshot summary { display: grid; grid-template-columns: minmax(0, 1fr) 160px 155px; align-items: center; gap: 16px; min-height: 64px; padding: 12px; list-style: none; cursor: pointer; }
+.diviskit-admin .diviskit-snapshot summary::-webkit-details-marker { display: none; }
+.diviskit-admin .diviskit-snapshot summary:hover { background: #fafafa; }
+.diviskit-admin .diviskit-snapshot[open] summary { background: var(--diviskit-muted); }
+.diviskit-admin .diviskit-snapshot-title { display: flex; align-items: flex-start; gap: 8px; }
+.diviskit-admin .diviskit-snapshot-title .dashicons { font-size: 16px; }
+.diviskit-admin .diviskit-snapshot[open] .diviskit-snapshot-title .dashicons { transform: rotate(90deg); }
+.diviskit-admin .diviskit-snapshot-title strong { display: block; font-size: 13px; }
+.diviskit-admin .diviskit-snapshot-title code { display: block; font-size: 11px; color: var(--diviskit-muted-foreground); }
+.diviskit-admin .diviskit-snapshot-time { font-size: 12px; color: var(--diviskit-muted-foreground); }
+.diviskit-admin .diviskit-snapshot-meta { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 28px; margin: 0; padding: 4px 18px 18px 34px; background: #fafafa; }
+.diviskit-admin .diviskit-snapshot-meta > div { padding: 10px 0; border-bottom: 1px solid var(--diviskit-border); }
+.diviskit-admin .diviskit-snapshot-meta dt { font-size: 11px; margin-bottom: 3px; }
+.diviskit-admin .diviskit-snapshot-meta dd { font-size: 12px; }
+.diviskit-admin .diviskit-empty { padding: 28px 0; margin: 0; border-block: 1px solid var(--diviskit-border); color: var(--diviskit-muted-foreground); }
+.diviskit-admin .diviskit-overview-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 34px; padding-bottom: 22px; }
+.diviskit-admin .diviskit-rate-values { display: flex; flex-wrap: wrap; gap: 25px; margin: 12px 0; }
+.diviskit-admin .diviskit-rate-values strong { font-size: 18px; font-weight: 600; }
+.diviskit-admin .diviskit-rate-values small { display: block; }
+.diviskit-admin .diviskit-support-title { margin-top: 22px; }
+.diviskit-admin .diviskit-support-list { display: flex; flex-wrap: wrap; gap: 6px 17px; margin: 12px 0; padding: 0; list-style: none; font-size: 12px; }
+.diviskit-admin .diviskit-support-list li { display: flex; gap: 3px; align-items: center; margin: 0; }
+.diviskit-admin .diviskit-addon { padding: 12px 0 16px; border-bottom: 1px solid var(--diviskit-border); }
+.diviskit-admin .diviskit-addon p { margin: 6px 0; color: var(--diviskit-muted-foreground); }
+.diviskit-admin .diviskit-updates { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 20px; padding: 22px 0 14px; border-top: 1px solid var(--diviskit-border); }
+.diviskit-admin .diviskit-updates p { font-size: 12px; color: var(--diviskit-muted-foreground); }
+.diviskit-admin .diviskit-license-layout { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 36px; padding-bottom: 28px; }
+.diviskit-admin .diviskit-license-controls { border-left: 1px solid var(--diviskit-border); padding-left: 28px; }
+.diviskit-admin .diviskit-activation label { display: block; margin: 20px 0 7px; font-weight: 600; }
+.diviskit-admin .diviskit-activation input[type="password"] { display: block; width: 100%; min-width: 0; min-height: 40px; border: 1px solid #a1a1aa; border-radius: var(--diviskit-radius); padding: 8px 10px; background: var(--diviskit-background); color: var(--diviskit-foreground); }
+.diviskit-admin .diviskit-activation .submit { margin: 16px 0; padding: 0; }
+.diviskit-admin .diviskit-license-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; }
+.diviskit-admin .diviskit-license-actions form { max-width: 100%; }
+.diviskit-admin .diviskit-replace-license { padding: 16px 0; margin-bottom: 16px; border-block: 1px solid var(--diviskit-border); }
+.diviskit-admin .diviskit-replace-license summary { cursor: pointer; font-weight: 500; padding: 4px 0; }
+.diviskit-admin .diviskit-footer { border-top: 1px solid var(--diviskit-border); padding: 16px 28px; color: var(--diviskit-muted-foreground); font-size: 11px; }
+
+/* ── Connect card / hero ─────────────────────────────────────── */
+.diviskit-admin .diviskit-card { padding: 18px 0; margin-bottom: 8px; border-top: 1px solid var(--diviskit-border); }
+.diviskit-admin .diviskit-card--hero { padding: 22px 20px; margin-bottom: 20px; border: 1px solid var(--diviskit-border); border-radius: var(--diviskit-radius); background: linear-gradient(160deg, #f6f7ff 0%, var(--diviskit-background) 55%); }
+.diviskit-admin .diviskit-card--hero .diviskit-section-heading h2 { font-size: 18px; }
+.diviskit-admin .diviskit-selftest { margin: 10px 0; padding: 10px 12px; border: 1px solid var(--diviskit-border); border-radius: var(--diviskit-radius); font-size: 12px; }
+.diviskit-admin .diviskit-selftest[hidden] { display: none; }
+.diviskit-admin .diviskit-selftest--pending { background: var(--diviskit-muted); color: var(--diviskit-muted-foreground); }
+.diviskit-admin .diviskit-selftest--ok { background: #f0fdf4; border-color: #bbf7d0; color: #166534; }
+.diviskit-admin .diviskit-selftest--error { background: #fff5f5; border-color: #efc6ca; color: #902329; }
+.diviskit-admin .diviskit-namespaces { display: grid; gap: 8px; margin: 14px 0; }
+.diviskit-admin .diviskit-namespace { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 10px 12px; border: 1px solid var(--diviskit-border); border-radius: var(--diviskit-radius); background: var(--diviskit-background); }
+.diviskit-admin .diviskit-namespace--inactive { opacity: .65; }
+.diviskit-admin .diviskit-namespace code { display: block; font-size: 12px; word-break: break-all; }
+.diviskit-admin .diviskit-namespace .diviskit-muted { font-size: 11px; }
+.diviskit-admin .diviskit-mcp-config { margin-top: 6px; }
+.diviskit-admin .diviskit-mcp-config > summary { cursor: pointer; font-weight: 600; padding: 6px 0; }
+.diviskit-admin .diviskit-config-block { position: relative; margin: 10px 0; }
+.diviskit-admin .diviskit-config-block pre { margin: 0; padding: 14px; max-height: 320px; overflow: auto; border: 1px solid var(--diviskit-border); border-radius: var(--diviskit-radius); background: #0b111d; color: #d6e2ff; font-size: 12px; line-height: 1.6; }
+.diviskit-admin .diviskit-config-block .button { position: absolute; top: 8px; right: 8px; }
+.diviskit-admin .diviskit-copied { border-color: #166534 !important; color: #166534 !important; }
+.diviskit-admin .diviskit-module-list { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 10px 0; padding: 0; list-style: none; }
+.diviskit-admin .diviskit-module-list li { display: flex; align-items: center; gap: 7px; margin: 0; }
+.diviskit-admin .diviskit-cap-groups { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; margin: 12px 0 4px; padding: 0; list-style: none; }
+.diviskit-admin .diviskit-cap-groups li { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0; padding: 7px 10px; border: 1px solid var(--diviskit-border); border-radius: var(--diviskit-radius); font-size: 12px; }
+.diviskit-admin .diviskit-cap-groups li span { color: var(--diviskit-muted-foreground); font-variant-numeric: tabular-nums; }
+.diviskit-admin :where(div, section, span, dd, dt, p, code, a, strong, small, summary, input) { min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 1100px) {
+	.diviskit-admin .diviskit-installation-facts,
+	.diviskit-admin .diviskit-overview-grid,
+	.diviskit-admin .diviskit-license-layout { grid-template-columns: minmax(0, 1fr); }
+	.diviskit-admin .diviskit-license-controls { border-left: 0; border-top: 1px solid var(--diviskit-border); padding: 24px 0 0; }
+	.diviskit-admin .diviskit-snapshot-columns,
+	.diviskit-admin .diviskit-snapshot summary { grid-template-columns: minmax(0, 1fr) 120px 120px; }
+}
+@media (max-width: 782px) {
+	.diviskit-admin { margin-top: 16px; }
+	.diviskit-admin .diviskit-header { padding: 18px; gap: 12px; }
+	.diviskit-admin .diviskit-brand img { width: 140px; }
+	.diviskit-admin .diviskit-nav { margin: 16px 18px 0; max-width: calc(100% - 36px); }
+	.diviskit-admin .diviskit-content { padding: 22px 18px 0; }
+	.diviskit-admin .diviskit-snapshot-columns { display: none; }
+	.diviskit-admin .diviskit-snapshot summary { grid-template-columns: minmax(0, 1fr) minmax(0, 105px); gap: 8px 10px; padding: 14px 4px; min-height: 76px; }
+	.diviskit-admin .diviskit-snapshot-time { grid-column: 1 / -1; grid-row: 2; padding-left: 28px; }
+	.diviskit-admin .diviskit-snapshot summary > .diviskit-status { align-self: start; margin-top: 3px; }
+	.diviskit-admin .diviskit-snapshot-meta { grid-template-columns: minmax(0, 1fr); padding: 0 12px 16px 22px; }
+	.diviskit-admin .diviskit-facts > div { grid-template-columns: 105px minmax(0, 1fr); }
+	.diviskit-admin .diviskit-updates { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+	.diviskit-admin .diviskit-footer { padding: 16px 18px; }
+}
+.diviskit-admin .diviskit-toggle-list { display: grid; gap: 10px; margin: 12px 0; }
+.diviskit-admin .diviskit-toggle { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 1px solid var(--diviskit-border); border-radius: var(--diviskit-radius); cursor: pointer; }
+.diviskit-admin .diviskit-toggle:hover { background: var(--diviskit-muted); }
+.diviskit-admin .diviskit-toggle input { margin-top: 2px; }
+.diviskit-admin .diviskit-toggle span { display: grid; gap: 2px; }
+.diviskit-admin .diviskit-toggle small { color: var(--diviskit-muted-foreground); }
+.diviskit-admin .diviskit-policy-grid { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 18px 24px; margin-top: 10px; }
+@media (max-width: 782px) { .diviskit-admin .diviskit-policy-grid { grid-template-columns: minmax(0,1fr); } }

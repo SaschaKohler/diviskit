@@ -1,18 +1,18 @@
 /**
- * SK MailerLite DOI — form styles (Vision design system).
+ * Diviskit Optin — form styles (Vision design system).
  * Colors prefer Divi global-color CSS vars (var(--gcid-*)) with fallbacks.
  */
 
-.skml-form {
+.dkopt-form {
   background: var(--gcid-vsn-surface, #2b2f31);
   border: 1px solid var(--gcid-vsn-line, rgba(255, 255, 255, 0.12));
   padding: 28px;
   max-width: 560px;
   box-sizing: border-box;
 }
-.skml-form *, .skml-form *::before, .skml-form *::after { box-sizing: border-box; }
+.dkopt-form *, .dkopt-form *::before, .dkopt-form *::after { box-sizing: border-box; }
 
-.skml-heading {
+.dkopt-heading {
   margin: 0 0 12px;
   font-family: 'Anton', Impact, sans-serif;
   font-size: 30px;
@@ -23,7 +23,7 @@
   color: var(--gcid-vsn-white, #ffffff);
 }
 
-.skml-sub {
+.dkopt-sub {
   margin: 0 0 24px;
   font-family: 'Geist', 'Helvetica Neue', Arial, sans-serif;
   font-size: 15px;
@@ -32,7 +32,7 @@
 }
 
 /* --- input ---------------------------------------------------------- */
-.skml-input {
+.dkopt-input {
   display: block;
   width: 100%;
   margin: 0 0 16px;
@@ -46,24 +46,24 @@
   color: var(--gcid-vsn-white, #ffffff);
   transition: border-color 0.15s ease;
 }
-.skml-input::placeholder { color: var(--gcid-vsn-muted-soft, rgba(255, 255, 255, 0.45)); }
-.skml-input:focus { border-color: var(--gcid-vsn-accent, #ffd400); outline: none; }
+.dkopt-input::placeholder { color: var(--gcid-vsn-muted-soft, rgba(255, 255, 255, 0.45)); }
+.dkopt-input:focus { border-color: var(--gcid-vsn-accent, #ffd400); outline: none; }
 
 /* --- consent checkbox ------------------------------------------------ */
-.skml-consent {
+.dkopt-consent {
   display: block;
   position: relative;
   margin: 0 0 20px;
   padding-left: 28px;
   cursor: pointer;
 }
-.skml-consent input {
+.dkopt-consent input {
   position: absolute;
   width: 1px;
   height: 1px;
   opacity: 0;
 }
-.skml-box {
+.dkopt-box {
   position: absolute;
   left: 0;
   top: 1px;
@@ -72,28 +72,28 @@
   background: var(--gcid-vsn-darker, #17191a);
   border: 1px solid var(--gcid-vsn-line-strong, rgba(255, 255, 255, 0.28));
 }
-.skml-consent input:focus-visible + .skml-box {
+.dkopt-consent input:focus-visible + .dkopt-box {
   border-color: var(--gcid-vsn-accent, #ffd400);
 }
-.skml-consent input:checked + .skml-box {
+.dkopt-consent input:checked + .dkopt-box {
   background: var(--gcid-vsn-accent, #ffd400) url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2317191a' d='M6.564.75l-3.59 3.612-1.538-1.55L0 4.26 2.974 7.25 8 2.193z'/%3e%3c/svg%3e") no-repeat center/10px;
   border-color: var(--gcid-vsn-accent, #ffd400);
 }
-.skml-consent-text {
+.dkopt-consent-text {
   font-family: 'Geist', 'Helvetica Neue', Arial, sans-serif;
   font-size: 13px;
   line-height: 18px;
   color: var(--gcid-vsn-muted, rgba(255, 255, 255, 0.62));
 }
-.skml-consent-text a { color: var(--gcid-vsn-accent, #ffd400); text-decoration: underline; }
+.dkopt-consent-text a { color: var(--gcid-vsn-accent, #ffd400); text-decoration: underline; }
 
 /* --- optional interest checkboxes -------------------------------------- */
-.skml-interests {
+.dkopt-interests {
   margin: 0 0 18px;
   padding: 0;
   border: none;
 }
-.skml-int-legend {
+.dkopt-int-legend {
   margin: 0 0 8px;
   padding: 0;
   font-family: 'Geist Mono', 'SFMono-Regular', monospace;
@@ -103,19 +103,19 @@
   letter-spacing: 0.12em;
   color: var(--gcid-vsn-muted-soft, rgba(255, 255, 255, 0.45));
 }
-.skml-interest {
+.dkopt-interest {
   display: block;
   position: relative;
   margin: 0 0 6px;
   padding-left: 28px;
   cursor: pointer;
 }
-.skml-interest .skml-consent-text {
+.dkopt-interest .dkopt-consent-text {
   color: var(--gcid-vsn-text-soft, rgba(255, 255, 255, 0.85));
 }
 
 /* --- honeypot --------------------------------------------------------- */
-.skml-hp {
+.dkopt-hp {
   position: absolute;
   left: -9999px;
   top: -9999px;
@@ -124,17 +124,17 @@
 }
 
 /* --- recaptcha v3 note -------------------------------------------------- */
-.skml-captcha-note {
+.dkopt-captcha-note {
   margin: -8px 0 20px;
   font-family: 'Geist', 'Helvetica Neue', Arial, sans-serif;
   font-size: 11px;
   line-height: 1.5;
   color: var(--gcid-vsn-muted-soft, rgba(255, 255, 255, 0.45));
 }
-.skml-captcha-note a { color: inherit; text-decoration: underline; }
+.dkopt-captcha-note a { color: inherit; text-decoration: underline; }
 
 /* --- submit ------------------------------------------------------------ */
-.skml-btn {
+.dkopt-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -156,35 +156,35 @@
   cursor: pointer;
   transition: background-color 0.15s ease;
 }
-.skml-btn:hover { background: var(--gcid-vsn-accent-deep, #e6be00); }
-.skml-btn:disabled { cursor: default; opacity: 0.85; }
+.dkopt-btn:hover { background: var(--gcid-vsn-accent-deep, #e6be00); }
+.dkopt-btn:disabled { cursor: default; opacity: 0.85; }
 
-.skml-spinner {
+.dkopt-spinner {
   display: none;
   width: 11px;
   height: 11px;
   border: 3px solid #17191a;
   border-color: #17191a #17191a #17191a transparent;
   border-radius: 50%;
-  animation: skml-spin 1.2s linear infinite;
+  animation: dkopt-spin 1.2s linear infinite;
 }
-.skml-btn.is-loading .skml-spinner { display: inline-block; }
-@keyframes skml-spin {
+.dkopt-btn.is-loading .dkopt-spinner { display: inline-block; }
+@keyframes dkopt-spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
 
 /* --- messages ---------------------------------------------------------- */
-.skml-msg {
+.dkopt-msg {
   margin: 14px 0 0;
   font-family: 'Geist', 'Helvetica Neue', Arial, sans-serif;
   font-size: 13px;
   line-height: 1.5;
   color: var(--gcid-vsn-muted, rgba(255, 255, 255, 0.62));
 }
-.skml-msg:empty { display: none; }
-.skml-msg.is-error { color: var(--gcid-vsn-danger, #ff6b6b); }
-.skml-input.is-error { border-color: var(--gcid-vsn-danger, #ff6b6b); }
+.dkopt-msg:empty { display: none; }
+.dkopt-msg.is-error { color: var(--gcid-vsn-danger, #ff6b6b); }
+.dkopt-input.is-error { border-color: var(--gcid-vsn-danger, #ff6b6b); }
 
 /* --- done state --------------------------------------------------------- */
-.skml-done .skml-sub { margin-bottom: 0; }
+.dkopt-done .dkopt-sub { margin-bottom: 0; }

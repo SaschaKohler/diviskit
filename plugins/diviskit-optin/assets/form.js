@@ -1,5 +1,5 @@
 /**
- * SK MailerLite DOI — form submit via REST (no jQuery).
+ * Diviskit Optin — form submit via REST (no jQuery).
  * reCAPTCHA v3: invisible, a fresh token is requested per submit
  * (grecaptcha.execute, action "subscribe") and verified server-side
  * incl. score + action.
@@ -8,26 +8,26 @@
   'use strict';
 
   function captchaToken() {
-    if (!(window.SKML && SKML.captcha && SKML.site && window.grecaptcha)) {
+    if (!(window.DKOPT && DKOPT.captcha && DKOPT.site && window.grecaptcha)) {
       return Promise.resolve('');
     }
     return new Promise(function (resolve) {
       grecaptcha.ready(function () {
-        grecaptcha.execute(SKML.site, { action: 'subscribe' })
+        grecaptcha.execute(DKOPT.site, { action: 'subscribe' })
           .then(resolve)
           .catch(function () { resolve(''); });
       });
     });
   }
 
-  document.querySelectorAll('[data-skml-form]').forEach(function (root) {
+  document.querySelectorAll('[data-dkopt-form]').forEach(function (root) {
     var form = root.querySelector('form');
     if (!form) return;
 
-    var body    = root.querySelector('.skml-body');
-    var done    = root.querySelector('.skml-done');
-    var btn     = form.querySelector('.skml-btn');
-    var msg     = form.querySelector('.skml-msg');
+    var body    = root.querySelector('.dkopt-body');
+    var done    = root.querySelector('.dkopt-done');
+    var btn     = form.querySelector('.dkopt-btn');
+    var msg     = form.querySelector('.dkopt-msg');
     var emailEl = form.querySelector('input[name="email"]');
 
     function fail(text) {
@@ -57,7 +57,7 @@
       btn.classList.add('is-loading');
 
       captchaToken().then(function (token) {
-        return fetch(SKML.rest, {
+        return fetch(DKOPT.rest, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -78,11 +78,11 @@
             body.hidden = true;
             done.hidden = false;
           } else {
-            fail((r.data && r.data.message) ? r.data.message : SKML.error);
+            fail((r.data && r.data.message) ? r.data.message : DKOPT.error);
           }
         })
         .catch(function () {
-          fail(SKML.error);
+          fail(DKOPT.error);
         });
     });
   });

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 166 42" role="img" aria-labelledby="diviskit-wordmark-title">
+  <title id="diviskit-wordmark-title">Diviskit</title>
+  <g transform="translate(2 5) scale(1.35)">
+    <path fill="#0b111d" d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4z"/>
+    <rect x="13" y="13" width="7" height="7" rx="3.5" fill="#3854f4"/>
+  </g>
+  <text x="44" y="29" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="24" font-weight="700" fill="#0b111d" letter-spacing="-0.5">Diviskit</text>
+</svg>
