@@ -1,0 +1,1 @@
+../plugins/diviskit-agent/bin/install-skills.sh

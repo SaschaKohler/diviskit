@@ -7,7 +7,7 @@
 
 Diviskit gives Claude Code, Codex, Devin, Claude Desktop, and other MCP clients a typed control layer over WordPress site state. It pairs an MCP server, the Diviskit Agent WordPress plugin, and skill knowledge so AI agents can author Divi pages, inspect schemas, manage design tokens, work with SCF/CPT data models, run safe WP-CLI operations, and drive the Vendokit commerce stack.
 
-Diviskit Agent is a GPL-licensed fork of the DiviOps Agent. It serves the identical REST contract on the canonical `diviskit/v1` namespace plus a `diviops/v1` compatibility alias. Divi is a registered trademark of Elegant Themes, Inc. Diviskit is not affiliated with or endorsed by Elegant Themes.
+All routes are served on the `diviskit/v1` REST namespace. Divi is a registered trademark of Elegant Themes, Inc. Diviskit is not affiliated with or endorsed by Elegant Themes.
 
 ```
 Claude Code / Devin ◄──► MCP Server (stdio) ◄──► WordPress REST API ◄──► Diviskit Agent plugin
@@ -28,7 +28,7 @@ Claude Code / Devin ◄──► MCP Server (stdio) ◄──► WordPress REST 
 | **`@diviskit/mcp-server`** | Node.js MCP server bridging MCP clients to WordPress. Distributed via npm — no clone, no build. Source included for reference. | `npx -y --package @diviskit/mcp-server diviskit-mcp` (source: `diviskit-server/`) |
 | **Skill bundle `diviskit-agent`** | `diviskit` harness primer, `diviskit-builder` (block formats + design rules + per-module maps), `diviskit-scf` (SCF/ACF automation). | `claude/diviskit-agent/skills/` |
 | **Diviskit Pro** *(separate distribution)* | `diviskit-pro` plugin (Vendokit `diviskit_vk_*` handlers) + `diviskit-vendokit` and `diviskit-mega-menu` skills. | <https://diviskit.com> |
-| **Skill installer** | Copies skill bundles for Codex/Devin users without a plugin marketplace. | `bin/install-skills.sh` |
+| **Skill installer** | Copies skill bundles for Codex/Devin users without a plugin marketplace. | `bin/install-skills.sh` (also shipped inside the plugin) |
 | **Project templates** | `AGENTS.md` Grundtemplate + Devin `mcp_config.local.json` example. | `templates/` |
 
 The WordPress plugin, npm MCP server, and client-side skills are three independent
@@ -53,7 +53,7 @@ troubleshooting, see [SETUP.md](SETUP.md).
 
 ### 1. Install the WordPress plugins
 
-Upload **`diviskit-agent.zip`** via **WP Admin → Plugins → Add New → Upload Plugin**, then activate it. Requires Divi 5.1+ on WordPress 6.5+.
+Download **`diviskit-agent.zip`** from the [latest release](https://github.com/SaschaKohler/diviskit/releases/latest), upload it via **WP Admin → Plugins → Add New → Upload Plugin**, then activate it. Requires Divi 5.1+ on WordPress 6.5+ and PHP 8.0+.
 
 Verify: visit `http://your-site.local/wp-json/diviskit/v1/schema/settings` — you should get a 401 (auth required).
 
@@ -147,20 +147,24 @@ Verify with `What skills do you have?` — you should see `diviskit`, `diviskit-
 (Pro buyers install `diviskit-pro@diviskit` from the Pro distribution —
 `diviskit-vendokit` + `diviskit-mega-menu` skills.)
 
-For Codex, Devin, and other clients without a plugin marketplace, use the
-bundled installer:
+For Devin, Codex, Cursor, and other clients without a plugin marketplace, use the
+installer. It ships inside the plugin (`wp-content/plugins/diviskit-agent/bin/`)
+and in this repo under `bin/`:
 
 ```bash
 ./bin/install-skills.sh --client devin --scope user
 ./bin/install-skills.sh --client devin --scope project   # per-site install
 ./bin/install-skills.sh --client codex --scope user
+./bin/install-skills.sh --client cursor --scope project
 ```
 
-…it copies `claude/diviskit-agent/skills/*` into the client's skills directory
-(`~/.config/devin/skills/`, `~/.codex/skills/`, or project `.devin/skills/` /
-`.codex/skills/` with `--scope project`). Manual copies do not update with
-WordPress or npm — re-run the installer after each update and restart the
-client.
+It syncs the skills from your site's `/wp-json/diviskit/v1/skills` endpoint
+(sha256 manifest), so the copy is always version-locked to the installed
+plugin. Credentials come from the `diviskit-mcp` entry in your MCP config or
+the `WP_URL` / `WP_USER` / `WP_APP_PASSWORD` environment variables. Targets:
+`~/.config/devin/skills/`, `~/.codex/skills/`, `~/.claude/skills/`,
+`~/.cursor/skills/`, or the project-level equivalents with `--scope project`.
+Re-run the installer after each plugin update and restart the client.
 
 Also copy [templates/AGENTS.md](templates/AGENTS.md) into your WordPress
 project root — Devin (and Claude Code) read it automatically and it carries
@@ -245,7 +249,7 @@ diviskit.com store and will ship separately once released.
 ## Requirements
 
 - Node.js 22+
-- PHP 7.4+
+- PHP 8.0+
 - WordPress 6.5+
 - Divi 5.1.0+ theme active
 - Diviskit Agent WordPress plugin installed and active
@@ -273,3 +277,7 @@ Full troubleshooting matrix and environment-specific setup (DDEV, wp-env, WordPr
 
 Mixed per component — see [LICENSE](LICENSE). WordPress plugins are GPL-2.0+;
 the MCP server and skills are MIT.
+
+Diviskit Agent is an independently maintained fork of the GPL-licensed DiviOps
+Agent (forked at 1.5.25). Original copyright notices are preserved in the
+plugin headers and LICENSE files; Diviskit is not affiliated with DiviOps.
