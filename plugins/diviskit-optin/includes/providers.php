@@ -37,6 +37,14 @@ function dkopt_providers() {
             ),
             'hint'   => 'API-Key: Brevo → SMTP & API → API Keys (v3). List ID findest du in der Listen-Übersicht (Zahl). Kontakte werden mit updateEnabled upserted.',
         ),
+        'webhook'    => array(
+            'label'  => 'Webhook (generisch)',
+            'fields' => array(
+                'webhook_url'    => 'Webhook-URL',
+                'webhook_secret' => 'Secret (optional)',
+            ),
+            'hint'   => 'POST mit JSON-Body { event, email, interests, confirmed_at, site } an die URL — Bridge zu Zapier, Make, n8n, Mailchimp oder eigenen Integrationen. Mit Secret wird ein X-Dkopt-Signature-Header (HMAC-SHA256 über den Body) mitgeschickt. HTTP 2xx gilt als Erfolg.',
+        ),
         'none'       => array(
             'label'  => 'Nur lokal speichern',
             'fields' => array(),
@@ -59,6 +67,8 @@ function dkopt_push_subscriber( $email, $interests = array() ) {
     switch ( dkopt_opt( 'provider' ) ) {
         case 'brevo':
             return dkopt_brevo_add_subscriber( $email );
+        case 'webhook':
+            return dkopt_webhook_add_subscriber( $email, $interests );
         case 'none':
             return true;
         case 'mailerlite':
@@ -75,6 +85,8 @@ function dkopt_provider_ping() {
     switch ( dkopt_opt( 'provider' ) ) {
         case 'brevo':
             return dkopt_brevo_ping();
+        case 'webhook':
+            return dkopt_webhook_ping();
         case 'none':
             return new WP_Error( 'dkopt_no_provider', 'Kein Provider konfiguriert — Sync deaktiviert.' );
         case 'mailerlite':
@@ -240,4 +252,84 @@ function dkopt_brevo_ping() {
     return ( $code >= 200 && $code < 300 )
         ? true
         : new WP_Error( 'dkopt_brevo_' . $code, 'Brevo API HTTP ' . $code );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Generic webhook                                                    */
+/* ------------------------------------------------------------------ */
+
+/**
+ * With a secret configured the body is signed GitHub-style:
+ * X-Dkopt-Signature: sha256=<hmac(body, secret)>.
+ */
+function dkopt_webhook_headers( $body_json ) {
+    $headers = array(
+        'Accept'       => 'application/json',
+        'Content-Type' => 'application/json',
+        'User-Agent'   => 'diviskit-optin/' . DIVISKIT_OPTIN_VERSION . ' (+WordPress)',
+    );
+    $secret = trim( (string) dkopt_opt( 'webhook_secret' ) );
+    if ( '' !== $secret ) {
+        $headers['X-Dkopt-Signature'] = 'sha256=' . hash_hmac( 'sha256', $body_json, $secret );
+    }
+    return $headers;
+}
+
+function dkopt_webhook_post( $url, $payload, $timeout = 15 ) {
+    $body = wp_json_encode( $payload );
+    return wp_remote_post( $url, array(
+        'timeout' => $timeout,
+        'headers' => dkopt_webhook_headers( $body ),
+        'body'    => $body,
+    ) );
+}
+
+/**
+ * @return true|WP_Error
+ */
+function dkopt_webhook_add_subscriber( $email, $interests = array() ) {
+    $url = trim( (string) dkopt_opt( 'webhook_url' ) );
+    if ( '' === $url ) {
+        return new WP_Error( 'dkopt_webhook_no_url', 'Webhook-URL fehlt (Einstellungen).' );
+    }
+
+    $res = dkopt_webhook_post( $url, array(
+        'event'        => 'subscriber.confirmed',
+        'email'        => $email,
+        'interests'    => array_values( $interests ),
+        'confirmed_at' => current_time( 'mysql', true ),
+        'site'         => home_url(),
+    ) );
+
+    if ( is_wp_error( $res ) ) {
+        return $res;
+    }
+
+    $code = (int) wp_remote_retrieve_response_code( $res );
+    if ( $code >= 200 && $code < 300 ) {
+        return true;
+    }
+    return new WP_Error( 'dkopt_webhook_' . $code, 'Webhook HTTP ' . $code . ': ' . substr( wp_strip_all_tags( (string) wp_remote_retrieve_body( $res ) ), 0, 200 ) );
+}
+
+/**
+ * Connectivity check — fires a ping event (no real subscriber data).
+ * @return true|WP_Error
+ */
+function dkopt_webhook_ping() {
+    $url = trim( (string) dkopt_opt( 'webhook_url' ) );
+    if ( '' === $url ) {
+        return new WP_Error( 'dkopt_webhook_no_url', 'Webhook-URL fehlt (Einstellungen).' );
+    }
+    $res = dkopt_webhook_post( $url, array(
+        'event' => 'ping',
+        'site'  => home_url(),
+    ), 10 );
+    if ( is_wp_error( $res ) ) {
+        return $res;
+    }
+    $code = (int) wp_remote_retrieve_response_code( $res );
+    return ( $code >= 200 && $code < 300 )
+        ? true
+        : new WP_Error( 'dkopt_webhook_' . $code, 'Webhook HTTP ' . $code );
 }

@@ -15,6 +15,8 @@ function dkopt_defaults() {
         'ml_group_id'          => '',
         'brevo_api_key'        => '',
         'brevo_list_id'        => '',
+        'webhook_url'          => '',
+        'webhook_secret'       => '',
 
         // Spam-Schutz (Keys + aktiviert, sonst nur Honeypot + Rate-Limit)
         'recaptcha_enabled'    => 1,
@@ -154,6 +156,7 @@ function dkopt_sanitize_options( $in ) {
 
     $text_keys = array(
         'ml_api_token', 'ml_group_id', 'brevo_api_key', 'brevo_list_id',
+        'webhook_secret',
         'recaptcha_site_key', 'recaptcha_secret_key',
         'form_heading', 'form_subline', 'form_placeholder', 'form_button',
         'form_success', 'form_success_heading',
@@ -177,7 +180,7 @@ function dkopt_sanitize_options( $in ) {
         $out['consent_text'] = sanitize_textarea_field( $in['consent_text'] );
     }
 
-    foreach ( array( 'policy_url', 'imprint_url', 'redirect_confirm', 'redirect_error' ) as $key ) {
+    foreach ( array( 'policy_url', 'imprint_url', 'redirect_confirm', 'redirect_error', 'webhook_url' ) as $key ) {
         if ( isset( $in[ $key ] ) ) {
             $out[ $key ] = esc_url_raw( trim( $in[ $key ] ) );
         }

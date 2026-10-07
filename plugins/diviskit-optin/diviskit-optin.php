@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: Diviskit Optin
- * Description: Eigenes Double-Opt-In für Newsletter-Signups: gebrandete deutsche Bestätigungsmail aus frei editierbaren Mail-Templates, DSGVO-Einwilligungsnachweis mit Consent-Text, reCAPTCHA v3 + Honeypot. Bestätigte Subscriber werden per API an den gewählten Provider (MailerLite, Brevo) übergeben — deren kostenpflichtiges DOI wird umgangen.
- * Version: 0.4.0
+ * Description: Eigenes Double-Opt-In für Newsletter-Signups: gebrandete deutsche Bestätigungsmail aus frei editierbaren Mail-Templates, DSGVO-Einwilligungsnachweis mit Consent-Text, reCAPTCHA v3 + Honeypot. Bestätigte Subscriber werden an den gewählten Provider (MailerLite, Brevo, generischer Webhook) übergeben — deren kostenpflichtiges DOI wird umgangen.
+ * Version: 0.5.0
  * Author: Sascha Kohler
  * License: GPLv2 or later
  * Text Domain: diviskit-optin
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! defined( 'DIVISKIT_OPTIN_VERSION' ) ) {
-    define( 'DIVISKIT_OPTIN_VERSION', '0.4.0' );
+    define( 'DIVISKIT_OPTIN_VERSION', '0.5.0' );
 }
 if ( ! defined( 'DIVISKIT_OPTIN_DB_VERSION' ) ) {
     define( 'DIVISKIT_OPTIN_DB_VERSION', '2' );

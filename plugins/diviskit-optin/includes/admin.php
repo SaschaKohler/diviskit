@@ -198,10 +198,10 @@ function dkopt_admin_settings_tab() {
     $providers = dkopt_providers();
     $provider  = isset( $providers[ $o['provider'] ] ) ? $o['provider'] : 'mailerlite';
 
-    // Connectivity check for the selected provider (needs its key set).
+    // Connectivity check for the selected provider (needs its key/url set).
     $has_key   = 'none' === $provider;
     foreach ( $providers[ $provider ]['fields'] as $key => $label ) {
-        if ( false !== stripos( $key, 'key' ) || false !== stripos( $key, 'token' ) ) {
+        if ( false !== stripos( $key, 'key' ) || false !== stripos( $key, 'token' ) || false !== stripos( $key, 'url' ) ) {
             $has_key = '' !== trim( (string) $o[ $key ] );
         }
     }
@@ -236,7 +236,7 @@ function dkopt_admin_settings_tab() {
             <?php foreach ( $p['fields'] as $key => $label ) : ?>
               <tr class="dkopt-pfield" data-provider="<?php echo esc_attr( $id ); ?>">
                 <th scope="row"><?php echo esc_html( $label ); ?></th>
-                <td><?php dkopt_field( $key, ( false !== stripos( $key, 'key' ) || false !== stripos( $key, 'token' ) ) ? 'password' : 'text' ); ?></td>
+                <td><?php dkopt_field( $key, ( false !== stripos( $key, 'key' ) || false !== stripos( $key, 'token' ) || false !== stripos( $key, 'secret' ) ) ? 'password' : 'text' ); ?></td>
               </tr>
             <?php endforeach; ?>
             <?php if ( '' !== $p['hint'] ) : ?>

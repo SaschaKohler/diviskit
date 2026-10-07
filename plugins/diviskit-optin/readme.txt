@@ -1,6 +1,6 @@
 === Diviskit Optin ===
 Contributors: saschakohler
-Tags: double opt-in, newsletter, gdpr, dsgvo, mailerlite, brevo
+Tags: double opt-in, newsletter, gdpr, dsgvo, mailerlite, brevo, webhook
 Requires at least: 6.0
 Requires PHP: 7.4
 License: GPLv2 or later
@@ -24,8 +24,9 @@ der Mail-Marketing-Anbieter durch einen eigenen Bestätigungsflow:
   vier eingebaute Designs (Standard, Diviskit, Schlicht, Dark),
   Live-Vorschau + Testmail-Versand aus dem Admin
 * Einwilligungsnachweis: Consent-Text, Zeitstempel, IP, User-Agent pro Signup
-* Provider-Select: MailerLite oder Brevo — bestätigte Subscriber werden per
-  API eingetragen; „Nur lokal" speichert ohne externen Dienst
+* Provider-Select: MailerLite, Brevo oder generischer Webhook (JSON-POST mit
+  optionalem HMAC-SHA256-Signatur-Header — Bridge zu Zapier, Make, n8n & Co.);
+  „Nur lokal" speichert ohne externen Dienst
 * Optionale Produkt-Interessen-Checkboxen: Labels konfigurierbar, Auswahl wird
   lokal gespeichert und bei MailerLite auf konfigurierbare Group-IDs gemappt
 * Spam-Schutz: Honeypot + Rate-Limit + optionales reCAPTCHA v3 (invisible)
@@ -38,6 +39,11 @@ MailerLite zusätzlich die eigene DOI-Mail.
 
 == Upgrade Notice ==
 
+= 0.5.0 =
+Neuer Provider „Webhook (generisch)": bestätigte Subscriber werden als
+JSON-POST an eine beliebige URL geschickt — damit geht jeder Dienst mit
+HTTP-Endpunkt (Zapier, Make, n8n, Mailchimp-Bridge, eigene API).
+
 = 0.4.0 =
 Rename von sk-mailerlite-doi → diviskit-optin. Einstellungen,
 Subscriber-Tabelle und Cron werden automatisch migriert. Bestehende
@@ -45,6 +51,14 @@ Subscriber-Tabelle und Cron werden automatisch migriert. Bestehende
 funktionieren weiter (Legacy-Aliase).
 
 == Changelog ==
+
+= 0.5.0 =
+* Neuer Provider „Webhook (generisch)": JSON-POST { event, email, interests,
+  confirmed_at, site } an eine konfigurierbare URL — 2xx gilt als Erfolg,
+  Fehler werden wie bei den API-Providern gespeichert und täglich retried
+* Optionales Secret signiert den Body per HMAC-SHA256
+  (X-Dkopt-Signature-Header, GitHub-Stil)
+* Connectivity-Check pingt den Hook mit einem { event: "ping" }-Event
 
 = 0.4.0 =
 * Rename: sk-mailerlite-doi → Diviskit Optin (Slug diviskit-optin)
