@@ -48,7 +48,7 @@ done
 case "$SLUG" in
   diviskit-agent)           MAIN=diviskit-agent.php;            PID=344; VCONST="const VERSION";            PUBLIC=1; BUNDLE=1 ;;
   diviskit-design-library)  MAIN=diviskit-design-library.php;   PID=319; VCONST="const VERSION";            PUBLIC=1; BUNDLE=1 ;;
-  diviskit-optin)           MAIN=diviskit-optin.php;            PID="";  VCONST="DIVISKIT_OPTIN_VERSION";   PUBLIC=1; BUNDLE=0 ;;
+  # diviskit-optin moved to its own repo (../diviskit-optin) at 0.5.0 — release via git tag + wp.org deploy action.
   diviskit-pro)             MAIN=diviskit-pro.php;              PID=318; VCONST="DIVISKIT_PRO_VERSION";     PUBLIC=0; BUNDLE=0 ;;
   diviskit-consent)         MAIN=diviskit-consent.php;          PID=317; VCONST="DIVISKIT_CONSENT_VERSION"; PUBLIC=0; BUNDLE=0 ;;
   vendokit)                 MAIN=vendokit.php;                  PID=320; VCONST="VK_VERSION";               PUBLIC=0; BUNDLE=0 ;;
