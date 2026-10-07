@@ -4,7 +4,8 @@ This repo is the **source of truth** for the free Diviskit plugins:
 
 - `plugins/diviskit-agent` — REST bridge / MCP backend
 - `plugins/diviskit-design-library` — design effects library
-- `plugins/sk-mailerlite-doi` — newsletter double-opt-in
+- `plugins/diviskit-optin` — newsletter double-opt-in (ehemals
+  `sk-mailerlite-doi`, umbenannt in 0.4.0; Legacy-Aliase im Plugin)
 
 Also here: `diviskit-server/` (MCP server source), `claude/` (skill
 artifacts), `templates/` (site AGENTS.md + MCP config templates),
@@ -19,7 +20,7 @@ artifacts), `templates/` (site AGENTS.md + MCP config templates),
   content) stays on the site.
 - Free plugins additionally mirror into `diviskit-pro/plugins/` (pro
   suite bundle) — `bin/release.sh` handles this automatically
-  (BUNDLE=1 for agent + design-library). sk-mailerlite-doi is
+  (BUNDLE=1 for agent + design-library). diviskit-optin is
   free-repo only.
 - Remote: `git@github.com:SaschaKohler/diviskit.git`
 - Dev/test site: `diviskit-shop` (`https://diviskit-shop.ddev.site`,

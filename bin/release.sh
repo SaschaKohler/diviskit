@@ -48,9 +48,9 @@ done
 case "$SLUG" in
   diviskit-agent)           MAIN=diviskit-agent.php;            PID=344; VCONST="const VERSION";            PUBLIC=1; BUNDLE=1 ;;
   diviskit-design-library)  MAIN=diviskit-design-library.php;   PID=319; VCONST="const VERSION";            PUBLIC=1; BUNDLE=1 ;;
-  sk-mailerlite-doi)        MAIN=sk-mailerlite-doi.php;         PID="";  VCONST="SKML_VERSION";             PUBLIC=1; BUNDLE=0 ;;
+  diviskit-optin)           MAIN=diviskit-optin.php;            PID="";  VCONST="DIVISKIT_OPTIN_VERSION";   PUBLIC=1; BUNDLE=0 ;;
   diviskit-pro)             MAIN=diviskit-pro.php;              PID=318; VCONST="DIVISKIT_PRO_VERSION";     PUBLIC=0; BUNDLE=0 ;;
-  sk-consent)               MAIN=sk-consent.php;                PID=317; VCONST="SK_CONSENT_VERSION";       PUBLIC=0; BUNDLE=0 ;;
+  diviskit-consent)         MAIN=diviskit-consent.php;          PID=317; VCONST="DIVISKIT_CONSENT_VERSION"; PUBLIC=0; BUNDLE=0 ;;
   vendokit)                 MAIN=vendokit.php;                  PID=320; VCONST="VK_VERSION";               PUBLIC=0; BUNDLE=0 ;;
   vendokit-divi)            MAIN=vendokit-divi.php;             PID=320; VCONST="VKD_VERSION";              PUBLIC=0; BUNDLE=0 ;;
   vendokit-support)         MAIN=vendokit-support.php;          PID=320; VCONST="VKS_VERSION";              PUBLIC=0; BUNDLE=0 ;;

@@ -38,5 +38,5 @@ namespace, `diviops/v1` kept as a compat alias).
 ### Pro (separate distribution)
 
 `diviskit-pro` (Vendokit coverage slice), the `diviskit-vendokit` +
-`diviskit-mega-menu` skills, and `sk-consent` ship in the Pro distribution —
+`diviskit-mega-menu` skills, and `diviskit-consent` ship in the Pro distribution —
 see <https://diviskit.com>.

@@ -1,6 +1,6 @@
 # Diviskit — Setup Guide
 
-Get from zero to generating Divi 5 pages with Claude Code, Codex, or Devin in ~15 minutes. For project framing, suite components, and the response-contract overview, see the [README](README.md).
+Get from zero to generating Divi 5 pages with Claude Code, Codex, Devin, Cursor, or any other MCP client in ~15 minutes. For project framing, suite components, and the response-contract overview, see the [README](README.md).
 
 > **Beta software.** Diviskit is under active development. Use on production sites at your own discretion. Always back up your WordPress site before running write operations.
 
@@ -9,7 +9,7 @@ Get from zero to generating Divi 5 pages with Claude Code, Codex, or Devin in ~1
 - **WordPress** 6.5+ with **Divi 5** theme (5.1.0+)
 - **PHP** 7.4+
 - **Node.js** 22+ (for the MCP server)
-- **Claude Code** CLI, **Codex**, or **Devin** installed
+- **Claude Code** CLI, **Codex**, **Devin**, or another MCP-capable client installed
 - A local or remote WordPress site
 
 ## Three independent components
@@ -277,7 +277,7 @@ The skills teach the assistant the verified Divi 5 block formats and the slice t
 |---|---|---|
 | `diviskit-agent` | `diviskit-agent` (Free) | `diviskit` (harness primer), `diviskit-builder`, `diviskit-scf` |
 
-(The Pro distribution adds `diviskit-pro` → `diviskit-vendokit` + `diviskit-mega-menu`.)
+(The Pro distribution adds `diviskit-pro` → `diviskit-launchpad`, `diviskit-vendokit` + `diviskit-mega-menu`.)
 
 ### Claude Code
 
@@ -299,6 +299,15 @@ The installer pulls them from the site, so the synced copy is always
 version-locked to the installed plugin — sites with `diviskit-pro` also
 return the Pro skills automatically (no `--pro` flag).
 
+The script ships inside the plugin itself — no suite checkout needed.
+Download it from the Diviskit dashboard ("Install the authoring skills")
+or directly:
+
+```bash
+curl -fsSL -o install-skills.sh "https://your-site.example/wp-content/plugins/diviskit-agent/bin/install-skills.sh"
+chmod +x install-skills.sh
+```
+
 Credentials come from the `diviskit-mcp` entry in
 `.devin/mcp_config.local.json` (Step 3) or from `WP_URL` / `WP_USER` /
 `WP_APP_PASSWORD` env vars:
@@ -312,6 +321,17 @@ Credentials come from the `diviskit-mcp` entry in
 
 # Codex
 ./bin/install-skills.sh --client codex --scope user
+
+# Claude Code — local skills dir (marketplace install above is preferred)
+./bin/install-skills.sh --client claude --scope project
+
+# Cursor — skills tree + generated .cursor/rules/diviskit-*.mdc
+./bin/install-skills.sh --client cursor --scope project
+
+# Any other client — copy the tree anywhere, wire it into the client's
+# rules/context file yourself (Windsurf .windsurfrules, Cline .clinerules,
+# Aider CONVENTIONS.md, ...):
+./bin/install-skills.sh --client generic --target /path/to/skills
 ```
 
 Re-run after every plugin update. Restart the client/session so it picks
