@@ -9,7 +9,7 @@
  * Text Domain: diviskit-design-library
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Update URI: https://diviskit.com/item/diviskit-design-library/
+ * Update URI: https://shop.diviskit.com/item/diviskit-design-library/
  *
  * Forked from the GPL-licensed diviops-design-library. Integration contract:
  * `dsk-*` CSS classes, `_diviskit_design_*` post-meta keys and
@@ -340,12 +340,12 @@ add_action( 'plugins_loaded', function () {
 		'item'         => (string) apply_filters( 'dsk_design_library_license_item', 'diviskit-design-library' ),
 		'api_url'      => defined( 'DSK_DESIGN_LIBRARY_STORE_URL' )
 			? DSK_DESIGN_LIBRARY_STORE_URL
-			: apply_filters( 'dsk_design_library_store_url', 'https://diviskit.com' ),
+			: apply_filters( 'dsk_design_library_store_url', 'https://shop.diviskit.com' ),
 		'version'      => Diviskit_Design_Library::VERSION,
 		'file'         => __FILE__,
 		'slug'         => 'diviskit-design-library',
 		'plugin_title' => 'Diviskit Design Library',
-		'purchase_url' => apply_filters( 'dsk_design_library_purchase_url', 'https://diviskit.com/item/diviskit-design-library/' ),
+		'purchase_url' => apply_filters( 'dsk_design_library_purchase_url', 'https://shop.diviskit.com/item/diviskit-design-library/' ),
 		// Free product: updates run anonymously; the optional free license
 		// (free checkout in the shop) unlocks the included support year.
 		'free'         => true,
@@ -365,7 +365,7 @@ add_action( 'plugins_loaded', function () {
 			'item'         => (string) apply_filters( 'dsk_design_library_license_item', 'diviskit-design-library' ),
 			'api_url'      => defined( 'DSK_DESIGN_LIBRARY_STORE_URL' )
 				? DSK_DESIGN_LIBRARY_STORE_URL
-				: apply_filters( 'dsk_design_library_store_url', 'https://diviskit.com' ),
+				: apply_filters( 'dsk_design_library_store_url', 'https://shop.diviskit.com' ),
 			'version'      => Diviskit_Design_Library::VERSION,
 			'slug'         => 'diviskit-design-library',
 			'plugin_title' => 'Diviskit Design Library',
