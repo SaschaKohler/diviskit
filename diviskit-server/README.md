@@ -193,6 +193,34 @@ coverage is intentionally narrow: only the (module, group, variant)
 combinations whose canonical shape is VB-verified in the registry are
 emittable.
 
+### Registry evidence pipeline
+
+`data/verified-attrs.json` is a **generated artifact** — never hand-edit it.
+It is produced by `diviskit-registry` (`npm run registry:build`) from two
+inputs:
+
+- `data/registry-seed.json` — hand-maintained seed: legacy diviops evidence
+  (sources prefixed `legacy-diviops:`) plus `SCHEMA_OBSERVED` doc-derived
+  cells.
+- `data/evidence/*.capture.json` — machine-produced captures, append-only
+  per cell.
+
+Two commands produce evidence (both gate on `--site <host>` being in the
+`DIVISKIT_VERIFY_SITES` env allowlist AND equal to the `WP_URL` hostname —
+captures can never hit an unblessed site):
+
+| Command | Proves |
+|---|---|
+| `diviskit-preset capture <emitter> [opts] --site <host>` | Emitted shape round-trips byte-identically through `preset/create` → `preset/inspect`. Drift detection + cross-version stability for already-verified cells. |
+| `diviskit-preset adopt <preset_id> --site <host>` | Reads an existing VB-authored preset from canonical storage — ground truth for cells the emitters can't emit yet (the automated replacement for manual shape dumps). |
+
+Merge rules: ≥1 match on a cell → `VB_PRESET_STORAGE_VERIFIED`; matches on
+≥2 distinct `divi_version` values → `CROSS_VERSION_STABLE`. Evidence can only
+raise levels — a mismatch is recorded as a `drift_detected` gap in
+`data/verified-attrs-backlog.json` (the capture work queue), never an
+automatic downgrade. `npm run registry:check` regenerates in memory and fails
+when the committed artifacts drift (CI mode).
+
 ## Response contract
 
 Tools return a standardized envelope so clients can branch on `ok` and

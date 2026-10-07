@@ -1,0 +1,60 @@
+{
+  "schema_version": "1.0.0",
+  "kind": "preset_storage_roundtrip",
+  "command": "heading-font",
+  "applies_to": [
+    {
+      "pattern_family": "divi/font",
+      "module": "divi/heading",
+      "pattern_variant": "local_hosted_pattern_b",
+      "wrapper": "title",
+      "preset_type": "group",
+      "group_name": "divi/font",
+      "group_id": "designTitleText"
+    }
+  ],
+  "verifications": [
+    {
+      "method": "rest_storage_roundtrip",
+      "captured_at": "2026-10-04T07:44:56.644Z",
+      "site": "diviskit-shop.ddev.site",
+      "divi_version": "5.13.1",
+      "plugin_version": "1.7.4",
+      "preset_id": "5dc890d1-5938-48c5-91f0-8b09eadaa646",
+      "result": "match",
+      "diff_paths": [],
+      "emitted_attrs": {
+        "title": {
+          "decoration": {
+            "font": {
+              "font": {
+                "desktop": {
+                  "value": {
+                    "family": "Sora 700",
+                    "size": "48px"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "stored_attrs": {
+        "title": {
+          "decoration": {
+            "font": {
+              "font": {
+                "desktop": {
+                  "value": {
+                    "family": "Sora 700",
+                    "size": "48px"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

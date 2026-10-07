@@ -1,0 +1,240 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-10-04",
+  "generator": "diviskit-registry (src/preset-cli/build-registry.ts)",
+  "gaps": [
+    {
+      "pattern_family": "divi/font-body",
+      "module": "divi/accordion-item",
+      "pattern_variant": "google_fonts_pattern_a",
+      "effective_level": "SCHEMA_OBSERVED",
+      "needed_level": "VB_PRESET_STORAGE_VERIFIED",
+      "reason": "below_write_threshold",
+      "source": "legacy-diviops:.claude/skills/divi-5-builder/references/module-formats.md#tier-2--pattern-families"
+    },
+    {
+      "pattern_family": "divi/font-body",
+      "module": "divi/blurb",
+      "pattern_variant": "google_fonts_pattern_a",
+      "effective_level": "SCHEMA_OBSERVED",
+      "needed_level": "VB_PRESET_STORAGE_VERIFIED",
+      "reason": "below_write_threshold",
+      "source": "legacy-diviops:.claude/skills/divi-5-builder/references/module-formats.md#tier-2--pattern-families"
+    },
+    {
+      "pattern_family": "divi/font-body",
+      "module": "divi/slide",
+      "pattern_variant": "google_fonts_pattern_a",
+      "effective_level": "SCHEMA_OBSERVED",
+      "needed_level": "VB_PRESET_STORAGE_VERIFIED",
+      "reason": "below_write_threshold",
+      "source": "legacy-diviops:.claude/skills/divi-5-builder/references/module-formats.md#tier-2--pattern-families"
+    },
+    {
+      "pattern_family": "divi/font-body",
+      "module": "divi/testimonial",
+      "pattern_variant": "google_fonts_pattern_a",
+      "effective_level": "SCHEMA_OBSERVED",
+      "needed_level": "VB_PRESET_STORAGE_VERIFIED",
+      "reason": "below_write_threshold",
+      "source": "legacy-diviops:.claude/skills/divi-5-builder/references/module-formats.md#tier-2--pattern-families"
+    },
+    {
+      "pattern_family": "divi/font",
+      "module": "divi/accordion-item",
+      "pattern_variant": "google_fonts_pattern_a",
+      "effective_level": "SCHEMA_OBSERVED",
+      "needed_level": "VB_PRESET_STORAGE_VERIFIED",
+      "reason": "below_write_threshold",
+      "source": "legacy-diviops:.claude/skills/divi-5-builder/references/module-formats.md#tier-2--pattern-families"
+    },
+    {
+      "pattern_family": "divi/font",
+      "module": "divi/blurb",
+      "pattern_variant": "google_fonts_pattern_a",
+      "effective_level": "SCHEMA_OBSERVED",
+      "needed_level": "VB_PRESET_STORAGE_VERIFIED",
+      "reason": "below_write_threshold",
+      "source": "legacy-diviops:.claude/skills/divi-5-builder/references/module-formats.md#tier-2--pattern-families"
+    },
+    {
+      "pattern_family": "divi/font",
+      "module": "divi/number-counter",
+      "pattern_variant": "google_fonts_pattern_a",
+      "effective_level": "SCHEMA_OBSERVED",
+      "needed_level": "VB_PRESET_STORAGE_VERIFIED",
+      "reason": "below_write_threshold",
+      "source": "legacy-diviops:.claude/skills/divi-5-builder/references/module-formats.md#tier-2--pattern-families"
+    },
+    {
+      "pattern_family": "divi/font",
+      "module": "divi/slide",
+      "pattern_variant": "google_fonts_pattern_a",
+      "effective_level": "SCHEMA_OBSERVED",
+      "needed_level": "VB_PRESET_STORAGE_VERIFIED",
+      "reason": "below_write_threshold",
+      "source": "legacy-diviops:.claude/skills/divi-5-builder/references/module-formats.md#tier-2--pattern-families"
+    },
+    {
+      "pattern_family": "divi/font",
+      "module": "divi/testimonial",
+      "pattern_variant": "google_fonts_pattern_a",
+      "effective_level": "SCHEMA_OBSERVED",
+      "needed_level": "VB_PRESET_STORAGE_VERIFIED",
+      "reason": "below_write_threshold",
+      "source": "legacy-diviops:.claude/skills/divi-5-builder/references/module-formats.md#tier-2--pattern-families"
+    },
+    {
+      "pattern_family": "divi/spacing",
+      "module": "divi/button",
+      "effective_level": "SCHEMA_OBSERVED",
+      "needed_level": "VB_PRESET_STORAGE_VERIFIED",
+      "reason": "below_write_threshold",
+      "source": "legacy-diviops:.claude/skills/divi-5-builder/references/presets.md#known-group-bucket-inventory-vb-verified-2026-05-04"
+    },
+    {
+      "pattern_family": "divi/spacing",
+      "module": "divi/heading",
+      "effective_level": "SCHEMA_OBSERVED",
+      "needed_level": "VB_PRESET_STORAGE_VERIFIED",
+      "reason": "below_write_threshold",
+      "source": "legacy-diviops:.claude/skills/divi-5-builder/references/presets.md#known-group-bucket-inventory-vb-verified-2026-05-04"
+    },
+    {
+      "pattern_family": "divi/spacing",
+      "module": "divi/text",
+      "effective_level": "SCHEMA_OBSERVED",
+      "needed_level": "VB_PRESET_STORAGE_VERIFIED",
+      "reason": "below_write_threshold",
+      "source": "legacy-diviops:.claude/skills/divi-5-builder/references/presets.md#known-group-bucket-inventory-vb-verified-2026-05-04"
+    },
+    {
+      "pattern_family": "module.decoration.background",
+      "module": "divi/button",
+      "effective_level": "SCHEMA_OBSERVED",
+      "needed_level": "VB_PRESET_STORAGE_VERIFIED",
+      "reason": "below_write_threshold",
+      "source": "legacy-diviops:.claude/skills/divi-5-builder/references/module-formats.md#button-vb-verified-2026-03-31-for-511-schema-audited-2026-04-12-"
+    },
+    {
+      "pattern_family": "module.decoration.background",
+      "module": "divi/heading",
+      "effective_level": "SCHEMA_OBSERVED",
+      "needed_level": "VB_PRESET_STORAGE_VERIFIED",
+      "reason": "below_write_threshold",
+      "source": "legacy-diviops:.claude/skills/divi-5-builder/references/module-formats.md#tier-1--common-decoration-all-modules"
+    },
+    {
+      "pattern_family": "module.decoration.background",
+      "module": "divi/text",
+      "effective_level": "SCHEMA_OBSERVED",
+      "needed_level": "VB_PRESET_STORAGE_VERIFIED",
+      "reason": "below_write_threshold",
+      "source": "legacy-diviops:.claude/skills/divi-5-builder/references/module-formats.md#tier-1--common-decoration-all-modules"
+    },
+    {
+      "pattern_family": "module.decoration.border",
+      "module": "divi/heading",
+      "effective_level": "SCHEMA_OBSERVED",
+      "needed_level": "VB_PRESET_STORAGE_VERIFIED",
+      "reason": "below_write_threshold",
+      "source": "legacy-diviops:.claude/skills/divi-5-builder/references/module-formats.md#tier-1--common-decoration-all-modules"
+    },
+    {
+      "pattern_family": "module.decoration.border",
+      "module": "divi/image",
+      "effective_level": "SCHEMA_OBSERVED",
+      "needed_level": "VB_PRESET_STORAGE_VERIFIED",
+      "reason": "below_write_threshold",
+      "source": "legacy-diviops:.claude/skills/divi-5-builder/references/module-formats.md#image-vb-verified-2026-03-19-schema-audited-2026-04-12--exception"
+    },
+    {
+      "pattern_family": "module.decoration.border",
+      "module": "divi/section",
+      "effective_level": "SCHEMA_OBSERVED",
+      "needed_level": "VB_PRESET_STORAGE_VERIFIED",
+      "reason": "below_write_threshold",
+      "source": "legacy-diviops:.claude/skills/divi-5-builder/references/module-formats.md#tier-1--common-decoration-all-modules"
+    },
+    {
+      "pattern_family": "module.decoration.border",
+      "module": "divi/text",
+      "effective_level": "SCHEMA_OBSERVED",
+      "needed_level": "VB_PRESET_STORAGE_VERIFIED",
+      "reason": "below_write_threshold",
+      "source": "legacy-diviops:.claude/skills/divi-5-builder/references/module-formats.md#tier-1--common-decoration-all-modules"
+    },
+    {
+      "pattern_family": "module.decoration.sizing",
+      "module": "divi/column",
+      "effective_level": "SCHEMA_OBSERVED",
+      "needed_level": "VB_PRESET_STORAGE_VERIFIED",
+      "reason": "below_write_threshold",
+      "source": "legacy-diviops:.claude/skills/divi-5-builder/references/module-formats.md#column-vb-verified-2026-03-19-flex-pipeline-reverified-2026-05-09-against-divi-541-"
+    },
+    {
+      "pattern_family": "module.decoration.sizing",
+      "module": "divi/group",
+      "effective_level": "SCHEMA_OBSERVED",
+      "needed_level": "VB_PRESET_STORAGE_VERIFIED",
+      "reason": "below_write_threshold",
+      "source": "legacy-diviops:.claude/skills/divi-5-builder/references/module-formats.md#group-vb-verified-2026-03-21-"
+    },
+    {
+      "pattern_family": "module.decoration.sizing",
+      "module": "divi/section",
+      "effective_level": "SCHEMA_OBSERVED",
+      "needed_level": "VB_PRESET_STORAGE_VERIFIED",
+      "reason": "below_write_threshold",
+      "source": "legacy-diviops:.claude/skills/divi-5-builder/references/module-formats.md#tier-1--common-decoration-all-modules"
+    },
+    {
+      "pattern_family": "module.decoration.spacing",
+      "module": "divi/button",
+      "effective_level": "SCHEMA_OBSERVED",
+      "needed_level": "VB_PRESET_STORAGE_VERIFIED",
+      "reason": "below_write_threshold",
+      "source": "legacy-diviops:.claude/skills/divi-5-builder/references/module-formats.md#button-vb-verified-2026-03-31-for-511-schema-audited-2026-04-12-"
+    },
+    {
+      "pattern_family": "module.decoration.spacing",
+      "module": "divi/column",
+      "effective_level": "SCHEMA_OBSERVED",
+      "needed_level": "VB_PRESET_STORAGE_VERIFIED",
+      "reason": "below_write_threshold",
+      "source": "legacy-diviops:.claude/skills/divi-5-builder/references/module-formats.md#tier-1--common-decoration-all-modules"
+    },
+    {
+      "pattern_family": "module.decoration.spacing",
+      "module": "divi/group",
+      "effective_level": "SCHEMA_OBSERVED",
+      "needed_level": "VB_PRESET_STORAGE_VERIFIED",
+      "reason": "below_write_threshold",
+      "source": "legacy-diviops:.claude/skills/divi-5-builder/references/module-formats.md#tier-1--common-decoration-all-modules"
+    },
+    {
+      "pattern_family": "module.decoration.spacing",
+      "module": "divi/heading",
+      "effective_level": "SCHEMA_OBSERVED",
+      "needed_level": "VB_PRESET_STORAGE_VERIFIED",
+      "reason": "below_write_threshold",
+      "source": "legacy-diviops:.claude/skills/divi-5-builder/references/module-formats.md#tier-1--common-decoration-all-modules"
+    },
+    {
+      "pattern_family": "module.decoration.spacing",
+      "module": "divi/row",
+      "effective_level": "SCHEMA_OBSERVED",
+      "needed_level": "VB_PRESET_STORAGE_VERIFIED",
+      "reason": "below_write_threshold",
+      "source": "legacy-diviops:.claude/skills/divi-5-builder/references/module-formats.md#tier-1--common-decoration-all-modules"
+    },
+    {
+      "pattern_family": "module.decoration.spacing",
+      "module": "divi/text",
+      "effective_level": "SCHEMA_OBSERVED",
+      "needed_level": "VB_PRESET_STORAGE_VERIFIED",
+      "reason": "below_write_threshold",
+      "source": "legacy-diviops:.claude/skills/divi-5-builder/references/module-formats.md#tier-1--common-decoration-all-modules"
+    }
+  ]
+}

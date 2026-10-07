@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0.0",
+  "kind": "preset_storage_roundtrip",
+  "command": "spacing",
+  "applies_to": [
+    {
+      "pattern_family": "divi/spacing",
+      "module": "divi/section",
+      "wrapper": "module",
+      "preset_type": "group",
+      "group_name": "divi/spacing",
+      "group_id": "designSpacing"
+    }
+  ],
+  "verifications": [
+    {
+      "method": "rest_storage_roundtrip",
+      "captured_at": "2026-10-04T07:43:56.019Z",
+      "site": "diviskit-shop.ddev.site",
+      "divi_version": "5.13.1",
+      "plugin_version": "1.7.4",
+      "preset_id": "aad65ac2-db93-4f43-ade4-ab15ecbc813f",
+      "result": "match",
+      "diff_paths": [],
+      "emitted_attrs": {
+        "module": {
+          "decoration": {
+            "spacing": {
+              "desktop": {
+                "value": {
+                  "padding": {
+                    "top": "80px",
+                    "bottom": "80px",
+                    "syncVertical": "off",
+                    "syncHorizontal": "off"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "stored_attrs": {
+        "module": {
+          "decoration": {
+            "spacing": {
+              "desktop": {
+                "value": {
+                  "padding": {
+                    "top": "80px",
+                    "bottom": "80px",
+                    "syncVertical": "off",
+                    "syncHorizontal": "off"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

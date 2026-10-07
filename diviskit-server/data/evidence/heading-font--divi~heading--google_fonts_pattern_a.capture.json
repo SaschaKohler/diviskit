@@ -1,0 +1,62 @@
+{
+  "schema_version": "1.0.0",
+  "kind": "preset_storage_roundtrip",
+  "command": "heading-font",
+  "applies_to": [
+    {
+      "pattern_family": "divi/font",
+      "module": "divi/heading",
+      "pattern_variant": "google_fonts_pattern_a",
+      "wrapper": "title",
+      "preset_type": "group",
+      "group_name": "divi/font",
+      "group_id": "designTitleText"
+    }
+  ],
+  "verifications": [
+    {
+      "method": "rest_storage_roundtrip",
+      "captured_at": "2026-10-04T07:44:52.484Z",
+      "site": "diviskit-shop.ddev.site",
+      "divi_version": "5.13.1",
+      "plugin_version": "1.7.4",
+      "preset_id": "8d7908a5-7f9d-4fe8-856f-da33c33bfd08",
+      "result": "match",
+      "diff_paths": [],
+      "emitted_attrs": {
+        "title": {
+          "decoration": {
+            "font": {
+              "font": {
+                "desktop": {
+                  "value": {
+                    "family": "Inter",
+                    "weight": "700",
+                    "size": "48px"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "stored_attrs": {
+        "title": {
+          "decoration": {
+            "font": {
+              "font": {
+                "desktop": {
+                  "value": {
+                    "family": "Inter",
+                    "weight": "700",
+                    "size": "48px"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

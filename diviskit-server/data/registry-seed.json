@@ -1,8 +1,5 @@
 {
   "schema_version": "1.0.0",
-  "registry_version": "1.1.0",
-  "generated_at": "2026-10-04",
-  "generator": "diviskit-registry (src/preset-cli/build-registry.ts)",
   "evidence_level_ordering": {
     "UNVERIFIED": 0,
     "SCHEMA_OBSERVED": 1,
@@ -262,8 +259,8 @@
     {
       "pattern_family": "divi/font",
       "pattern_variant": "google_fonts_pattern_a",
-      "pattern_evidence_level": "CROSS_VERSION_STABLE",
-      "pattern_evidence_source": "data/evidence/heading-font--divi~heading--google_fonts_pattern_a.capture.json",
+      "pattern_evidence_level": "VB_PRESET_STORAGE_VERIFIED",
+      "pattern_evidence_source": "legacy-diviops:docs/verification/evidence/canonical-shape-dumps-2026-05-18/round-1a-heading-h1-pattern-a-google.json",
       "pattern_divi_version": "5.5.2",
       "pattern_verified_at": "2026-05-18",
       "canonical_shape_note": "Pattern A (Google Fonts CDN): separate {family: 'Inter', weight: '700', size, color} keys at <wrapper>.decoration.font.font.desktop.value.*. weight is a numeric-string ('100' to '900'). See reference_local_hosted_fonts_eu_pattern.",
@@ -279,13 +276,13 @@
           "preset_type": "group",
           "group_name": "divi/font",
           "group_id": "designTitleText",
-          "cell_evidence_level": "CROSS_VERSION_STABLE",
-          "cell_divi_version": "5.13.1, 5.5.2",
-          "verified_at": "2026-10-04",
-          "source": "data/evidence/heading-font--divi~heading--google_fonts_pattern_a.capture.json",
-          "caveats": [
-            "Verified via automated REST storage roundtrip (preset/create → preset/inspect byte-diff), not a Visual Builder UI roundtrip."
-          ]
+          "cell_evidence_level": "VB_PRESET_STORAGE_VERIFIED",
+          "cell_divi_version": "5.5.2",
+          "verified_at": "2026-05-18",
+          "source": "legacy-diviops:docs/verification/evidence/canonical-shape-dumps-2026-05-18/round-1a-heading-h1-pattern-a-google.json",
+          "preset_map_key": "title.decoration.font.font__family",
+          "state": "desktop.value",
+          "caveats": []
         },
         "divi/blurb": {
           "wrapper": "title",
@@ -351,8 +348,8 @@
     {
       "pattern_family": "divi/font",
       "pattern_variant": "local_hosted_pattern_b",
-      "pattern_evidence_level": "CROSS_VERSION_STABLE",
-      "pattern_evidence_source": "data/evidence/heading-font--divi~heading--local_hosted_pattern_b.capture.json",
+      "pattern_evidence_level": "VB_PRESET_STORAGE_VERIFIED",
+      "pattern_evidence_source": "legacy-diviops:docs/verification/evidence/canonical-shape-dumps-2026-05-18/round-1b-heading-h1-pattern-b-local.json",
       "pattern_divi_version": "5.5.2",
       "pattern_verified_at": "2026-05-18",
       "canonical_shape_note": "Pattern B (local-hosted, EU-GDPR via divi-oafontz plugin + et_uploaded_fonts): {family: 'Sora 700', size, color} — weight is ENCODED in family string; NO separate 'weight' key. Pattern A vs Pattern B are NOT interchangeable evidence for write emitters. Reference: reference_local_hosted_fonts_eu_pattern.",
@@ -367,12 +364,14 @@
           "preset_type": "group",
           "group_name": "divi/font",
           "group_id": "designTitleText",
-          "cell_evidence_level": "CROSS_VERSION_STABLE",
-          "cell_divi_version": "5.13.1, 5.5.2",
-          "verified_at": "2026-10-04",
-          "source": "data/evidence/heading-font--divi~heading--local_hosted_pattern_b.capture.json",
+          "cell_evidence_level": "VB_PRESET_STORAGE_VERIFIED",
+          "cell_divi_version": "5.5.2",
+          "verified_at": "2026-05-18",
+          "source": "legacy-diviops:docs/verification/evidence/canonical-shape-dumps-2026-05-18/round-1b-heading-h1-pattern-b-local.json",
+          "preset_map_key": "title.decoration.font.font__family",
+          "state": "desktop.value",
           "caveats": [
-            "Verified via automated REST storage roundtrip (preset/create → preset/inspect byte-diff), not a Visual Builder UI roundtrip."
+            "User did NOT touch the weight picker; Pattern B's encoding lives in the family string itself"
           ]
         }
       }
@@ -380,8 +379,8 @@
     {
       "pattern_family": "divi/font-body",
       "pattern_variant": "google_fonts_pattern_a",
-      "pattern_evidence_level": "CROSS_VERSION_STABLE",
-      "pattern_evidence_source": "data/evidence/text-body-font--divi~text--google_fonts_pattern_a.capture.json",
+      "pattern_evidence_level": "VB_PRESET_STORAGE_VERIFIED",
+      "pattern_evidence_source": "legacy-diviops:docs/verification/evidence/canonical-shape-dumps-2026-05-18/round-2-body-text-pattern-a.json",
       "pattern_divi_version": "5.5.2",
       "pattern_verified_at": "2026-05-18",
       "canonical_shape_note": "Pattern A on body-text family. Wrapper chain: content.decoration.bodyFont.body.font.desktop.value.{family, weight, color, size}. bodyFont.link.font.desktop.value.color for link state. Pattern B for body-text deferred unless heading-vs-body shape divergence surfaces a body-specific need (per round-2 _meta).",
@@ -397,13 +396,13 @@
           "preset_type": "group",
           "group_name": "divi/font-body",
           "group_id": "designText",
-          "cell_evidence_level": "CROSS_VERSION_STABLE",
-          "cell_divi_version": "5.13.1, 5.5.2",
-          "verified_at": "2026-10-04",
-          "source": "data/evidence/text-body-font--divi~text--google_fonts_pattern_a.capture.json",
-          "caveats": [
-            "Verified via automated REST storage roundtrip (preset/create → preset/inspect byte-diff), not a Visual Builder UI roundtrip."
-          ]
+          "cell_evidence_level": "VB_PRESET_STORAGE_VERIFIED",
+          "cell_divi_version": "5.5.2",
+          "verified_at": "2026-05-18",
+          "source": "legacy-diviops:docs/verification/evidence/canonical-shape-dumps-2026-05-18/round-2-body-text-pattern-a.json",
+          "preset_map_key": "content.decoration.bodyFont.body.font__family",
+          "state": "desktop.value",
+          "caveats": []
         },
         "divi/testimonial": {
           "wrapper": "content",
@@ -453,8 +452,8 @@
     },
     {
       "pattern_family": "divi/button.background",
-      "pattern_evidence_level": "CROSS_VERSION_STABLE",
-      "pattern_evidence_source": "data/evidence/button--divi~button.capture.json",
+      "pattern_evidence_level": "VB_PRESET_STORAGE_VERIFIED",
+      "pattern_evidence_source": "legacy-diviops:docs/verification/evidence/canonical-shape-dumps-2026-05-18/round-3-button-canonical-complete.json",
       "pattern_divi_version": "5.5.2",
       "pattern_verified_at": "2026-05-18",
       "canonical_shape_note": "button.decoration.background.desktop.{value.color, hover.color}. NOTE: hover wrapper omits 'value' (per reference_canonical_hover_state_shape — Divi 5.5.x hover is one wrapper shallower than desktop). Phase 2 CLI must emit hover.color (NOT hover.value.color).",
@@ -464,20 +463,20 @@
           "preset_type": "group",
           "group_name": "divi/button",
           "group_id": "button",
-          "cell_evidence_level": "CROSS_VERSION_STABLE",
-          "cell_divi_version": "5.13.1, 5.5.2",
-          "verified_at": "2026-10-04",
-          "source": "data/evidence/button--divi~button.capture.json",
-          "caveats": [
-            "Verified via automated REST storage roundtrip (preset/create → preset/inspect byte-diff), not a Visual Builder UI roundtrip."
-          ]
+          "cell_evidence_level": "VB_PRESET_STORAGE_VERIFIED",
+          "cell_divi_version": "5.5.2",
+          "verified_at": "2026-05-18",
+          "source": "legacy-diviops:docs/verification/evidence/canonical-shape-dumps-2026-05-18/round-3-button-canonical-complete.json",
+          "preset_map_key": "button.decoration.background__color",
+          "state": "desktop.value + desktop.hover",
+          "caveats": []
         }
       }
     },
     {
       "pattern_family": "divi/button.border",
-      "pattern_evidence_level": "CROSS_VERSION_STABLE",
-      "pattern_evidence_source": "data/evidence/button--divi~button.capture.json",
+      "pattern_evidence_level": "VB_PRESET_STORAGE_VERIFIED",
+      "pattern_evidence_source": "legacy-diviops:docs/verification/evidence/canonical-shape-dumps-2026-05-18/round-3-button-canonical-complete.json",
       "pattern_divi_version": "5.5.2",
       "pattern_verified_at": "2026-05-18",
       "canonical_shape_note": "button.decoration.border.desktop.value.radius = {topLeft, topRight, bottomLeft, bottomRight, sync}. Outlined-button styles.all.{width, color} captured at round-4-button-outlined-canonical.json. radius vocabulary differs from current MCP shape ({top,right,bottom,left,syncCorners}) — migration question deferred per F2 of round-3 findings.",
@@ -487,12 +486,14 @@
           "preset_type": "group",
           "group_name": "divi/button",
           "group_id": "button",
-          "cell_evidence_level": "CROSS_VERSION_STABLE",
-          "cell_divi_version": "5.13.1, 5.5.2",
-          "verified_at": "2026-10-04",
-          "source": "data/evidence/button--divi~button.capture.json",
+          "cell_evidence_level": "VB_PRESET_STORAGE_VERIFIED",
+          "cell_divi_version": "5.5.2",
+          "verified_at": "2026-05-18",
+          "source": "legacy-diviops:docs/verification/evidence/canonical-shape-dumps-2026-05-18/round-3-button-canonical-complete.json",
+          "preset_map_key": "button.decoration.border__radius",
+          "state": "desktop.value",
           "caveats": [
-            "Verified via automated REST storage roundtrip (preset/create → preset/inspect byte-diff), not a Visual Builder UI roundtrip."
+            "Canonical radius vocabulary is {topLeft, topRight, bottomLeft, bottomRight, sync} — NOT {top,right,bottom,left,syncCorners}. Current MCP shape diverges; migration question deferred per round-3 finding F2."
           ]
         }
       }
@@ -500,11 +501,11 @@
     {
       "pattern_family": "divi/button.font",
       "pattern_variant": "google_fonts_pattern_a",
-      "pattern_evidence_level": "CROSS_VERSION_STABLE",
-      "pattern_evidence_source": "data/evidence/button--divi~button.capture.json",
+      "pattern_evidence_level": "VB_PRESET_STORAGE_VERIFIED",
+      "pattern_evidence_source": "legacy-diviops:docs/verification/evidence/canonical-shape-dumps-2026-05-18/round-3-button-canonical-complete.json",
       "pattern_divi_version": "5.5.2",
       "pattern_verified_at": "2026-05-18",
-      "canonical_shape_note": "button.decoration.font.font.desktop.value.{family, weight, color}. Pattern A only at present; Pattern B button capture deferred to backlog. button.decoration.font.font is Font Family B (double-nested). Hover color emits at ...font.font.desktop.hover.color (shallow hover wrapper, same as background: hover is a sibling of 'value', never carries its own 'value'). 'font.font.hover' — hover as sibling of the breakpoint objects — is a verified VB crash shape (frontend renders, builder shows 'Oops! An Error Has Occurred'; verified 2026-10-04, Divi 5.14). Same crash class: decoration bucket as sibling of button.decoration (e.g. button.border next to button.decoration instead of inside it) — JSON-valid, validator-clean, frontend-fine, VB-breaking.",
+      "canonical_shape_note": "button.decoration.font.font.desktop.value.{family, weight, color}. Pattern A only at present; Pattern B button capture deferred to backlog. button.decoration.font.font is Font Family B (double-nested).",
       "co_attrs": [
         "weight",
         "color"
@@ -516,20 +517,20 @@
           "preset_type": "group",
           "group_name": "divi/button",
           "group_id": "button",
-          "cell_evidence_level": "CROSS_VERSION_STABLE",
-          "cell_divi_version": "5.13.1, 5.5.2",
-          "verified_at": "2026-10-04",
-          "source": "data/evidence/button--divi~button.capture.json",
-          "caveats": [
-            "Verified via automated REST storage roundtrip (preset/create → preset/inspect byte-diff), not a Visual Builder UI roundtrip."
-          ]
+          "cell_evidence_level": "VB_PRESET_STORAGE_VERIFIED",
+          "cell_divi_version": "5.5.2",
+          "verified_at": "2026-05-18",
+          "source": "legacy-diviops:docs/verification/evidence/canonical-shape-dumps-2026-05-18/round-3-button-canonical-complete.json",
+          "preset_map_key": "button.decoration.font.font__family",
+          "state": "desktop.value",
+          "caveats": []
         }
       }
     },
     {
       "pattern_family": "divi/spacing",
-      "pattern_evidence_level": "CROSS_VERSION_STABLE",
-      "pattern_evidence_source": "data/evidence/spacing--divi~section.capture.json",
+      "pattern_evidence_level": "VB_PRESET_STORAGE_VERIFIED",
+      "pattern_evidence_source": "legacy-diviops:docs/verification/evidence/canonical-shape-dumps-2026-05-23/round-5-spacing-section.json",
       "pattern_divi_version": "5.6.0",
       "pattern_verified_at": "2026-05-23",
       "canonical_shape_note": "Composable Settings spacing bucket (group preset). VB-verified on Divi 5.6.0 via the canonical section spacing capture (divi/section cell only): groupId is the Composable Settings panel id 'designSpacing' (NOT a dotted attribute path — prior 'module.decoration.spacing' note was a misread). primaryAttrName is 'module' for section spacing; registry schema does not carry primaryAttrName today, recorded in the divi/section cell caveats instead. Attrs root: attrs.<primaryAttrName>.decoration.spacing.desktop.value.{padding|margin}, where both padding and margin follow the IDENTICAL sparse-emit rule: only user-touched corners (top, right, bottom, left) appear, with syncVertical + syncHorizontal always emitted together on any spacing touch (atomic sibling pair; 'off' by default, 'on' when user explicitly enables sync). Margin capture (kxc3elho8v on the write/reset sandbox substrate) corroborates the same shape rule with single-corner touch on the margin axis. Round-trip render-side verification (divi/section block referencing an MCP-created preset on the write/reset sandbox substrate, page 1520): clean — empty corners stay empty in VB, no phantom defaults. Inner-element variants (title, content wrappers) and non-section module cells (heading, text, button) are NOT verified — they retain schema-inferred group_id values with caveats; do NOT extrapolate this section evidence to those cells per feedback_preset_map_per_module.",
@@ -566,12 +567,16 @@
           "preset_type": "group",
           "group_name": "divi/spacing",
           "group_id": "designSpacing",
-          "cell_evidence_level": "CROSS_VERSION_STABLE",
-          "cell_divi_version": "5.13.1, 5.6.0",
-          "verified_at": "2026-10-04",
-          "source": "data/evidence/spacing--divi~section.capture.json",
+          "cell_evidence_level": "VB_PRESET_STORAGE_VERIFIED",
+          "cell_divi_version": "5.6.0",
+          "verified_at": "2026-05-23",
+          "source": "legacy-diviops:docs/verification/evidence/canonical-shape-dumps-2026-05-23/round-5-spacing-section.json",
+          "preset_map_key": "module.decoration.spacing__padding",
+          "state": "desktop.value",
           "caveats": [
-            "Verified via automated REST storage roundtrip (preset/create → preset/inspect byte-diff), not a Visual Builder UI roundtrip."
+            "Sparse-emit padding AND margin: only user-touched corners appear in attrs; syncVertical + syncHorizontal always emit on any spacing touch (atomic sibling pair, both as 'off' by default — 'on' when user explicitly enables sync).",
+            "primaryAttrName='module' for this cell. Registry schema does not carry primaryAttrName as a first-class field today; recorded here in caveats. Phase 2 emitter must include primaryAttrName='module' when writing this preset shape.",
+            "VB authoring footgun: padding/margin field values MUST be committed via Enter or blur before saving the preset in the Composable Settings panel, or the preset saves as an empty registry shell with no 'attrs' key. CLI-driven emitters don't have this problem (values are passed via flags), but worth knowing for any UI-driven preset authoring."
           ]
         },
         "divi/button": {

@@ -70,6 +70,17 @@ import {
   CapabilityMissingError,
   PresetIsolationError,
 } from "./write-path.js";
+import {
+  assertVerifySite,
+  captureAppliesTo,
+  runAdoption,
+  runCapture,
+  CaptureMismatchError,
+  SiteRefusedError,
+  CAPTURABLE_COMMANDS,
+  type CapturableCommand,
+  type EmittedPresetEntry,
+} from "./capture.js";
 
 export const EXIT = {
   OK: 0,
@@ -77,6 +88,7 @@ export const EXIT = {
   EVIDENCE_GATE: 2,
   CAPABILITY_MISSING: 3,
   WRITE_ERROR: 4,
+  SITE_REFUSED: 5,
 } as const;
 
 export type ExitCode = (typeof EXIT)[keyof typeof EXIT];
@@ -104,6 +116,9 @@ USAGE
                                             (currently divi/section only)
   diviskit-preset nav [options]              Emit Divi nav block-markup
                                             skeletons
+  diviskit-preset capture <emitter> [opts]   Capture registry evidence via a
+                                            REST storage roundtrip on a
+                                            scratch site (see below)
   diviskit-preset --help                     Show this help
 
 MODE
@@ -227,9 +242,31 @@ nav OPTIONS (dry-run block markup only; --apply is refused)
       {"label":"Products","links":[{"label":"Overview","url":"/products"}]}
     ]}
 
+capture (registry evidence — scratch sites only)
+  diviskit-preset capture <emitter> [emitter opts] --site <host> [--keep-preset]
+    <emitter> is one of: button, heading-font, text-body-font, spacing.
+    Emits the preset, posts it to /preset/create on the named site,
+    reads it back via /preset/inspect, byte-diffs emitted vs stored
+    attrs, appends a verification record to data/evidence/*.capture.json,
+    then deletes the preset (skip cleanup with --keep-preset).
+  Safety: --site is required, must appear in the DIVISKIT_VERIFY_SITES
+    env allowlist (comma-separated hosts), and must equal the WP_URL
+    hostname. All three checks must pass — captures can never hit an
+    unblessed site.
+  Follow-up: run \`npm run registry:build\` in diviskit-server to merge
+    the new evidence into data/verified-attrs.json.
+
+adopt (registry evidence — VB-authored ground truth)
+  diviskit-preset adopt <preset_id> --site <host>
+    Reads an existing preset via /preset/inspect and records its stored
+    shape as canonical evidence. Use for cells the emitters can't emit
+    yet: author the preset once in the Visual Builder on the scratch
+    site, then adopt it — the automated replacement for manual
+    canonical-shape dumps. Same --site allowlist rules as capture.
+
 EXIT CODES
-  0 success   1 invalid input   2 evidence-gate refusal
-  3 capability missing   4 write error
+  0 success   1 invalid input   2 evidence-gate refusal / capture mismatch
+  3 capability missing   4 write error   5 site refused
 
 EXAMPLES
   diviskit-preset button --name "Primary" --bg-color gcid-primary-color \\
@@ -256,6 +293,8 @@ EXAMPLES
 
 interface ParsedArgs {
   command: string | null;
+  /** Second positional, only consumed for `capture <emitter>`. */
+  subcommand: string | null;
   help: boolean;
   apply: boolean;
   dryRun: boolean;
@@ -296,12 +335,21 @@ const VALUE_FLAGS = new Set([
   "--margin-sync-horizontal",
   "--spec",
   "--spec-file",
+  "--site",
+  "--evidence-dir",
+]);
+
+const BOOLEAN_FLAGS = new Set([
+  "--bypass-hover-padding-gate",
+  "--responsive-split",
+  "--keep-preset",
 ]);
 
 /** Parse argv (after `node script`) into a structured shape. Throws on unknown flags. */
 export function parseArgs(argv: string[]): ParsedArgs {
   const parsed: ParsedArgs = {
     command: null,
+    subcommand: null,
     help: false,
     apply: false,
     dryRun: false,
@@ -329,11 +377,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
       parsed.dryRun = true;
       continue;
     }
-    if (tok === "--bypass-hover-padding-gate") {
-      parsed.options.set(tok, true);
-      continue;
-    }
-    if (tok === "--responsive-split") {
+    if (BOOLEAN_FLAGS.has(tok)) {
       parsed.options.set(tok, true);
       continue;
     }
@@ -348,6 +392,14 @@ export function parseArgs(argv: string[]): ParsedArgs {
     }
     if (!tok.startsWith("-") && parsed.command === null) {
       parsed.command = tok;
+      continue;
+    }
+    if (
+      !tok.startsWith("-") &&
+      (parsed.command === "capture" || parsed.command === "adopt") &&
+      parsed.subcommand === null
+    ) {
+      parsed.subcommand = tok;
       continue;
     }
     throw new UsageError(`Unknown flag or argument: ${tok}`);
@@ -376,6 +428,8 @@ const KNOWN_COMMANDS = new Set([
   "text-body-font",
   "spacing",
   "nav",
+  "capture",
+  "adopt",
 ]);
 
 /** Map parsed `button` options into the emitter input shape. */
@@ -684,6 +738,16 @@ export async function run(
     return EXIT.INVALID_INPUT;
   }
 
+  // `capture` wraps the emitter commands with a live storage roundtrip —
+  // it bypasses the dry-run/apply mode split entirely (it IS a write +
+  // readback) and has its own site-safety gate.
+  if (parsed.command === "capture") {
+    return runCaptureCommand(parsed, io, serverVersion);
+  }
+  if (parsed.command === "adopt") {
+    return runAdoptCommand(parsed, io, serverVersion);
+  }
+
   // --- compose + gate -------------------------------------------------
   // Per-command branch produces:
   //  - `dryRunBody`: the canonical JSON to print in --dry-run mode.
@@ -803,6 +867,205 @@ export async function run(
     }
     io.err(
       `Write failed: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    return EXIT.WRITE_ERROR;
+  }
+}
+
+/**
+ * `diviskit-preset capture <emitter> [opts] --site <host>`.
+ *
+ * Composes the emitter's preset exactly like --apply would (same input
+ * builders, same emitters, same registry gate — a capture of an
+ * un-emittable shape fails at the same gate), then runs the storage
+ * roundtrip in capture.ts and prints a JSON summary.
+ */
+async function runCaptureCommand(
+  parsed: ParsedArgs,
+  io: CliIO,
+  serverVersion?: string,
+): Promise<ExitCode> {
+  try {
+    const sub = parsed.subcommand;
+    if (!sub) {
+      throw new UsageError(
+        "capture requires an emitter subcommand: " +
+          CAPTURABLE_COMMANDS.join(", ") +
+          ". Example: diviskit-preset capture spacing --module divi/section " +
+          "--padding-top 80px --site diviskit-shop.ddev.site",
+      );
+    }
+    if (!(CAPTURABLE_COMMANDS as readonly string[]).includes(sub)) {
+      throw new UsageError(
+        `capture cannot run emitter "${sub}" — supported: ` +
+          CAPTURABLE_COMMANDS.join(", ") +
+          ". (nav emits block markup, not presets — nothing to capture.)",
+      );
+    }
+    const command = sub as CapturableCommand;
+
+    // Same composition path as dry-run/apply — the emitter's registry
+    // gate still applies, so only emittable shapes can be captured.
+    let entry: EmittedPresetEntry;
+    let createBody: Record<string, unknown>;
+    if (command === "button") {
+      const e = emitButtonGroupPreset(buildButtonInput(parsed));
+      entry = e;
+      createBody = buildPresetCreateBody(e);
+    } else if (command === "heading-font") {
+      const e = emitHeadingFontGroupPreset(buildHeadingFontInput(parsed));
+      entry = e;
+      createBody = buildHeadingFontPresetCreateBody(e);
+    } else if (command === "text-body-font") {
+      const e = emitTextBodyFontGroupPreset(buildTextBodyFontInput(parsed));
+      entry = e;
+      createBody = buildTextBodyFontPresetCreateBody(e);
+    } else {
+      const e = emitSpacingGroupPreset(buildSpacingInput(parsed));
+      entry = e;
+      createBody = buildSpacingPresetCreateBody(e);
+    }
+
+    const opt = (k: string): string | undefined => {
+      const v = parsed.options.get(k);
+      return typeof v === "string" ? v : undefined;
+    };
+
+    // Site safety BEFORE building the client — refuse early, no network.
+    const wpUrl = process.env.WP_URL ?? "";
+    const site = assertVerifySite(wpUrl, opt("--site"));
+    const client = buildClientFromEnv();
+    if (!serverVersion) {
+      throw new UsageError(
+        "capture requires the server version for the plugin handshake — " +
+          "invoke via the `diviskit-preset` bin.",
+      );
+    }
+
+    // Sanity: every cell we claim to verify must be derivable.
+    const appliesTo = captureAppliesTo(command, entry);
+    if (appliesTo.length === 0) {
+      throw new UsageError(
+        "capture could not derive any registry cell from the emitted " +
+          "preset (empty attrs decoration tree?). Nothing to verify.",
+      );
+    }
+
+    const summary = await runCapture(client, command, entry, createBody, {
+      serverVersion,
+      site,
+      evidenceDir: opt("--evidence-dir"),
+      keepPreset: parsed.options.get("--keep-preset") === true,
+    });
+    io.out(JSON.stringify(summary, null, 2));
+    io.err(
+      "Evidence recorded. Run `npm run registry:build` in diviskit-server " +
+        "to merge it into data/verified-attrs.json.",
+    );
+    return EXIT.OK;
+  } catch (err) {
+    if (err instanceof CaptureMismatchError) {
+      io.err(err.message);
+      return EXIT.EVIDENCE_GATE;
+    }
+    if (err instanceof SiteRefusedError) {
+      io.err(err.message);
+      return EXIT.SITE_REFUSED;
+    }
+    if (err instanceof EvidenceGateError) {
+      io.err(err.message);
+      return EXIT.EVIDENCE_GATE;
+    }
+    if (err instanceof CapabilityMissingError) {
+      io.err(err.message);
+      return EXIT.CAPABILITY_MISSING;
+    }
+    if (
+      err instanceof CredentialsMissingError ||
+      err instanceof PresetIsolationError
+    ) {
+      io.err(err.message);
+      return EXIT.INVALID_INPUT;
+    }
+    if (err instanceof UsageError) {
+      io.err(err.message);
+      io.err("Run `diviskit-preset --help` for usage.");
+      return EXIT.INVALID_INPUT;
+    }
+    io.err(
+      `Capture failed: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    return EXIT.WRITE_ERROR;
+  }
+}
+
+/**
+ * `diviskit-preset adopt <preset_id> --site <host>` — promote an
+ * existing VB-authored preset into registry evidence. Same site-safety
+ * gate as capture; no preset is created or deleted (read-only roundtrip).
+ */
+async function runAdoptCommand(
+  parsed: ParsedArgs,
+  io: CliIO,
+  serverVersion?: string,
+): Promise<ExitCode> {
+  try {
+    const presetId = parsed.subcommand;
+    if (!presetId) {
+      throw new UsageError(
+        "adopt requires a preset id: " +
+          "diviskit-preset adopt <preset_id> --site diviskit-shop.ddev.site",
+      );
+    }
+    const opt = (k: string): string | undefined => {
+      const v = parsed.options.get(k);
+      return typeof v === "string" ? v : undefined;
+    };
+
+    const wpUrl = process.env.WP_URL ?? "";
+    const site = assertVerifySite(wpUrl, opt("--site"));
+    const client = buildClientFromEnv();
+    if (!serverVersion) {
+      throw new UsageError(
+        "adopt requires the server version for the plugin handshake — " +
+          "invoke via the `diviskit-preset` bin.",
+      );
+    }
+
+    const summary = await runAdoption(client, presetId, {
+      serverVersion,
+      site,
+      evidenceDir: opt("--evidence-dir"),
+    });
+    io.out(JSON.stringify(summary, null, 2));
+    io.err(
+      "Evidence recorded. Run `npm run registry:build` in diviskit-server " +
+        "to merge it into data/verified-attrs.json.",
+    );
+    return EXIT.OK;
+  } catch (err) {
+    if (err instanceof SiteRefusedError) {
+      io.err(err.message);
+      return EXIT.SITE_REFUSED;
+    }
+    if (err instanceof CapabilityMissingError) {
+      io.err(err.message);
+      return EXIT.CAPABILITY_MISSING;
+    }
+    if (
+      err instanceof CredentialsMissingError ||
+      err instanceof PresetIsolationError
+    ) {
+      io.err(err.message);
+      return EXIT.INVALID_INPUT;
+    }
+    if (err instanceof UsageError) {
+      io.err(err.message);
+      io.err("Run `diviskit-preset --help` for usage.");
+      return EXIT.INVALID_INPUT;
+    }
+    io.err(
+      `Adoption failed: ${err instanceof Error ? err.message : String(err)}`,
     );
     return EXIT.WRITE_ERROR;
   }

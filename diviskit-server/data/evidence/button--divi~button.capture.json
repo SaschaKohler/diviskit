@@ -1,0 +1,116 @@
+{
+  "schema_version": "1.0.0",
+  "kind": "preset_storage_roundtrip",
+  "command": "button",
+  "applies_to": [
+    {
+      "pattern_family": "divi/button.background",
+      "module": "divi/button",
+      "wrapper": "button",
+      "preset_type": "group",
+      "group_name": "divi/button",
+      "group_id": "button"
+    },
+    {
+      "pattern_family": "divi/button.border",
+      "module": "divi/button",
+      "wrapper": "button",
+      "preset_type": "group",
+      "group_name": "divi/button",
+      "group_id": "button"
+    },
+    {
+      "pattern_family": "divi/button.font",
+      "pattern_variant": "google_fonts_pattern_a",
+      "module": "divi/button",
+      "wrapper": "button",
+      "preset_type": "group",
+      "group_name": "divi/button",
+      "group_id": "button"
+    }
+  ],
+  "verifications": [
+    {
+      "method": "rest_storage_roundtrip",
+      "captured_at": "2026-10-04T07:45:42.421Z",
+      "site": "diviskit-shop.ddev.site",
+      "divi_version": "5.13.1",
+      "plugin_version": "1.7.4",
+      "preset_id": "ee710d76-cca9-4747-b516-9e91fea88c8d",
+      "result": "match",
+      "diff_paths": [],
+      "emitted_attrs": {
+        "button": {
+          "decoration": {
+            "background": {
+              "desktop": {
+                "value": {
+                  "color": "#2563eb"
+                }
+              }
+            },
+            "border": {
+              "desktop": {
+                "value": {
+                  "radius": {
+                    "topLeft": "8px",
+                    "topRight": "8px",
+                    "bottomLeft": "8px",
+                    "bottomRight": "8px",
+                    "sync": "on"
+                  }
+                }
+              }
+            },
+            "font": {
+              "font": {
+                "desktop": {
+                  "value": {
+                    "family": "Inter",
+                    "weight": "600"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "stored_attrs": {
+        "button": {
+          "decoration": {
+            "background": {
+              "desktop": {
+                "value": {
+                  "color": "#2563eb"
+                }
+              }
+            },
+            "border": {
+              "desktop": {
+                "value": {
+                  "radius": {
+                    "topLeft": "8px",
+                    "topRight": "8px",
+                    "bottomLeft": "8px",
+                    "bottomRight": "8px",
+                    "sync": "on"
+                  }
+                }
+              }
+            },
+            "font": {
+              "font": {
+                "desktop": {
+                  "value": {
+                    "family": "Inter",
+                    "weight": "600"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
