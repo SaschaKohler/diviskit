@@ -90,6 +90,32 @@ Three silent-failure traps to avoid.
 
 Custom styling lives on **sibling-level paths**: `button.decoration.{border, background, font, boxShadow}` for visual styling. Padding is **scope-dependent**: `module.decoration.spacing.padding` for inline buttons / `divi/button` module presets, `button.decoration.spacing.padding` for `divi/button` group presets (the `presetGroup` render path at `ButtonModule.php:633-644` merges the latter into module spacing via `array_replace_recursive`).
 
+Fully-styled inline button — VB-saved shape, copy verbatim and swap values *(VB-verified 2026-10-04, Divi 5.14; tokenized colors as `$variable({...})$` strings work here too)*:
+
+```json
+{
+  "builderVersion": "5.13",
+  "module": {
+    "meta": {"adminLabel": {"desktop": {"value": "CTA"}}},
+    "decoration": {
+      "spacing": {"desktop": {"value": {"padding": {"top": "16px", "bottom": "16px", "left": "30px", "right": "30px", "syncVertical": "on", "syncHorizontal": "on"}}}}
+    }
+  },
+  "button": {
+    "innerContent": {"desktop": {"value": {"text": "Get Started", "linkUrl": "#target"}}},
+    "decoration": {
+      "button": {"desktop": {"value": {"icon": {"enable": "off"}}}},
+      "background": {"desktop": {"value": {"color": "#17150F"}, "hover": {"color": "#E8490F"}}},
+      "font": {"font": {"desktop": {"value": {"color": "#F7F4EE", "size": "15px", "weight": "700"}, "hover": {"color": "#FFFFFF"}}}},
+      "border": {"desktop": {"value": {"radius": {"topLeft": "0px", "topRight": "0px", "bottomLeft": "0px", "bottomRight": "0px", "sync": "on"}}}}
+    }
+  }
+}
+```
+
+- **Every `hover` sits inside the breakpoint object** — `font.font.desktop.hover`, never `font.font.hover`. Hover at group level (sibling of `desktop`) crashes the VB with "Oops! An Error Has Occurred" while the frontend renders fine.
+- **Decoration buckets stay inside `decoration`** — `button.border` as a sibling of `button.decoration` (instead of `border` inside it) is JSON-valid, passes `diviskit_validate_blocks`, and still breaks the VB. Both misnestings are invisible to the validator; shape-diff against this reference when the frontend renders but the builder errors.
+
 ---
 
 ## `divi/blurb`

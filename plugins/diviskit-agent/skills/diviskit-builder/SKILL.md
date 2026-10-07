@@ -61,6 +61,7 @@ Read the right file for the task at hand — don't load everything.
 | Per-module detailed schema | [modules/](references/modules/) — 87 individual module files |
 | Adding CSS classes to modules | [design-effects.md](references/design-effects.md) — uses `module.decoration.attributes`, NOT `className` |
 | CSS effects & WebGL shaders | [design-effects.md](references/design-effects.md) |
+| Reusable design elements / card recipes | [design-elements.md](references/design-elements.md) — e.g. Index Card (numbered editorial card) |
 | Loop elements (query-driven modules) | [loops.md](references/loops.md) — `module.advanced.loop` + `loop_post_*` variables |
 | Mega menus & navigation | Skill [`diviskit-mega-menu`](../diviskit-mega-menu/SKILL.md) — CSS-only native `<details>` mobile menu ([mobile-menu.md](../diviskit-mega-menu/references/mobile-menu.md)), `divi/dropdown` mega menus, zero-canvas drawers, loop-driven links, and three-canvas panels. Use the `<details>` system for compact Text/Code-module headers; use `divi/dropdown` when individual modules must remain VB-editable. |
 | Presets & cleanup | [presets.md](references/presets.md) |
