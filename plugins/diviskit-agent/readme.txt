@@ -117,6 +117,11 @@ Run it from anywhere inside your DDEV project (or pass the project directory as 
 
 == Changelog ==
 
+= 1.7.5 =
+
+* New "Skill bundles" dashboard card lists every skill the `/skills` endpoint serves — name, source bundle (`diviskit-agent`, `diviskit-pro`, future add-ons), file count, and the frontmatter description — so Pro skill contributions are visible in the Free dashboard.
+* `diviskit-builder` skill gains a `design-elements.md` reference with reusable component recipes (Index Card pattern).
+
 = 1.7.4 =
 
 * Ships `bin/install-skills.sh` inside the plugin — downloadable from the Diviskit dashboard — supporting Devin, Codex, Claude Code, Cursor (generated rules), and generic target directories for skill installation.
