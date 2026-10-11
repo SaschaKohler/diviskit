@@ -67,7 +67,7 @@ Read the right file for the task at hand — don't load everything.
 | Presets & cleanup | [presets.md](references/presets.md) |
 | PageSpeed/performance fixes | [performance.md](references/performance.md) — fonts inline, script defer, mediaelement dequeue, viewport, SSR consent |
 | Design system setup | [SKILL.md](#design-system-lifecycle) (below) → [presets.md](references/presets.md) |
-| Page templates | [patterns/](references/patterns/) — SaaS landing, more coming |
+| Page templates (technical examples, not default layouts) | [SaaS landing](references/patterns/saas-landing.md), [service lead generation](references/patterns/service-lead-gen.md), [portfolio case study](references/patterns/portfolio-case-study.md), [product launch / waitlist](references/patterns/product-launch.md), [event registration](references/patterns/event-registration.md) |
 
 ### Tier 3 module maps — auto-generated
 

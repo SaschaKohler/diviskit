@@ -1,6 +1,6 @@
 # Pattern: SaaS Landing Page
 
-A dark-theme, conversion-focused landing page with 6 sections. Proven structure from page 756 (OARIS Studio).
+A dark-theme, conversion-focused landing page with 6 sections.
 
 ## Section Structure
 
