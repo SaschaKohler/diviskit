@@ -9,6 +9,10 @@ Policy:
 - Keep entries customer-facing. Avoid internal issue numbers unless they are needed to explain a user-visible change.
 - Do not include secrets, credentials, customer data, or environment-specific URLs.
 
+## 1.7.7
+
+- `diviskit-builder` skill: the "Oops! An Error Has Occurred" font-`hover` pitfall is generalised — `hover` must live inside the breakpoint (`<fontPath>.desktop.hover`) in every font option group (`bodyFont.body.font`, `button.decoration.font.font`, `divi/link` `decoration.font.font`, `title.decoration.font.font`, …) and in Theme Builder header/footer layouts. A wrong-level hover renders fine on the frontend but emits no hover CSS and crashes the module in the Visual Builder.
+
 ## 1.7.6
 
 - Unifies Divi version resolution in `resolve_divi_version()` (moved to trait-core): single source of truth for the admin dashboard, handshake, settings dump, compatibility checks and the schema-hash cache key. `ET_BUILDER_VERSION` (derived from the installed theme header) now wins over `ET_BUILDER_PRODUCT_VERSION` / `ET_CORE_VERSION`, which Elegant Themes' release task has shipped with stale values (e.g. 5.14.0 inside the 5.15.0 theme).
