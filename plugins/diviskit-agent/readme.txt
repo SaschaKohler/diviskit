@@ -3,7 +3,7 @@ Contributors: diviskit
 Tags: divi, mcp, ai, rest-api, site-builder
 Requires at least: 6.5
 Tested up to: 7.1
-Stable tag: 1.7.7
+Stable tag: 1.7.8
 Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -116,6 +116,10 @@ Run it from anywhere inside your DDEV project (or pass the project directory as 
 2. An agent-authored page open in the Divi 5 Visual Builder, with the native Heading module content controls available for continued editing. Divi is a separate required product.
 
 == Changelog ==
+
+= 1.7.8 =
+
+* Adds opencode as a supported skill-install client: `install-skills.sh --client opencode` targets `.opencode/skills/` / `~/.config/opencode/skills/` and resolves credentials from `opencode.json[c]` (`mcp.<name>.environment`, incl. `{env:NAME}` references and JSONC). Setup docs and templates updated.
 
 = 1.7.7 =
 
