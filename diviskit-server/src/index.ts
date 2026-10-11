@@ -5175,7 +5175,7 @@ function registerProTools(): void {
     "diviskit_vk_license_settings_get",
     {
       description:
-        "Read a Vendokit product's licensing configuration (Pro tier): the _vk_license_* postmeta (enabled/version/prefix/update_download_id/changelog/tested/requires/requires_php), per-variation license settings ({activation_limit, validity_unit, validity_value}; activation_limit 0 = unlimited, validity_unit 'lifetime' = no expiry), and update_file readiness (whether update_download_id resolves to an existing download row of this product). Read-only.",
+        "Read a Vendokit product's licensing configuration (Pro tier): the _vk_license_* postmeta (enabled/version/prefix/update_download_id/changelog/tested/requires/requires_php), per-variation license settings ({activation_limit, validity_unit, validity_value, support_unit, support_value}; activation_limit 0 = unlimited, validity_unit 'lifetime' = no expiry, support_* anchors the support window on first activation), and update_file readiness (whether update_download_id resolves to an existing download row of this product). Read-only.",
       inputSchema: {
         id: z.number().int().positive().describe("Vendokit product ID."),
       },
@@ -5194,7 +5194,7 @@ function registerProTools(): void {
     "diviskit_vk_license_settings_update",
     {
       description:
-        "Update a Vendokit product's licensing configuration (Pro tier; requires manage_options). Partial update — only provided fields change: enabled, version, prefix, variations ({variation_id: {activation_limit, validity_unit, validity_value}}), update_download_id (must reference a vk_downloads row belonging to this product), changelog, tested, requires, requires_php. Supports dry_run which returns the planned field list without writing postmeta. " +
+        "Update a Vendokit product's licensing configuration (Pro tier; requires manage_options). Partial update — only provided fields change: enabled, version, prefix, variations ({variation_id: {activation_limit, validity_unit, validity_value, support_unit, support_value}}; units are singular day/week/month/year/lifetime — validity_* is the update/download window from purchase, support_* is the support window from first license activation), update_download_id (must reference a vk_downloads row belonging to this product), changelog, tested, requires, requires_php. Supports dry_run which returns the planned field list without writing postmeta. " +
         DRY_RUN_DESC_SUFFIX,
       inputSchema: {
         id: z.number().int().positive().describe("Vendokit product ID."),
@@ -5206,8 +5206,10 @@ function registerProTools(): void {
             z.string(),
             z.object({
               activation_limit: z.number().int().min(0).optional(),
-              validity_unit: z.enum(["days", "months", "years", "lifetime"]).optional(),
+              validity_unit: z.enum(["day", "week", "month", "year", "lifetime"]).optional(),
               validity_value: z.number().int().min(0).optional(),
+              support_unit: z.enum(["day", "week", "month", "year", "lifetime"]).optional(),
+              support_value: z.number().int().min(0).optional(),
             }),
           )
           .optional()
@@ -5288,6 +5290,143 @@ function registerProTools(): void {
       return { content: [{ type: "text" as const, text: serializeEnvelope(result, "diviskit_vk_gateway_get") }] };
     },
     { target: "vendokit", capabilityKey: "vendokit_gateway_get" },
+  );
+
+  // ── Migrate (D4→D5 migration remediation) ───────────────────────────
+  //
+  // Pro coverage tools for the migrate module — audits post_content for
+  // `divi/shortcode-module` legacy islands left by the D4→D5 migrator,
+  // classifies them (reconvert | agent_rebuild | orphan), previews and
+  // applies server-side reconversion, and splices agent-built native
+  // block markup over non-convertible islands. Routes live at
+  // /diviskit/v1/pro/migrate/*. Capability keys are `migrate_*`; tool
+  // names follow the `diviskit_migrate_*` convention.
+  //
+  // Audit/status/module-map also answer on Divi 4 sites (the wedge);
+  // preview/reconvert require the D5 conversion engine and return
+  // `migrate.divi5_required` on Divi 4.
+
+  // diviskit_migrate_audit_run — POST /diviskit/v1/pro/migrate/audit
+  registerProTool(
+    "diviskit_migrate_audit_run",
+    {
+      description:
+        "Scan the site's post_content for D4→D5 migration residue (Pro tier; requires the migrate module). Read-only. Finds `divi/shortcode-module` legacy islands (third-party/non-convertible modules left wrapped after migration), raw `[et_pb_*` shortcode leftovers the migrator never touched, divi/placeholder and divi/global-layout wrappers, and the `u0026#` unslash corruption signature. Each island is classified: reconvert (D5 mapping exists — use diviskit_migrate_page_reconvert), agent_rebuild (module still renders via the legacy framework but has no D5 mapping — rebuild with diviskit_migrate_island_replace), orphan (source plugin gone — renders silently empty, highest priority). Pass post_id to audit a single post, include_raw: true to receive each island's parsed shortcode attributes and inner content (needed to design replacements). Works on Divi 4 sites too — there the full `[et_pb_*` inventory is the pre-migration module map.",
+      inputSchema: {
+        post_id: z.number().int().positive().optional().describe("Limit the audit to one post/page instead of scanning the whole site."),
+        include_raw: z.boolean().optional().default(false).describe("Include each island's parsed shortcode atts and inner content — required to design native replacements."),
+      },
+      annotations: { readOnlyHint: true, idempotentHint: true },
+      _meta: { idempotent: "true" },
+    },
+    async ({ post_id, include_raw }) => {
+      const body: Record<string, unknown> = {};
+      if (post_id !== undefined) body.post_id = post_id;
+      if (include_raw !== undefined) body.include_raw = include_raw;
+      const result = await wp.requestEnveloped("/pro/migrate/audit", { method: "POST", body });
+      return { content: [{ type: "text" as const, text: serializeEnvelope(result, "diviskit_migrate_audit_run") }] };
+    },
+    { target: "migrate", capabilityKey: "migrate_audit_run" },
+  );
+
+  // diviskit_migrate_status_get — POST /diviskit/v1/pro/migrate/status
+  registerProTool(
+    "diviskit_migrate_status_get",
+    {
+      description:
+        "Aggregate migration-residue status for the site (Pro tier; requires the migrate module). Read-only. Returns verdict green (clean) / yellow (islands or raw shortcode leftovers present) / red (orphan islands — plugins deactivated, content renders silently empty — or corruption markers), plus totals and the affected slug list. Run after remediation passes to prove the site is legacy-free.",
+      inputSchema: {},
+      annotations: { readOnlyHint: true, idempotentHint: true },
+      _meta: { idempotent: "true" },
+    },
+    async () => {
+      const result = await wp.requestEnveloped("/pro/migrate/status", { method: "POST" });
+      return { content: [{ type: "text" as const, text: serializeEnvelope(result, "diviskit_migrate_status_get") }] };
+    },
+    { target: "migrate", capabilityKey: "migrate_status_get" },
+  );
+
+  // diviskit_migrate_map_get — POST /diviskit/v1/pro/migrate/module-map
+  registerProTool(
+    "diviskit_migrate_map_get",
+    {
+      description:
+        "Per-shortcode remediation map for the whole site (Pro tier; requires the migrate module). Read-only. For every distinct legacy slug found: occurrence count, affected post IDs, whether a D5 d4Shortcode conversion mapping exists (convertible → cheap reconvert), whether the module is still registered (agent_rebuild → renders via legacy framework today), and the resulting strategy. Sort by occurrences — replacing the top slugs de-legacies the most pages first.",
+      inputSchema: {},
+      annotations: { readOnlyHint: true, idempotentHint: true },
+      _meta: { idempotent: "true" },
+    },
+    async () => {
+      const result = await wp.requestEnveloped("/pro/migrate/module-map", { method: "POST" });
+      return { content: [{ type: "text" as const, text: serializeEnvelope(result, "diviskit_migrate_map_get") }] };
+    },
+    { target: "migrate", capabilityKey: "migrate_map_get" },
+  );
+
+  // diviskit_migrate_island_preview — POST /diviskit/v1/pro/migrate/preview
+  registerProTool(
+    "diviskit_migrate_island_preview",
+    {
+      description:
+        "Dry-run Divi 5's server-side conversion without writing (Pro tier; requires the migrate module + Divi 5). Read-only against the DB. Pass post_id to see what reconversion of that post would produce, or pass content (raw D4 shortcode markup or D5 content containing islands) to test the conversion of arbitrary markup — e.g. a single island's embedded shortcode. Returns converted_content plus islands_before/islands_after and remaining_slugs. Use this before diviskit_migrate_page_reconvert and to check whether a slug converts natively before designing a manual replacement.",
+      inputSchema: {
+        post_id: z.number().int().positive().optional().describe("Preview conversion for this post's stored content."),
+        content: z.string().optional().describe("Raw content to convert (alternative to post_id) — e.g. one island's inner shortcode."),
+      },
+      annotations: { readOnlyHint: true, idempotentHint: true },
+      _meta: { idempotent: "true" },
+    },
+    async ({ post_id, content }) => {
+      const body: Record<string, unknown> = {};
+      if (post_id !== undefined) body.post_id = post_id;
+      if (content !== undefined) body.content = content;
+      const result = await wp.requestEnveloped("/pro/migrate/preview", { method: "POST", body });
+      return { content: [{ type: "text" as const, text: serializeEnvelope(result, "diviskit_migrate_island_preview") }] };
+    },
+    { target: "migrate", capabilityKey: "migrate_island_preview" },
+  );
+
+  // diviskit_migrate_page_reconvert — POST /diviskit/v1/pro/migrate/reconvert
+  registerProTool(
+    "diviskit_migrate_page_reconvert",
+    {
+      description:
+        "Apply Divi 5's server-side conversion to one post (Pro tier; requires the migrate module + Divi 5). Mutates post_content: every `divi/shortcode-module` island whose slug has a d4Shortcode mapping is replaced by native D5 blocks; non-convertible islands stay wrapped. The write bypasses wp_unslash (byte-verified) and stores the previous post_content in `_diviskit_migrate_prev` postmeta. Returns islands_before/after, removed_slugs, and the remaining islands with their strategies. Preview first with diviskit_migrate_island_preview.",
+      inputSchema: {
+        post_id: z.number().int().positive().describe("Post ID to reconvert."),
+      },
+      annotations: { readOnlyHint: false, idempotentHint: true, destructiveHint: false },
+      _meta: { idempotent: "conditional" },
+    },
+    async ({ post_id }) => {
+      const result = await wp.requestEnveloped("/pro/migrate/reconvert", { method: "POST", body: { post_id } });
+      return { content: [{ type: "text" as const, text: serializeEnvelope(result, "diviskit_migrate_page_reconvert") }] };
+    },
+    { target: "migrate", capabilityKey: "migrate_page_reconvert" },
+  );
+
+  // diviskit_migrate_island_replace — POST /diviskit/v1/pro/migrate/island-replace
+  registerProTool(
+    "diviskit_migrate_island_replace",
+    {
+      description:
+        "Replace one legacy island with native Divi 5 block markup you supply (Pro tier; requires the migrate module). Mutates post_content by splicing `replacement` over the island at `island_index` (document order — get indexes via diviskit_migrate_audit_run with post_id). The replacement must parse to at least one named block and must not contain another divi/shortcode-module wrapper. Icon unicode values must be entity-escaped as `\\u0026#x…;` inside the block JSON — the literal `u0026` corruption signature is rejected. Write is byte-verified; previous post_content lands in `_diviskit_migrate_prev` postmeta. NOTE: island indexes shift when earlier islands are removed — re-audit before replacing the next island, or work back-to-front.",
+      inputSchema: {
+        post_id: z.number().int().positive().describe("Post ID containing the island."),
+        island_index: z.number().int().min(0).describe("Document-order index of the divi/shortcode-module island to replace (from audit output)."),
+        replacement: z.string().min(1).describe("Native D5 block markup, e.g. `<!-- wp:divi/blurb {\"title\":{...}} -->…<!-- /wp:divi/blurb -->`."),
+      },
+      annotations: { readOnlyHint: false, idempotentHint: false, destructiveHint: false },
+      _meta: { idempotent: "false" },
+    },
+    async ({ post_id, island_index, replacement }) => {
+      const result = await wp.requestEnveloped("/pro/migrate/island-replace", {
+        method: "POST",
+        body: { post_id, island_index, replacement },
+      });
+      return { content: [{ type: "text" as const, text: serializeEnvelope(result, "diviskit_migrate_island_replace") }] };
+    },
+    { target: "migrate", capabilityKey: "migrate_island_replace" },
   );
 }
 
