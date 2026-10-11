@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # release.sh — Diviskit plugin release pipeline.
 #
-#   bin/release.sh <slug> <version> [--staging] [--push] [--tested <wp>] [--changelog "<html>"]
+#   bin/release.sh <slug> <version> [--staging] [--push] [--tested <wp>] [--changelog "<html>"] [--tests] [--skip-tests]
 #
 # Source of truth: the suite repos (Active_Projects/diviskit = free,
 # Active_Projects/diviskit-pro = payware). This script works from any of
@@ -32,16 +32,19 @@ PRO_REPO="$AP/diviskit-pro"
 # ---- args -------------------------------------------------------------
 SLUG=${1:-}; VERSION=${2:-}; shift 2 || true
 STAGING=0; PUSH=0; TESTED=""; CHANGELOG=""
+FORCE_TESTS=0; SKIP_TESTS=0
 while [ $# -gt 0 ]; do
   case "$1" in
     --staging) STAGING=1 ;;
     --push) PUSH=1 ;;
     --tested) TESTED=$2; shift ;;
     --changelog) CHANGELOG=$2; shift ;;
+    --tests) FORCE_TESTS=1 ;;
+    --skip-tests) SKIP_TESTS=1 ;;
     *) die "unknown arg $1" ;;
   esac; shift
 done
-[ -n "$SLUG" ] && [ -n "$VERSION" ] || die "usage: release.sh <slug> <version> [--staging] [--push] [--tested <wp>] [--changelog <html>]"
+[ -n "$SLUG" ] && [ -n "$VERSION" ] || die "usage: release.sh <slug> <version> [--staging] [--push] [--tested <wp>] [--changelog <html>] [--tests] [--skip-tests]"
 
 # ---- per-plugin config -------------------------------------------------
 # BUNDLE=1: free plugins that also ship inside the pro suite repo.
@@ -78,6 +81,19 @@ fi
 echo "==> php -l"
 (cd "$SITE" && ddev exec bash -c "find /var/www/html/$PDIR -name '*.php' -print0 | xargs -0 -n1 php -l 2>&1 | grep -v 'No syntax errors' || true") | tee /tmp/release-lint.txt
 grep -q "Parse error\|Fatal" /tmp/release-lint.txt && die "php lint failed"
+
+# ---- 3b. e2e gate --------------------------------------------------------
+# Playwright suite tests/e2e covers the full install chain: fresh DDEV
+# instance (WP + Divi + plugin zip), REST handshake, skills bundles and
+# diviskit-mcp. Runs by default for diviskit-agent (the plugin it tests);
+# --tests forces it for any slug, --skip-tests bypasses. Needs the
+# diviskit-test DDEV site running + Docker.
+if [ "$SKIP_TESTS" != "1" ] && { [ "$SLUG" = "diviskit-agent" ] || [ "$FORCE_TESTS" = "1" ]; }; then
+  echo "==> e2e gate (tests/e2e)"
+  ( cd "$FREE_REPO/tests/e2e" \
+    && { [ -d node_modules ] || npm install --no-audit --no-fund; } \
+    && npx playwright test ) || die "e2e gate failed — fix the failure or re-run with --skip-tests"
+fi
 
 # ---- 4. zip ------------------------------------------------------------
 echo "==> zip"

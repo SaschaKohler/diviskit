@@ -1,10 +1,28 @@
 # TESTING.md — Beta-readiness test plan (diviskit-agent + diviskit-pro)
 
 Audit basis: diviskit-agent 1.7.2 / diviskit-pro 1.0.3 (2026-10).
-The plugin has **no automated test suite yet** — vendokit ships a
-wp-phpunit scaffold (`plugins/vendokit/{composer.json,phpunit.xml.dist,tests/}`)
-that can be cloned as the starting point. Until then, items below are
-manual/scripted checks against the DDEV sites.
+Automated coverage now exists on two levels:
+
+- **wp-phpunit** (`plugins/diviskit-agent/{composer.json,phpunit.xml.dist,
+  tests/}`) — cloned from vendokit's scaffold; unit tests for the
+  permission callbacks (role matrix, request-aware create/status guards,
+  fixed-publish CPT gates), handshake payload/426 gate and the
+  envelope/skills file contract. Runs inside `diviskit-test` against the
+  dedicated `test` DB:
+  `cd ../diviskit-test && ddev exec "cd /var/www/html/wp-content/plugins/diviskit-agent && composer install"`
+  then `… && vendor/bin/phpunit"`. Needs the plugin rsynced to the site
+  (release.sh does this; manual: `rsync -a --delete plugins/diviskit-agent/
+  ../diviskit-test/wp-content/plugins/diviskit-agent/`).
+- **Playwright** (`tests/e2e/`) — automates §5's "Clean install" plus the
+  full skills + MCP chain against `diviskit-test` and a clean-room
+  `diviskit-agent-e2e` DDEV project (`cd tests/e2e && npm install &&
+  npx playwright test`; optional wp-admin-UI spec via env — see
+  `tests/e2e/playwright.config.ts` header; distribution is store-only,
+  no wp.org listing planned).
+
+`bin/release.sh` runs the Playwright suite as a gate before zipping
+(diviskit-agent by default; `--tests` forces, `--skip-tests` bypasses).
+Items below remain manual/scripted checks against the DDEV sites.
 
 Status legend: **[B]** beta-blocker · **[R]** recommended before 1.0 · **[L]** later
 
@@ -22,7 +40,8 @@ Application Passwords.
 - [ ] **Role matrix** — subscriber: nothing; contributor+author:
       `check_read_permission` routes only (edit_posts), no writes;
       editor: read + write (edit_pages), no `manage_options` routes;
-      admin: everything.
+      admin: everything. Guard-level coverage:
+      `tests/Unit/PermissionsTest.php` — the HTTP sweep stays manual.
 - [ ] **Per-object checks** — author tries `page/update-content`,
       `module/update`, `section/*`, `seo/metadata` POST, `page/trash`
       on an admin-owned page → `forbidden`. Handlers deferring to
@@ -92,7 +111,9 @@ Application Passwords.
 
 - [ ] **Handshake integrity** — `compatible:true`; every route in
       `CAPABILITIES` ↔ registered route ↔ MCP tool name (drift check:
-      add-route-without-capability regression test).
+      add-route-without-capability regression test). Payload shape +
+      capability-map completeness: `tests/Unit/HandshakeTest.php`;
+      tool↔capability drift: `tests/e2e/tests/03-mcp.spec.ts`.
 - [ ] **dry_run** on every mutating route → `{dry_run:true, plan:{summary,
       changes[]}}` shape, zero DB mutation.
 - [ ] **Idempotency** — `page_trash` twice → `already_trashed`;
@@ -111,7 +132,9 @@ Application Passwords.
       in the admin dashboard.
 - [ ] **Skills endpoints** — manifest sha256 matches bundle bytes;
       base64 decodes; `diviskit_skills_dirs` filter: Pro bundle appears
-      only with Pro installed (module gating honored).
+      only with Pro installed (module gating honored). File contract
+      unit-covered (`tests/Unit/EnvelopeTest.php`), end-to-end incl.
+      Pro gating in `tests/e2e/tests/02-skills.spec.ts`.
 - [ ] **Pro module gate** — vendokit routes answer
       `vendokit.module_inactive` (412) when the module toggle is off or
       the vendokit plugin is absent — not generic 404.
@@ -158,12 +181,19 @@ Application Passwords.
 
 ## 6. Recommended infrastructure [R]
 
-- [ ] Clone vendokit's wp-phpunit scaffold for diviskit-agent:
-      `composer.json` (wp-phpunit/wp-phpunit), `phpunit.xml.dist`,
-      `tests/bootstrap.php` — start with permission-callback unit tests
-      and the handler-level `edit_post` guards.
-- [ ] REST smoke script (curl bats or shell) against DDEV site covering
-      §1–§3 — can run pre-release in CI later.
+- [x] ~~Clone vendokit's wp-phpunit scaffold for diviskit-agent~~ —
+      shipped: `plugins/diviskit-agent/tests/` (bootstrap +
+      wp-tests-config against the `test` DB, `DK_TestCase`,
+      `Unit/PermissionsTest` covering the §1 role matrix at guard level
+      incl. request-aware create/status gates and CPT cap splits,
+      `Unit/HandshakeTest`, `Unit/EnvelopeTest` for the §3 skills file
+      contract). Extend with handler-level `edit_post` coverage + §2/§3
+      write-path cases next.
+- [x] ~~REST smoke script (curl bats or shell) against DDEV site covering
+      §1–§3~~ — Playwright suite `tests/e2e/` covers clean install,
+      AGENTS.md markers, handshake auth/version gates, skills
+      manifest/bundle sha256 integrity, install-skills.sh client matrix
+      and diviskit-mcp stdio. §1/§2 security sweeps still manual.
 - [ ] `bin/make-translations.sh` in release.sh pipeline (regenerate POT
       + MO on every release so `languages/` never goes stale).
 

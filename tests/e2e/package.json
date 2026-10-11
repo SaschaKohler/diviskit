@@ -1,0 +1,18 @@
+{
+  "name": "diviskit-agent-e2e",
+  "private": true,
+  "version": "1.0.0",
+  "description": "E2E tests for the free diviskit-agent plugin: package download, WordPress install, bundled skills and diviskit-mcp server.",
+  "scripts": {
+    "test": "playwright test",
+    "test:fresh": "playwright test tests/00",
+    "test:install": "playwright test tests/01",
+    "test:skills": "playwright test tests/02",
+    "test:mcp": "playwright test tests/03",
+    "test:ui": "playwright test tests/04",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.0"
+  }
+}

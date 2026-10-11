@@ -1,0 +1,15 @@
+{
+    "name": "diviskit/agent",
+    "description": "Diviskit Agent — REST bridge / MCP backend. Dev dependencies only; the plugin runtime has no Composer dependencies.",
+    "type": "library",
+    "license": "GPL-2.0-or-later",
+    "require-dev": {
+        "phpunit/phpunit": "^9.6",
+        "wp-phpunit/wp-phpunit": "^7.1",
+        "yoast/phpunit-polyfills": "^3.0"
+    },
+    "scripts": {
+        "test": "phpunit --testdox",
+        "test:quiet": "phpunit"
+    }
+}
