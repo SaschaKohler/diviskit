@@ -3,7 +3,7 @@ Contributors: diviskit
 Tags: divi, mcp, ai, rest-api, site-builder
 Requires at least: 6.5
 Tested up to: 7.1
-Stable tag: 1.7.4
+Stable tag: 1.7.6
 Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -116,6 +116,12 @@ Run it from anywhere inside your DDEV project (or pass the project directory as 
 2. An agent-authored page open in the Divi 5 Visual Builder, with the native Heading module content controls available for continued editing. Divi is a separate required product.
 
 == Changelog ==
+
+= 1.7.6 =
+
+* Fixes the Divi version reported across the dashboard, handshake, settings dump and compatibility checks: `ET_BUILDER_VERSION` (derived from the installed theme) now takes precedence over `ET_BUILDER_PRODUCT_VERSION` / `ET_CORE_VERSION`, which have shipped stale values.
+* The settings dump additionally reports the site's `wp_version`; newer Diviskit MCP servers surface it in `diviskit_meta_ping`.
+* The `diviskit-builder` skill gains four new page patterns: service lead generation, portfolio case study, product launch / waitlist, and event registration.
 
 = 1.7.5 =
 

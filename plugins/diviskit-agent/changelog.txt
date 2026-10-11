@@ -9,6 +9,12 @@ Policy:
 - Keep entries customer-facing. Avoid internal issue numbers unless they are needed to explain a user-visible change.
 - Do not include secrets, credentials, customer data, or environment-specific URLs.
 
+## 1.7.6
+
+- Unifies Divi version resolution in `resolve_divi_version()` (moved to trait-core): single source of truth for the admin dashboard, handshake, settings dump, compatibility checks and the schema-hash cache key. `ET_BUILDER_VERSION` (derived from the installed theme header) now wins over `ET_BUILDER_PRODUCT_VERSION` / `ET_CORE_VERSION`, which Elegant Themes' release task has shipped with stale values (e.g. 5.14.0 inside the 5.15.0 theme).
+- `/schema/settings` response now reports `site.wp_version`; newer Diviskit MCP servers surface `site_url`, `divi_version` and `wp_version` in `diviskit_meta_ping`.
+- `diviskit-builder` skill: four new page patterns (service lead generation, portfolio case study, product launch / waitlist, event registration); provenance note removed from the SaaS landing pattern.
+
 ## 1.7.5
 
 - New "Skill bundles" dashboard card: lists every skill the `/skills` endpoint serves — name, source bundle (`diviskit-agent`, `diviskit-pro`, future add-ons), file count, and the skill's frontmatter description — making Pro skill contributions visible in the Free dashboard.
