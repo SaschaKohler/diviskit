@@ -37,11 +37,12 @@ trait Diviskit_Agent_Meta {
 			'description' => get_bloginfo( 'description' ),
 			'url'         => get_site_url(),
 			'language'    => get_locale(),
+			'wp_version'  => get_bloginfo( 'version' ),
 		];
 
 		// Builder-specific settings.
 		$settings['builder'] = [
-			'version'        => defined( 'ET_BUILDER_PRODUCT_VERSION' ) ? ET_BUILDER_PRODUCT_VERSION : 'unknown',
+			'version'        => self::resolve_divi_version() ?: 'unknown',
 			'is_divi5'       => true,
 			'active_modules' => self::get_active_module_count(),
 		];
@@ -1705,10 +1706,9 @@ trait Diviskit_Agent_Meta {
 			);
 		}
 
-		$divi_active  = function_exists( 'et_get_option' );
-		$divi_version = $divi_active && defined( 'ET_BUILDER_PRODUCT_VERSION' )
-			? ET_BUILDER_PRODUCT_VERSION
-			: null;
+		$divi_active      = function_exists( 'et_get_option' );
+		$resolved_version = self::resolve_divi_version();
+		$divi_version     = $divi_active && '' !== $resolved_version ? $resolved_version : null;
 
 		// Per-tool capability map (#486). Key = post-rename tool slug,
 		// value = bool true. Server's requireCapability() gate looks up

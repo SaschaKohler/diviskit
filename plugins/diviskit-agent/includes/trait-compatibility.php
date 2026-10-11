@@ -142,15 +142,6 @@ trait Diviskit_Agent_Compatibility {
 	 * @return string
 	 */
 	private static function divi_runtime_version_for_compatibility() {
-		if ( defined( 'ET_BUILDER_PRODUCT_VERSION' ) && ET_BUILDER_PRODUCT_VERSION ) {
-			return (string) ET_BUILDER_PRODUCT_VERSION;
-		}
-		if ( defined( 'ET_BUILDER_VERSION' ) && ET_BUILDER_VERSION ) {
-			return (string) ET_BUILDER_VERSION;
-		}
-		if ( defined( 'ET_CORE_VERSION' ) && ET_CORE_VERSION ) {
-			return (string) ET_CORE_VERSION;
-		}
-		return '';
+		return self::resolve_divi_version();
 	}
 }

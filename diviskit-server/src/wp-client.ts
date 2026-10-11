@@ -5,7 +5,7 @@
  * Generate one at: WP Admin → Users → Your Profile → Application Passwords.
  */
 
-import { type HandshakeResult } from './compatibility.js';
+import { type HandshakeResult, observedVersion } from './compatibility.js';
 import {
   type DiviopsResponse,
   ErrorCodes,
@@ -382,11 +382,22 @@ export class WPClient {
    * `result.builder.version` against that shape (the pre-pilot pattern)
    * silently regresses meta_ping to "Connected to Divi unknown" on
    * healthy sites.
+   *
+   * Also surfaces `site.url` / `site.wp_version` as optional diagnostics
+   * for meta_ping. Older plugins don't emit `wp_version` — consumers must
+   * treat it as optional.
    */
-  async testConnection(signal?: AbortSignal): Promise<{ ok: boolean; message: string }> {
+  async testConnection(signal?: AbortSignal): Promise<{
+    ok: boolean;
+    message: string;
+    site_url?: string;
+    wp_version?: string;
+    divi_version?: string;
+  }> {
     try {
       const response = await this.requestEnveloped<{
         builder?: { version?: string };
+        site?: { url?: string; wp_version?: string };
       }>('/schema/settings', { signal });
       if (!response.ok) {
         return {
@@ -394,9 +405,18 @@ export class WPClient {
           message: `Connection failed: [${response.error.code}] ${response.error.message}`,
         };
       }
+      const siteUrl = response.data.site?.url;
+      const wpVersion = observedVersion(response.data.site?.wp_version);
       return {
         ok: true,
         message: `Connected to Divi ${response.data.builder?.version ?? 'unknown'}`,
+        site_url:
+          typeof siteUrl === 'string' && siteUrl.length > 0
+            ? siteUrl
+            : undefined,
+        wp_version: wpVersion ?? undefined,
+        divi_version:
+          observedVersion(response.data.builder?.version) ?? undefined,
       };
     } catch (error) {
       if (signal?.aborted) throw signal.reason ?? error;

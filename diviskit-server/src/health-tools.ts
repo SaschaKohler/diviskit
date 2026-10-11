@@ -16,7 +16,7 @@ export const LAUNCHER_HEALTH_TOOL_NAMES = [
 
 export const META_PING_CONFIG = {
   description:
-    "Test the connection to the WordPress site and verify the Divi MCP plugin is active. Returns the standardized envelope { ok, data?, error: { code, message, hint? } }; success payload is { connected: true, message: \"Connected to Divi <version>\" } and connection failure surfaces as { ok: false, error: { code: 'wp_error', message } } with the underlying transport message preserved.",
+    "Test the connection to the WordPress site and verify the Divi MCP plugin is active. Returns the standardized envelope { ok, data?, error: { code, message, hint? } }; success payload is { connected: true, message: \"Connected to Divi <version>\", site_url, divi_version, wp_version? } — wp_version is omitted on older plugins — and connection failure surfaces as { ok: false, error: { code: 'wp_error', message } } with the underlying transport message preserved.",
   annotations: { readOnlyHint: true, idempotentHint: true },
   _meta: { idempotent: "true" },
 } as const;
@@ -90,7 +90,13 @@ export function registerLauncherHealthTools(options: {
     const response = await wrapResponse(async () => {
       const ping = await wp.testConnection(signal);
       if (!ping.ok) withCode(ErrorCodes.WP_ERROR, ping.message);
-      return { connected: true, message: ping.message };
+      return {
+        connected: true,
+        message: ping.message,
+        site_url: ping.site_url,
+        wp_version: ping.wp_version,
+        divi_version: ping.divi_version,
+      };
     });
     return modelVisibleHealthResult(response, target, "diviskit_meta_ping");
   });

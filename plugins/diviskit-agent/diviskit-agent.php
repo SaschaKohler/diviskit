@@ -2469,7 +2469,8 @@ Steps:
 		$divi_active   = function_exists( 'et_get_option' );
 		$design_system = isset( $_GET['view'] ) && is_string( $_GET['view'] ) && 'design-system' === $_GET['view'] && 'design-system' === sanitize_key( wp_unslash( $_GET['view'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Fixed read-only navigation; exact-token guard rejects normalization variants. No state change.
 		$support_view  = isset( $_GET['view'] ) && is_string( $_GET['view'] ) && 'support' === $_GET['view'] && 'support' === sanitize_key( wp_unslash( $_GET['view'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- same fixed read-only navigation token.
-		$divi_version  = $divi_active && defined( 'ET_BUILDER_PRODUCT_VERSION' ) ? ET_BUILDER_PRODUCT_VERSION : null;
+		$resolved_version = self::resolve_divi_version();
+		$divi_version     = $divi_active && '' !== $resolved_version ? $resolved_version : null;
 		$rest_url      = rest_url( self::REST_NAMESPACE );
 		$rate_disabled = (bool) DIVISKIT_RATE_LIMIT_DISABLED;
 		$read_limit    = (int) DIVISKIT_RATE_LIMIT_READ;

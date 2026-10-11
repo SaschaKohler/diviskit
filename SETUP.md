@@ -34,6 +34,21 @@ installation methods.
 
 > **If Divi is not active**, authenticated requests return `503 divi_unavailable`. Unauthenticated requests return 401 first.
 
+> **`/handshake` is POST-only.** A GET request returns 404, not 401 — the
+> route only accepts POST, so it cannot be probed in the browser. Verify
+> auth and compatibility with:
+>
+> ```bash
+> curl -s -X POST "http://your-site.local/wp-json/diviskit/v1/handshake" \
+>   -u "<user>:<app-password>" \
+>   -H "Content-Type: application/json" \
+>   -d '{"mcp_server_version":"1.1.0"}'
+> ```
+>
+> Expect `"compatible": true` plus a `capabilities` map.
+> `mcp_server_version` just needs to be ≥ the plugin's advertised
+> `min_server`.
+
 Optionally also install **`diviskit-design-library.zip`** — design effects
 (`dsk-*` CSS classes, WebGL shaders) used by the `diviskit-builder` skill.
 
@@ -252,7 +267,17 @@ Restart your client, then run:
 Use diviskit_meta_ping to verify the MCP is working.
 ```
 
-You should see your site URL, WordPress version, and Divi version.
+You should see `connected: true` together with the site URL and the Divi
+version:
+
+```json
+{ "connected": true, "message": "Connected to Divi 5.11.1",
+  "site_url": "https://your-site.local", "divi_version": "5.11.1",
+  "wp_version": "7.1.3" }
+```
+
+`wp_version` is reported by newer `diviskit-agent` releases — older plugins
+simply omit the field.
 
 Then try:
 
@@ -382,6 +407,7 @@ commands are additionally confined to `DIVISKIT_WP_CLI_SAFE_FS_ROOT` unless
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | `401` on handshake | App password has spaces / wrong user | Strip spaces; re-check `WP_USER` |
+| `404` on `/handshake` | GET used — the route is POST-only | Send `POST` with a `{"mcp_server_version":"…"}` JSON body |
 | `503 divi_unavailable` | Divi theme inactive | Activate Divi 5.x |
 | Tools list empty | MCP server failed to start | `claude mcp list`, check `npx` on PATH, Node 22+ |
 | `diviskit_vk_*` absent | Pro gate closed | `diviskit_meta_info` → `pro_active`, `vendokit.present`, `active_modules.vendokit` |

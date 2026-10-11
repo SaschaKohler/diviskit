@@ -88,22 +88,6 @@ trait Diviskit_Agent_ModuleSchema {
 	}
 
 	/**
-	 * Resolve the Divi build version, preferring the builder constant
-	 * over the core fallback. Single source of truth for both the
-	 * dump-all response payload and the schema-hash cache key, so the
-	 * two never diverge on a site that defines only ET_CORE_VERSION.
-	 */
-	private static function resolve_divi_version() {
-		if ( defined( 'ET_BUILDER_VERSION' ) && ET_BUILDER_VERSION ) {
-			return ET_BUILDER_VERSION;
-		}
-		if ( defined( 'ET_CORE_VERSION' ) && ET_CORE_VERSION ) {
-			return ET_CORE_VERSION;
-		}
-		return '';
-	}
-
-	/**
 	 * Hash every `*PresetAttrsMap.php` under `Packages/`.
 	 *
 	 * Walks `Packages/` (not just `Packages/ModuleLibrary/`) because

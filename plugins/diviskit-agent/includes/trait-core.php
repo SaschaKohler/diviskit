@@ -36,6 +36,32 @@ trait Diviskit_Agent_Core {
 	}
 
 	/**
+	 * Resolve the active Divi version. Single source of truth for the
+	 * admin dashboard, handshake, settings dump, compatibility checks and
+	 * the schema-hash cache key, so every surface reports the same value.
+	 *
+	 * Prefers ET_BUILDER_VERSION: it is derived from the theme header and
+	 * always tracks the installed Divi release. ET_BUILDER_PRODUCT_VERSION
+	 * and ET_CORE_VERSION are hard-coded by Elegant Themes' release task
+	 * and have shipped stale values (e.g. 5.14.0 inside the 5.15.0 theme),
+	 * so they only serve as fallbacks.
+	 *
+	 * @return string Version string, or '' when no Divi constant exists.
+	 */
+	private static function resolve_divi_version() {
+		if ( defined( 'ET_BUILDER_VERSION' ) && ET_BUILDER_VERSION ) {
+			return (string) ET_BUILDER_VERSION;
+		}
+		if ( defined( 'ET_BUILDER_PRODUCT_VERSION' ) && ET_BUILDER_PRODUCT_VERSION ) {
+			return (string) ET_BUILDER_PRODUCT_VERSION;
+		}
+		if ( defined( 'ET_CORE_VERSION' ) && ET_CORE_VERSION ) {
+			return (string) ET_CORE_VERSION;
+		}
+		return '';
+	}
+
+	/**
 	 * Normalize Divi block comment attributes before full-content writes.
 	 *
 	 * WordPress block attributes may contain HTML strings, but the serialized

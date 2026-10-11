@@ -4096,7 +4096,13 @@ registerLocalTool(
       if (!ping.ok) {
         withCode(ErrorCodes.WP_ERROR, ping.message);
       }
-      return { connected: true, message: ping.message };
+      return {
+        connected: true,
+        message: ping.message,
+        site_url: ping.site_url,
+        wp_version: ping.wp_version,
+        divi_version: ping.divi_version,
+      };
     });
     return {
       content: [
