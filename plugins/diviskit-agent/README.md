@@ -162,6 +162,25 @@ WP_USER = "your-wp-username"
 WP_APP_PASSWORD = "xxxxXXXXxxxxXXXXxxxxXXXX"
 ```
 
+For opencode, add the same server under `mcp` in `opencode.json` (project) or `~/.config/opencode/opencode.json` (user):
+
+```json
+{
+  "mcp": {
+    "diviskit-mcp": {
+      "type": "local",
+      "command": ["npx", "-y", "--package", "@diviskit/mcp-server", "diviskit-mcp"],
+      "enabled": true,
+      "environment": {
+        "WP_URL": "http://your-site.local",
+        "WP_USER": "your-wp-username",
+        "WP_APP_PASSWORD": "xxxxXXXXxxxxXXXXxxxxXXXX"
+      }
+    }
+  }
+}
+```
+
 See the [Diviskit MCP Server README](../../../diviskit-server/) for full setup and the response contract.
 
 ## Capabilities

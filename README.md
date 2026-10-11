@@ -5,12 +5,12 @@
 [![npm](https://img.shields.io/npm/v/@diviskit/mcp-server.svg?label=%40diviskit%2Fmcp-server)](https://www.npmjs.com/package/@diviskit/mcp-server)
 [![Divi 5](https://img.shields.io/badge/Divi-5.1.0%2B-7E3DD3.svg)](https://www.elegantthemes.com/gallery/divi/)
 
-Diviskit gives Claude Code, Codex, Devin, Claude Desktop, and other MCP clients a typed control layer over WordPress site state. It pairs an MCP server, the Diviskit Agent WordPress plugin, and skill knowledge so AI agents can author Divi pages, inspect schemas, manage design tokens, work with SCF/CPT data models, run safe WP-CLI operations, and drive the Vendokit commerce stack.
+Diviskit gives Claude Code, Codex, Devin, opencode, Claude Desktop, and other MCP clients a typed control layer over WordPress site state. It pairs an MCP server, the Diviskit Agent WordPress plugin, and skill knowledge so AI agents can author Divi pages, inspect schemas, manage design tokens, work with SCF/CPT data models, run safe WP-CLI operations, and drive the Vendokit commerce stack.
 
 All routes are served on the `diviskit/v1` REST namespace. Divi is a registered trademark of Elegant Themes, Inc. Diviskit is not affiliated with or endorsed by Elegant Themes.
 
 ```
-Claude Code / Devin ◄──► MCP Server (stdio) ◄──► WordPress REST API ◄──► Diviskit Agent plugin
+Claude Code / Devin / opencode ◄──► MCP Server (stdio) ◄──► WordPress REST API ◄──► Diviskit Agent plugin
                                                     ▲
                                                     │
                                         diviskit-builder skill
@@ -28,8 +28,8 @@ Claude Code / Devin ◄──► MCP Server (stdio) ◄──► WordPress REST 
 | **`@diviskit/mcp-server`** | Node.js MCP server bridging MCP clients to WordPress. Distributed via npm — no clone, no build. Source included for reference. | `npx -y --package @diviskit/mcp-server diviskit-mcp` (source: `diviskit-server/`) |
 | **Skill bundle `diviskit-agent`** | `diviskit` harness primer, `diviskit-builder` (block formats + design rules + per-module maps), `diviskit-scf` (SCF/ACF automation). | `claude/diviskit-agent/skills/` |
 | **Diviskit Pro** *(separate distribution)* | `diviskit-pro` plugin (Vendokit `diviskit_vk_*` handlers) + `diviskit-vendokit` and `diviskit-mega-menu` skills. | <https://diviskit.com> |
-| **Skill installer** | Copies skill bundles for Codex/Devin users without a plugin marketplace. | `bin/install-skills.sh` (also shipped inside the plugin) |
-| **Project templates** | `AGENTS.md` Grundtemplate + Devin `mcp_config.local.json` example. | `templates/` |
+| **Skill installer** | Copies skill bundles for Codex/Devin/opencode/Cursor users without a plugin marketplace. | `bin/install-skills.sh` (also shipped inside the plugin) |
+| **Project templates** | `AGENTS.md` Grundtemplate + Devin `mcp_config.local.json` and opencode `opencode.json` examples. | `templates/` |
 
 The WordPress plugin, npm MCP server, and client-side skills are three independent
 components. WordPress and npm updates do not install or refresh a manually copied
@@ -104,6 +104,25 @@ WP_USER = "your-wp-username"
 WP_APP_PASSWORD = "xxxxXXXXxxxxXXXXxxxxXXXX"
 ```
 
+opencode `opencode.json` (project root — gitignore it, or use `{env:NAME}` references for secrets; user scope `~/.config/opencode/opencode.json`):
+
+```json
+{
+  "mcp": {
+    "diviskit-mcp": {
+      "type": "local",
+      "command": ["npx", "-y", "--package", "@diviskit/mcp-server", "diviskit-mcp"],
+      "enabled": true,
+      "environment": {
+        "WP_URL": "http://your-site.local",
+        "WP_USER": "your-wp-username",
+        "WP_APP_PASSWORD": "xxxxXXXXxxxxXXXXxxxxXXXX"
+      }
+    }
+  }
+}
+```
+
 Devin `mcp_config.json` (user scope `~/.config/devin/mcp_config.json`, or project scope `.devin/mcp_config.local.json`):
 
 ```json
@@ -147,7 +166,7 @@ Verify with `What skills do you have?` — you should see `diviskit`, `diviskit-
 (Pro buyers install `diviskit-pro@diviskit` from the Pro distribution —
 `diviskit-vendokit` + `diviskit-mega-menu` skills.)
 
-For Devin, Codex, Cursor, and other clients without a plugin marketplace, use the
+For Devin, Codex, opencode, Cursor, and other clients without a plugin marketplace, use the
 installer. It ships inside the plugin (`wp-content/plugins/diviskit-agent/bin/`)
 and in this repo under `bin/`:
 
@@ -156,19 +175,24 @@ and in this repo under `bin/`:
 ./bin/install-skills.sh --client devin --scope project   # per-site install
 ./bin/install-skills.sh --client codex --scope user
 ./bin/install-skills.sh --client cursor --scope project
+./bin/install-skills.sh --client opencode --scope project
 ```
 
 It syncs the skills from your site's `/wp-json/diviskit/v1/skills` endpoint
 (sha256 manifest), so the copy is always version-locked to the installed
-plugin. Credentials come from the `diviskit-mcp` entry in your MCP config or
-the `WP_URL` / `WP_USER` / `WP_APP_PASSWORD` environment variables. Targets:
+plugin. Credentials come from the `diviskit-mcp` entry in your MCP config
+(`.devin/mcp_config.local.json` or `opencode.json`) or the `WP_URL` /
+`WP_USER` / `WP_APP_PASSWORD` environment variables. Targets:
 `~/.config/devin/skills/`, `~/.codex/skills/`, `~/.claude/skills/`,
-`~/.cursor/skills/`, or the project-level equivalents with `--scope project`.
-Re-run the installer after each plugin update and restart the client.
+`~/.cursor/skills/`, `~/.config/opencode/skills/`, or the project-level
+equivalents with `--scope project`. opencode additionally auto-discovers
+`.claude/skills/` and `.agents/skills/` — an existing Claude Code install
+works out of the box. Re-run the installer after each plugin update and
+restart the client.
 
 Also copy [templates/AGENTS.md](templates/AGENTS.md) into your WordPress
-project root — Devin (and Claude Code) read it automatically and it carries
-the Divi 5 safety rules the MCP tools alone can't enforce.
+project root — Devin, opencode, and Claude Code read it automatically and
+it carries the Divi 5 safety rules the MCP tools alone can't enforce.
 
 ### 5. Verify native Divi authoring
 

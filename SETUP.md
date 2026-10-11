@@ -128,6 +128,46 @@ WP_PATH = "/absolute/path/to/wordpress"
 
 Restart Codex after changing MCP config.
 
+### opencode
+
+opencode reads `AGENTS.md` natively, discovers skills from
+`.opencode/skills/` (project) / `~/.config/opencode/skills/` (user — and
+also picks up `.claude/skills/` and `.agents/skills/`), and registers MCP
+servers in `opencode.json` (project) or `~/.config/opencode/opencode.json`
+(user scope):
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "diviskit-mcp": {
+      "type": "local",
+      "command": ["npx", "-y", "--package", "@diviskit/mcp-server", "diviskit-mcp"],
+      "enabled": true,
+      "environment": {
+        "WP_URL": "https://your-site.ddev.site",
+        "WP_USER": "admin",
+        "WP_APP_PASSWORD": "xxxxXXXXxxxxXXXXxxxxXXXX",
+        "WP_CLI_CMD": "ddev wp",
+        "WP_PATH": "/absolute/path/to/project",
+        "NODE_TLS_REJECT_UNAUTHORIZED": "0"
+      }
+    }
+  }
+}
+```
+
+A ready template lives at [`templates/opencode/opencode.json`](templates/opencode/opencode.json).
+The file holds credentials — either gitignore the project `opencode.json`
+or keep secrets in the environment and reference them as
+`"WP_APP_PASSWORD": "{env:WP_APP_PASSWORD}"`.
+
+> **opencode v2** moves servers under `mcp.servers.<name>` and uses
+> `disabled: true` instead of `enabled: false` — same `type`/`command`/
+> `environment` fields otherwise.
+
+Restart opencode after changing the config.
+
 ### Devin
 
 Devin reads MCP config from several locations:
@@ -244,7 +284,7 @@ Diviskit connects via standard WordPress REST API and works with any host that e
 - **Use absolute paths** for `WP_PATH` — relative paths break when the client runs from a different directory
 - **Unique MCP name** — don't reuse a name from another project
 - **Paths with spaces** — wrap the entire `KEY=VALUE` argument in double quotes (e.g. `--env "WP_PATH=/path with spaces/"`)
-- **MCP not appearing after registration** — in Claude Code, run `claude mcp list`. If it's not there, `claude mcp remove` and re-add. In Codex, verify the `~/.codex/config.toml` entry and restart Codex. In Devin, restart the session.
+- **MCP not appearing after registration** — in Claude Code, run `claude mcp list`. If it's not there, `claude mcp remove` and re-add. In Codex, verify the `~/.codex/config.toml` entry and restart Codex. In Devin, restart the session. In opencode, verify the `opencode.json` entry and restart.
 
 ## Step 4: Verify Registration
 
@@ -285,7 +325,7 @@ Then try:
 Use diviskit_page_list to show all pages.
 ```
 
-> **If tools don't appear**: In Claude Code, check `claude mcp list`. In Codex, check `~/.codex/config.toml` and restart. In Devin, check the MCP config file and restart the session. The `npx` command must be reachable on your `PATH`. The `-y --package @diviskit/mcp-server diviskit-mcp` form avoids `npx` prompts and explicitly selects the MCP server bin from the package.
+> **If tools don't appear**: In Claude Code, check `claude mcp list`. In Codex, check `~/.codex/config.toml` and restart. In Devin, check the MCP config file and restart the session. In opencode, check the `mcp` block in `opencode.json` and restart. The `npx` command must be reachable on your `PATH`. The `-y --package @diviskit/mcp-server diviskit-mcp` form avoids `npx` prompts and explicitly selects the MCP server bin from the package.
 
 ### Pro capabilities (Pro distribution only)
 
@@ -316,7 +356,7 @@ claude plugin install diviskit-agent@diviskit
 
 Verify with `What skills do you have?` — you should see `diviskit`, `diviskit-builder`, and `diviskit-scf` listed.
 
-### Codex, Devin, and other clients (install script)
+### Codex, Devin, opencode, and other clients (install script)
 
 The skills ship inside the WordPress plugins (`skills/` in `diviskit-agent`
 and `diviskit-pro`) and are served at `GET /wp-json/diviskit/v1/skills`.
@@ -334,8 +374,8 @@ chmod +x install-skills.sh
 ```
 
 Credentials come from the `diviskit-mcp` entry in
-`.devin/mcp_config.local.json` (Step 3) or from `WP_URL` / `WP_USER` /
-`WP_APP_PASSWORD` env vars:
+`.devin/mcp_config.local.json` or `opencode.json` (Step 3), or from
+`WP_URL` / `WP_USER` / `WP_APP_PASSWORD` env vars:
 
 ```bash
 # Devin — project scope (single site, run from the project root)
@@ -352,6 +392,11 @@ Credentials come from the `diviskit-mcp` entry in
 
 # Cursor — skills tree + generated .cursor/rules/diviskit-*.mdc
 ./bin/install-skills.sh --client cursor --scope project
+
+# opencode — native Agent-Skills; a .claude/skills install is also
+# auto-discovered, so either client option works for a shared setup
+./bin/install-skills.sh --client opencode --scope project
+./bin/install-skills.sh --client opencode --scope user
 
 # Any other client — copy the tree anywhere, wire it into the client's
 # rules/context file yourself (Windsurf .windsurfrules, Cline .clinerules,

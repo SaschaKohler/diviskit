@@ -1,9 +1,9 @@
 # AGENTS.md — Diviskit project rules (Grundtemplate)
 
 > Copy this file into the WordPress project root and fill in the `{{...}}`
-> placeholders. Devin reads `AGENTS.md` automatically as project rules;
-> Claude Code reads it too (or symlink it as `CLAUDE.md`). Delete sections
-> that don't apply to the site.
+> placeholders. Devin, opencode and Codex read `AGENTS.md` automatically as
+> project rules; Claude Code reads it too (or symlink it as `CLAUDE.md`).
+> Delete sections that don't apply to the site.
 
 ## Site
 
@@ -16,13 +16,17 @@
 
 ## MCP server config
 
-Project-scope MCP config lives in `.devin/mcp_config.local.json` (gitignored —
-contains the Application Password). Server name `diviskit-mcp`, command
+Project-scope MCP config lives in `.devin/mcp_config.local.json` (Devin —
+gitignored, contains the Application Password) or in `opencode.json`
+(opencode — gitignore it too, or use `{env:NAME}` references for the
+secrets). Server name `diviskit-mcp`, command
 `npx -y --package @diviskit/mcp-server diviskit-mcp`, env `WP_URL` /
-`WP_USER` / `WP_APP_PASSWORD` / `WP_CLI_CMD` / `WP_PATH`. See
-`templates/devin/mcp_config.local.json` in the suite for a ready example.
+`WP_USER` / `WP_APP_PASSWORD` / `WP_CLI_CMD` / `WP_PATH`. Ready examples:
+`templates/devin/mcp_config.local.json` and
+`templates/opencode/opencode.json` in the suite.
 Devin also reads `~/.config/devin/mcp_config.json` (user scope) and
-`~/.codeium/windsurf/mcp_config.json` (legacy). Restart the session after
+`~/.codeium/windsurf/mcp_config.json` (legacy); opencode reads
+`~/.config/opencode/opencode.json`. Restart the session after
 changing MCP config.
 
 ## Plugin code — source of truth is the suite repos
@@ -86,9 +90,12 @@ structural.
 
 - Generators live in `.devin/generators/` → output to `.devin/generators/out/`,
   write via `$wpdb->update` (rule 2).
-- `design-system.json` (design tokens for this site) lives under
-  `.devin/skills/diviskit-builder/` or project docs — keep it out of any
-  plugin distribution.
+- Installed skills live under `.devin/skills/` (Devin), `.opencode/skills/`
+  (opencode) or `.claude/skills/` (Claude Code) — `install-skills.sh`
+  `--client <client> --scope project` puts them in the right place.
+- `design-system.json` (design tokens for this site) lives under the
+  client's `skills/diviskit-builder/` dir or project docs — keep it out of
+  any plugin distribution.
 
 ## Key IDs (fill in per site)
 

@@ -93,6 +93,25 @@ WP_USER = "your-wp-username"
 WP_APP_PASSWORD = "xxxxXXXXxxxxXXXXxxxxXXXX"
 ```
 
+opencode `opencode.json` (project root or `~/.config/opencode/opencode.json`):
+
+```json
+{
+  "mcp": {
+    "diviskit-mcp": {
+      "type": "local",
+      "command": ["npx", "-y", "--package", "@diviskit/mcp-server", "diviskit-mcp"],
+      "enabled": true,
+      "environment": {
+        "WP_URL": "https://your-site.example",
+        "WP_USER": "your-wp-username",
+        "WP_APP_PASSWORD": "xxxxXXXXxxxxXXXXxxxxXXXX"
+      }
+    }
+  }
+}
+```
+
 The explicit `--package` + bin form is required: the tarball ships two bins
 (`diviskit-mcp`, `diviskit-preset`), so npx
 cannot infer which one to run from the package name alone.
