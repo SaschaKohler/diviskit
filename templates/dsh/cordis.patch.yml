@@ -1,0 +1,30 @@
+# Diviskit MCP server for DeepSeek Harness (dsh).
+#
+# Merge this row into one of the dsh patch layers:
+#   ~/.dsh/profiles/<profile>/cordis.patch.yml   (single profile, e.g. web)
+#   ~/.dsh/cordis.patch.yml                      (all profiles)
+# or pass it as a one-shot overlay:  dsh --profile web --patch cordis.patch.yml
+#
+# Fill in the {{...}} placeholders. Keep secrets in the environment and
+# reference them via `!!js process.env.NAME` — never commit credentials.
+# If the row fails to resolve the plugin package, install it once:
+#   dsh plugin --profile web add @deepseek-ai/dsh-mcp-client
+#
+# The model sees the tools as  mcp__diviskit__diviskit_*  — the same
+# server-qualified shape Claude Code and Codex use. Patch edits on the
+# `web` profile hot-reload; other profiles re-read at startup.
+
+- id: mcp-diviskit
+  name: '@deepseek-ai/dsh-mcp-client'
+  config:
+    serverName: diviskit
+    transport: stdio
+    command: npx
+    args: ['-y', '--package', '@diviskit/mcp-server', 'diviskit-mcp']
+    env:
+      WP_URL: 'https://{{site}}.ddev.site'
+      WP_USER: '{{wp_user}}'
+      WP_APP_PASSWORD: !!js process.env.WP_APP_PASSWORD
+      WP_CLI_CMD: 'ddev wp'
+      WP_PATH: '{{absolute_project_path}}'
+      NODE_TLS_REJECT_UNAUTHORIZED: '0'

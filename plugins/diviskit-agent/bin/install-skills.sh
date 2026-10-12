@@ -21,7 +21,7 @@ RULES=""
 
 usage() {
   cat <<'EOF'
-Usage: install-skills.sh --client <devin|codex|claude|cursor|opencode|generic> [options]
+Usage: install-skills.sh --client <devin|codex|claude|cursor|opencode|dsh|generic> [options]
 
   --client   devin    → ~/.config/devin/skills/ (user) | .devin/skills/ (project)
              codex    → ~/.codex/skills/              | .codex/skills/
@@ -31,20 +31,25 @@ Usage: install-skills.sh --client <devin|codex|claude|cursor|opencode|generic> [
                         (skills tree + generated .cursor/rules/*.mdc)
              opencode → ~/.config/opencode/skills/    | .opencode/skills/
                         (native Agent-Skills; also auto-discovers .claude/skills/)
+             dsh      → ~/.dsh/skills/ ($DSH_HOME)    | .dsh/skills/
+                        (DeepSeek Harness; also scans .agents/skills/)
              generic  → any --target dir; wire it into your client's
                         rules/context file yourself
   --scope    user | project  (default user; ignored for generic)
   --target   destination dir — required with --client generic
   --config   path to an MCP config file holding diviskit-mcp credentials
-             (Devin mcp_config.local.json or opencode.json; default:
-             search upward from $PWD for either)
+             (Devin mcp_config.local.json, opencode.json or a dsh
+             cordis.patch.yml; default: search upward from $PWD, then
+             $DSH_HOME/cordis.patch.yml and $DSH_HOME/profiles/*/)
 
 Credentials are read from the MCP config's "diviskit-mcp" server entry —
 Devin shape `mcpServers.<name>.env`, opencode shape `mcp.<name>.environment`
-(v2: `mcp.servers.<name>.environment`) — or from the same-named environment
-variables if set. opencode `{env:NAME}` values are resolved from the
-process environment. The site decides which bundles are served — sites with
-diviskit-pro installed also return the Pro skills; no --pro flag needed.
+(v2: `mcp.servers.<name>.environment`), a dsh `dsh-mcp-client` row's
+`config.env` — or from the same-named environment variables if set.
+opencode `{env:NAME}` values and dsh `!!js process.env.NAME` values are
+resolved from the process environment. The site decides which bundles are
+served — sites with diviskit-pro installed also return the Pro skills;
+no --pro flag needed.
 
 Examples:
   ./bin/install-skills.sh --client devin --scope user
@@ -53,6 +58,7 @@ Examples:
   ./bin/install-skills.sh --client claude --scope project
   ./bin/install-skills.sh --client cursor --scope project
   ./bin/install-skills.sh --client opencode --scope project
+  ./bin/install-skills.sh --client dsh --scope project
   ./bin/install-skills.sh --client generic --target ~/.windsurf/skills
 EOF
 }
@@ -70,9 +76,11 @@ while [ $# -gt 0 ]; do
   esac
 done
 
+[ "$CLIENT" = "deepseek-harness" ] && CLIENT=dsh
+
 case "$CLIENT" in
-  devin|codex|claude|cursor|opencode|generic) ;;
-  *) echo "Missing or unsupported --client (devin|codex|claude|cursor|opencode|generic)." >&2; usage; exit 2 ;;
+  devin|codex|claude|cursor|opencode|dsh|generic) ;;
+  *) echo "Missing or unsupported --client (devin|codex|claude|cursor|opencode|dsh|generic)." >&2; usage; exit 2 ;;
 esac
 
 if [ "$CLIENT" = "claude" ]; then
@@ -101,6 +109,8 @@ case "$CLIENT" in
     fi ;;
   opencode)
     [ "$SCOPE" = user ] && TARGET="$HOME/.config/opencode/skills" || TARGET="$PWD/.opencode/skills" ;;
+  dsh)
+    [ "$SCOPE" = user ] && TARGET="${DSH_HOME:-$HOME/.dsh}/skills" || TARGET="$PWD/.dsh/skills" ;;
   generic)
     if [ -z "$TARGET_DIR" ]; then
       echo "ERROR: --client generic requires --target <dir>." >&2; usage; exit 2
@@ -115,15 +125,17 @@ fi
 
 # ── Resolve credentials ─────────────────────────────────────────────
 # Explicit env vars win; otherwise read the diviskit-mcp server entry
-# (or any server carrying a WP_URL) from .devin/mcp_config.local.json or
-# opencode.json[c], searched upward from $PWD unless --config points at
-# a file.
+# (or any server carrying a WP_URL) from .devin/mcp_config.local.json,
+# opencode.json[c] or a dsh cordis.patch.yml, searched upward from $PWD
+# unless --config points at a file. dsh home-level and profile patches
+# under $DSH_HOME (~/.dsh) are the final fallback.
 
 if [ -z "${WP_URL:-}" ] || [ -z "${WP_USER:-}" ] || [ -z "${WP_APP_PASSWORD:-}" ]; then
   if [ -z "$CONFIG" ]; then
     dir="$PWD"
     while true; do
-      for cand in "$dir/.devin/mcp_config.local.json" "$dir/opencode.json" "$dir/opencode.jsonc"; do
+      for cand in "$dir/.devin/mcp_config.local.json" "$dir/opencode.json" "$dir/opencode.jsonc" \
+                  "$dir/.dsh/cordis.patch.yml" "$dir/cordis.patch.yml" "$dir/cordis.yml"; do
         if [ -f "$cand" ]; then CONFIG="$cand"; break 2; fi
       done
       [ "$dir" = "/" ] && break
@@ -131,11 +143,18 @@ if [ -z "${WP_URL:-}" ] || [ -z "${WP_USER:-}" ] || [ -z "${WP_APP_PASSWORD:-}" 
     done
   fi
 
+  if [ -z "$CONFIG" ]; then
+    dsh_home="${DSH_HOME:-$HOME/.dsh}"
+    for cand in "$dsh_home/cordis.patch.yml" "$dsh_home"/profiles/*/cordis.patch.yml; do
+      if [ -f "$cand" ] && grep -q 'dsh-mcp-client' "$cand"; then CONFIG="$cand"; break; fi
+    done
+  fi
+
   if [ -z "$CONFIG" ] || [ ! -f "$CONFIG" ]; then
     echo "ERROR: no credentials." >&2
     echo "Set WP_URL / WP_USER / WP_APP_PASSWORD, or run from a project" >&2
-    echo "containing .devin/mcp_config.local.json or opencode.json (or" >&2
-    echo "pass --config)." >&2
+    echo "containing .devin/mcp_config.local.json, opencode.json or a" >&2
+    echo "cordis.patch.yml with a dsh-mcp-client row (or pass --config)." >&2
     exit 1
   fi
 
@@ -173,28 +192,95 @@ def load_cfg(path):
     cleaned = re.sub(r',\s*([}\]])', r'\1', ''.join(out))
     return json.loads(cleaned)
 
-cfg = load_cfg(sys.argv[1])
-# Devin/Windsurf shape: mcpServers.<name>.env — opencode shape:
-# mcp.<name>.environment (v1) or mcp.servers.<name>.environment (v2).
-env = cfg.get('mcpServers', {}).get('diviskit-mcp', {}).get('env', {})
-if not env.get('WP_URL'):
-    for srv in cfg.get('mcpServers', {}).values():
-        cand = srv.get('env', {})
-        if cand.get('WP_URL'):
-            env = cand
-            break
-if not env.get('WP_URL'):
-    mcp = cfg.get('mcp', {})
-    oc = mcp.get('servers') if isinstance(mcp.get('servers'), dict) else mcp
-    if isinstance(oc, dict):
-        env = oc.get('diviskit-mcp', {}).get('environment', {})
-        if not env.get('WP_URL'):
-            for srv in oc.values():
-                if isinstance(srv, dict):
-                    cand = srv.get('environment', {})
-                    if cand.get('WP_URL'):
-                        env = cand
-                        break
+def cordis_val(v):
+    v = v.split(' #', 1)[0].strip()
+    if v.startswith('!!js'):
+        expr = v[4:].strip().strip("'").strip('"')
+        m = re.fullmatch(r'process\.env\.([A-Za-z_][A-Za-z0-9_]*)', expr)
+        return os.environ.get(m.group(1), '') if m else ''
+    if len(v) > 1 and v[0] in ("'", '"') and v[-1] == v[0]:
+        v = v[1:-1]
+    return v
+
+def cordis_env(raw):
+    # Minimal cordis.yml subset: rows are the top-level `- ` list items.
+    # Collect every `env:` map and mark the rows whose `name:` is a
+    # dsh-mcp-client plugin; prefer the client row carrying WP_URL.
+    lines = raw.split('\n')
+    ind = lambda s: len(s) - len(s.lstrip(' '))
+    n = len(lines)
+    dash_inds = [ind(l) for l in lines if re.match(r'^\s*-\s', l)]
+    row_ind = min(dash_inds) if dash_inds else 0
+
+    def row_of(k):
+        for j in range(k, -1, -1):
+            s = lines[j].strip()
+            if not s:
+                continue
+            if re.match(r'^-\s', s) and ind(lines[j]) == row_ind:
+                return j
+            if ind(lines[j]) < row_ind:
+                return -1
+        return -1
+
+    name_re = re.compile(r'name:\s*[\x27\x22]?[\w@./-]*dsh-mcp-client')
+    client_rows, envs = set(), []
+    for k, l in enumerate(lines):
+        body = re.sub(r'^-\s+', '', l.strip())
+        if name_re.match(body):
+            client_rows.add(row_of(k))
+    i = 0
+    while i < n:
+        if re.match(r'^\s*env:\s*$', lines[i]):
+            env, j = {}, i + 1
+            while j < n:
+                es = lines[j].strip()
+                if es and not es.startswith('#') and ind(lines[j]) <= ind(lines[i]):
+                    break
+                km = re.match(r'^([A-Za-z_][A-Za-z0-9_]*)\s*:\s*(.*?)\s*$', es)
+                if km:
+                    env[km.group(1)] = cordis_val(km.group(2))
+                j += 1
+            envs.append((row_of(i) in client_rows, env))
+            i = j; continue
+        i += 1
+    for is_client, env in envs:
+        if is_client and env.get('WP_URL'):
+            return env
+    for is_client, env in envs:
+        if env.get('WP_URL'):
+            return env
+    for is_client, env in envs:
+        if is_client:
+            return env
+    return envs[0][1] if envs else {}
+
+path = sys.argv[1]
+if path.endswith(('.yml', '.yaml')):
+    env = cordis_env(open(path).read())
+else:
+    cfg = load_cfg(path)
+    # Devin/Windsurf shape: mcpServers.<name>.env — opencode shape:
+    # mcp.<name>.environment (v1) or mcp.servers.<name>.environment (v2).
+    env = cfg.get('mcpServers', {}).get('diviskit-mcp', {}).get('env', {})
+    if not env.get('WP_URL'):
+        for srv in cfg.get('mcpServers', {}).values():
+            cand = srv.get('env', {})
+            if cand.get('WP_URL'):
+                env = cand
+                break
+    if not env.get('WP_URL'):
+        mcp = cfg.get('mcp', {})
+        oc = mcp.get('servers') if isinstance(mcp.get('servers'), dict) else mcp
+        if isinstance(oc, dict):
+            env = oc.get('diviskit-mcp', {}).get('environment', {})
+            if not env.get('WP_URL'):
+                for srv in oc.values():
+                    if isinstance(srv, dict):
+                        cand = srv.get('environment', {})
+                        if cand.get('WP_URL'):
+                            env = cand
+                            break
 # Resolve opencode {env:NAME} interpolation from the process environment.
 def resolve(v):
     m = re.fullmatch(r'\{env:([A-Za-z_][A-Za-z0-9_]*)\}', str(v))
@@ -311,6 +397,10 @@ if client == 'cursor':
 elif client == 'opencode':
     print('Done. Restart opencode so it picks up the skills. Skills are also')
     print('discovered from .claude/skills/ and .agents/skills/ when present.')
+elif client == 'dsh':
+    print('Done. dsh watches the skills dir — new sessions pick the skills up')
+    print('automatically. Tools reach the model as mcp__diviskit__diviskit_*.')
+    print('.agents/skills/ is scanned too if you share one install across agents.')
 elif client == 'generic':
     print('Done. Point your AI client at the skills dir — e.g. reference the')
     print('SKILL.md files from its rules/context file (AGENTS.md, .windsurfrules,')

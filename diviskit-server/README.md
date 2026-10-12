@@ -3,7 +3,7 @@
 **An AI harness for WordPress site authoring — Divi-native today, WordPress-wide by design.**
 
 `@diviskit/mcp-server` is the Node.js MCP server of the Diviskit suite. It gives
-Devin, Claude Code, Codex, Claude Desktop, and other MCP clients a typed control
+Devin, Claude Code, Codex, opencode, DeepSeek Harness, Claude Desktop, and other MCP clients a typed control
 layer over WordPress site state, dispatching to the **Diviskit Agent** plugin
 for Divi 5 page authoring, SCF and CPT data models, design tokens, presets,
 library and Theme Builder templates, site audits, and safe WP-CLI passthrough.
@@ -110,6 +110,24 @@ opencode `opencode.json` (project root or `~/.config/opencode/opencode.json`):
     }
   }
 }
+```
+
+DeepSeek Harness (dsh) `cordis.patch.yml` — a `dsh-mcp-client` row in
+`~/.dsh/profiles/<profile>/cordis.patch.yml` or home-level
+`~/.dsh/cordis.patch.yml` (tools appear as `mcp__diviskit__diviskit_*`):
+
+```yaml
+- id: mcp-diviskit
+  name: '@deepseek-ai/dsh-mcp-client'
+  config:
+    serverName: diviskit
+    transport: stdio
+    command: npx
+    args: ['-y', '--package', '@diviskit/mcp-server', 'diviskit-mcp']
+    env:
+      WP_URL: 'https://your-site.example'
+      WP_USER: 'your-wp-username'
+      WP_APP_PASSWORD: !!js process.env.WP_APP_PASSWORD
 ```
 
 The explicit `--package` + bin form is required: the tarball ships two bins

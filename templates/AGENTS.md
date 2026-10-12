@@ -1,9 +1,9 @@
 # AGENTS.md — Diviskit project rules (Grundtemplate)
 
 > Copy this file into the WordPress project root and fill in the `{{...}}`
-> placeholders. Devin, opencode and Codex read `AGENTS.md` automatically as
-> project rules; Claude Code reads it too (or symlink it as `CLAUDE.md`).
-> Delete sections that don't apply to the site.
+> placeholders. Devin, opencode, Codex and DeepSeek Harness (dsh) read
+> `AGENTS.md` automatically as project rules; Claude Code reads it too (or
+> symlink it as `CLAUDE.md`). Delete sections that don't apply to the site.
 
 ## Site
 
@@ -19,11 +19,13 @@
 Project-scope MCP config lives in `.devin/mcp_config.local.json` (Devin —
 gitignored, contains the Application Password) or in `opencode.json`
 (opencode — gitignore it too, or use `{env:NAME}` references for the
-secrets). Server name `diviskit-mcp`, command
+secrets). dsh (DeepSeek Harness) connects via a `dsh-mcp-client` row in
+`~/.dsh/profiles/<profile>/cordis.patch.yml` or `~/.dsh/cordis.patch.yml`
+— secrets via `!!js process.env.NAME`. Server command
 `npx -y --package @diviskit/mcp-server diviskit-mcp`, env `WP_URL` /
 `WP_USER` / `WP_APP_PASSWORD` / `WP_CLI_CMD` / `WP_PATH`. Ready examples:
-`templates/devin/mcp_config.local.json` and
-`templates/opencode/opencode.json` in the suite.
+`templates/devin/mcp_config.local.json`, `templates/opencode/opencode.json`
+and `templates/dsh/cordis.patch.yml` in the suite.
 Devin also reads `~/.config/devin/mcp_config.json` (user scope) and
 `~/.codeium/windsurf/mcp_config.json` (legacy); opencode reads
 `~/.config/opencode/opencode.json`. Restart the session after
@@ -91,8 +93,9 @@ structural.
 - Generators live in `.devin/generators/` → output to `.devin/generators/out/`,
   write via `$wpdb->update` (rule 2).
 - Installed skills live under `.devin/skills/` (Devin), `.opencode/skills/`
-  (opencode) or `.claude/skills/` (Claude Code) — `install-skills.sh`
-  `--client <client> --scope project` puts them in the right place.
+  (opencode), `.dsh/skills/` (dsh) or `.claude/skills/` (Claude Code) —
+  `install-skills.sh --client <client> --scope project` puts them in the
+  right place.
 - `design-system.json` (design tokens for this site) lives under the
   client's `skills/diviskit-builder/` dir or project docs — keep it out of
   any plugin distribution.

@@ -181,6 +181,22 @@ For opencode, add the same server under `mcp` in `opencode.json` (project) or `~
 }
 ```
 
+For DeepSeek Harness (dsh), add a `dsh-mcp-client` row to `~/.dsh/profiles/<profile>/cordis.patch.yml` or `~/.dsh/cordis.patch.yml` — tools appear as `mcp__diviskit__diviskit_*`:
+
+```yaml
+- id: mcp-diviskit
+  name: '@deepseek-ai/dsh-mcp-client'
+  config:
+    serverName: diviskit
+    transport: stdio
+    command: npx
+    args: ['-y', '--package', '@diviskit/mcp-server', 'diviskit-mcp']
+    env:
+      WP_URL: 'http://your-site.local'
+      WP_USER: 'your-wp-username'
+      WP_APP_PASSWORD: !!js process.env.WP_APP_PASSWORD
+```
+
 See the [Diviskit MCP Server README](../../../diviskit-server/) for full setup and the response contract.
 
 ## Capabilities

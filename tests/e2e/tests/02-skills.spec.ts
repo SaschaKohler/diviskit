@@ -167,7 +167,7 @@ test.describe('install-skills.sh', () => {
     expect(fs.existsSync(stale)).toBe(false);
   });
 
-  for (const client of ['devin', 'codex', 'claude', 'opencode'] as const) {
+  for (const client of ['devin', 'codex', 'claude', 'opencode', 'dsh'] as const) {
     test(`--client ${client} --scope project → .${client}/skills`, () => {
       const out = run(['--client', client, '--scope', 'project'], tmp);
       expect(out).toContain('installed');
@@ -208,6 +208,36 @@ test.describe('install-skills.sh', () => {
       WP_URL: '',
       WP_USER: '',
       WP_APP_PASSWORD: '',
+    });
+    expect(out).toContain('installed');
+    expect(fs.existsSync(path.join(target, s.repoSkills[0], 'SKILL.md'))).toBe(true);
+  });
+
+  test('credentials resolve from --config cordis.patch.yml (dsh row)', () => {
+    const target = path.join(tmp, 'skills');
+    const config = path.join(tmp, 'cordis.patch.yml');
+    fs.writeFileSync(
+      config,
+      [
+        '- id: mcp-diviskit',
+        "  name: '@deepseek-ai/dsh-mcp-client'",
+        '  config:',
+        '    serverName: diviskit',
+        '    transport: stdio',
+        '    command: npx',
+        "    args: ['-y', '--package', '@diviskit/mcp-server', 'diviskit-mcp']",
+        '    env:',
+        `      WP_URL: '${s.wpUrl}'`,
+        `      WP_USER: '${s.wpUser}'`,
+        '      WP_APP_PASSWORD: !!js process.env.TEST_DSH_APP_PASSWORD',
+        '',
+      ].join('\n'),
+    );
+    const out = run(['--client', 'generic', '--target', target, '--config', config], tmp, {
+      WP_URL: '',
+      WP_USER: '',
+      WP_APP_PASSWORD: '',
+      TEST_DSH_APP_PASSWORD: s.wpAppPassword,
     });
     expect(out).toContain('installed');
     expect(fs.existsSync(path.join(target, s.repoSkills[0], 'SKILL.md'))).toBe(true);

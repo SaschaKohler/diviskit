@@ -404,7 +404,7 @@ version-locked copies into your client:
 ```bash
 curl -fsSL -o install-skills.sh "<?php echo esc_url( $installer ); ?>"
 chmod +x install-skills.sh
-./install-skills.sh --client devin --scope project   # or: codex | claude | cursor | opencode | generic --target <dir>
+./install-skills.sh --client devin --scope project   # or: codex | claude | cursor | opencode | dsh | generic --target <dir>
 ```
 
 Credentials come from the `diviskit-mcp` entry in the MCP config or the
@@ -469,7 +469,7 @@ Steps:
 2. Write the MCP config from AGENTS.md to `.devin/mcp_config.local.json`, replacing `<application-password>`, and add the file to `.gitignore`.
 3. Verify the handshake with the curl command from AGENTS.md — expect `"compatible": true` and a `capabilities` map.
 4. Smoke-test the server over stdio with the env vars from the config: send `initialize`, then `tools/list` (expect diviskit_* tools), then one read-only `tools/call` such as `diviskit_page_list` (expect `{"ok":true,...}`).
-5. Install the authoring skills: download `install-skills.sh` from the plugin (URL in AGENTS.md's "Install the authoring skills" section) and run it for my client — `devin`, `codex`, `claude`, `cursor`, `opencode`, or `generic --target <dir>` — then confirm the diviskit skills are available.
+5. Install the authoring skills: download `install-skills.sh` from the plugin (URL in AGENTS.md's "Install the authoring skills" section) and run it for my client — `devin`, `codex`, `claude`, `cursor`, `opencode`, `dsh`, or `generic --target <dir>` — then confirm the diviskit skills are available.
 6. Tell me to restart the AI client or reload the MCP session, then confirm the diviskit_* tools registered.
 <?php
 		return (string) ob_get_clean();
@@ -2614,7 +2614,7 @@ Steps:
 						</details>
 						<details class="diviskit-mcp-config">
 							<summary><?php esc_html_e( 'AI editor setup prompt', 'diviskit-agent' ); ?></summary>
-							<p class="diviskit-muted"><?php esc_html_e( 'Paste this prompt into your AI editor (Devin, Claude Code, Codex, opencode, …). The agent reads the AGENTS.md this plugin wrote to your site root, then runs the full MCP setup — application password, client config, handshake check and smoke test.', 'diviskit-agent' ); ?></p>
+							<p class="diviskit-muted"><?php esc_html_e( 'Paste this prompt into your AI editor (Devin, Claude Code, Codex, opencode, dsh, …). The agent reads the AGENTS.md this plugin wrote to your site root, then runs the full MCP setup — application password, client config, handshake check and smoke test.', 'diviskit-agent' ); ?></p>
 							<div class="diviskit-config-block">
 								<pre id="diviskit-setup-prompt"><?php echo esc_html( self::mcp_setup_prompt() ); ?></pre>
 								<button type="button" class="button button-small" data-diviskit-copy="diviskit-setup-prompt" data-copied="<?php esc_attr_e( 'Copied', 'diviskit-agent' ); ?>"><?php esc_html_e( 'Copy prompt', 'diviskit-agent' ); ?></button>
@@ -2629,7 +2629,7 @@ Steps:
 							<p class="diviskit-muted"><?php esc_html_e( 'The bundled skills teach your client the verified Divi 5 block formats and tool contracts. This installer pulls them from the site with checksum verification — Pro bundles are included automatically when Diviskit Pro is active.', 'diviskit-agent' ); ?></p>
 							<div class="diviskit-config-block">
 								<pre id="diviskit-skills-cmd"><?php echo esc_html( sprintf(
-									"curl -fsSL -o install-skills.sh \"%s\"\nchmod +x install-skills.sh\n./install-skills.sh --client devin --scope project   # or: codex | claude | cursor | opencode | generic --target <dir>",
+									"curl -fsSL -o install-skills.sh \"%s\"\nchmod +x install-skills.sh\n./install-skills.sh --client devin --scope project   # or: codex | claude | cursor | opencode | dsh | generic --target <dir>",
 									self::installer_script_url()
 								) ); ?></pre>
 								<button type="button" class="button button-small" data-diviskit-copy="diviskit-skills-cmd" data-copied="<?php esc_attr_e( 'Copied', 'diviskit-agent' ); ?>"><?php esc_html_e( 'Copy commands', 'diviskit-agent' ); ?></button>

@@ -168,6 +168,42 @@ or keep secrets in the environment and reference them as
 
 Restart opencode after changing the config.
 
+### DeepSeek Harness (dsh)
+
+dsh reads `AGENTS.md` from the project, discovers skills from
+`.dsh/skills/` (project) / `~/.dsh/skills/` (user — `.agents/skills/` works
+at both levels too), and connects MCP servers through the shipped
+`@deepseek-ai/dsh-mcp-client` plugin. Add one row per server to the
+profile's `~/.dsh/profiles/<profile>/cordis.patch.yml` or the home-level
+`~/.dsh/cordis.patch.yml` shared by all profiles:
+
+```yaml
+- id: mcp-diviskit
+  name: '@deepseek-ai/dsh-mcp-client'
+  config:
+    serverName: diviskit
+    transport: stdio
+    command: npx
+    args: ['-y', '--package', '@diviskit/mcp-server', 'diviskit-mcp']
+    env:
+      WP_URL: 'https://your-site.ddev.site'
+      WP_USER: 'admin'
+      WP_APP_PASSWORD: !!js process.env.WP_APP_PASSWORD
+      WP_CLI_CMD: 'ddev wp'
+      WP_PATH: '/absolute/path/to/project'
+      NODE_TLS_REJECT_UNAUTHORIZED: '0'
+```
+
+A ready template lives at
+[`templates/dsh/cordis.patch.yml`](templates/dsh/cordis.patch.yml). Keep
+secrets in the environment and reference them as `!!js process.env.NAME`.
+The tools reach the model as `mcp__diviskit__diviskit_*` — the same
+server-qualified shape Claude Code and Codex use. If the row fails to
+resolve the plugin, install it once:
+`dsh plugin --profile web add @deepseek-ai/dsh-mcp-client`. Patch edits
+hot-reload on the `web` profile; `headless`/`sdk`/`acp` re-read at startup.
+`dsh --profile web --dump-config` shows the composed tree.
+
 ### Devin
 
 Devin reads MCP config from several locations:
@@ -284,7 +320,7 @@ Diviskit connects via standard WordPress REST API and works with any host that e
 - **Use absolute paths** for `WP_PATH` — relative paths break when the client runs from a different directory
 - **Unique MCP name** — don't reuse a name from another project
 - **Paths with spaces** — wrap the entire `KEY=VALUE` argument in double quotes (e.g. `--env "WP_PATH=/path with spaces/"`)
-- **MCP not appearing after registration** — in Claude Code, run `claude mcp list`. If it's not there, `claude mcp remove` and re-add. In Codex, verify the `~/.codex/config.toml` entry and restart Codex. In Devin, restart the session. In opencode, verify the `opencode.json` entry and restart.
+- **MCP not appearing after registration** — in Claude Code, run `claude mcp list`. If it's not there, `claude mcp remove` and re-add. In Codex, verify the `~/.codex/config.toml` entry and restart Codex. In Devin, restart the session. In opencode, verify the `opencode.json` entry and restart. In dsh, verify the row with `dsh --profile <profile> --dump-config`.
 
 ## Step 4: Verify Registration
 
@@ -325,7 +361,7 @@ Then try:
 Use diviskit_page_list to show all pages.
 ```
 
-> **If tools don't appear**: In Claude Code, check `claude mcp list`. In Codex, check `~/.codex/config.toml` and restart. In Devin, check the MCP config file and restart the session. In opencode, check the `mcp` block in `opencode.json` and restart. The `npx` command must be reachable on your `PATH`. The `-y --package @diviskit/mcp-server diviskit-mcp` form avoids `npx` prompts and explicitly selects the MCP server bin from the package.
+> **If tools don't appear**: In Claude Code, check `claude mcp list`. In Codex, check `~/.codex/config.toml` and restart. In Devin, check the MCP config file and restart the session. In opencode, check the `mcp` block in `opencode.json` and restart. In dsh, run `dsh --profile web --dump-config` and check the `mcp-diviskit` row composed. The `npx` command must be reachable on your `PATH`. The `-y --package @diviskit/mcp-server diviskit-mcp` form avoids `npx` prompts and explicitly selects the MCP server bin from the package.
 
 ### Pro capabilities (Pro distribution only)
 
@@ -356,7 +392,7 @@ claude plugin install diviskit-agent@diviskit
 
 Verify with `What skills do you have?` — you should see `diviskit`, `diviskit-builder`, and `diviskit-scf` listed.
 
-### Codex, Devin, opencode, and other clients (install script)
+### Codex, Devin, opencode, dsh, and other clients (install script)
 
 The skills ship inside the WordPress plugins (`skills/` in `diviskit-agent`
 and `diviskit-pro`) and are served at `GET /wp-json/diviskit/v1/skills`.
@@ -374,8 +410,9 @@ chmod +x install-skills.sh
 ```
 
 Credentials come from the `diviskit-mcp` entry in
-`.devin/mcp_config.local.json` or `opencode.json` (Step 3), or from
-`WP_URL` / `WP_USER` / `WP_APP_PASSWORD` env vars:
+`.devin/mcp_config.local.json` or `opencode.json`, from a
+`dsh-mcp-client` row's `config.env` in a `cordis.patch.yml` (Step 3), or
+from `WP_URL` / `WP_USER` / `WP_APP_PASSWORD` env vars:
 
 ```bash
 # Devin — project scope (single site, run from the project root)
@@ -397,6 +434,11 @@ Credentials come from the `diviskit-mcp` entry in
 # auto-discovered, so either client option works for a shared setup
 ./bin/install-skills.sh --client opencode --scope project
 ./bin/install-skills.sh --client opencode --scope user
+
+# DeepSeek Harness — .dsh/skills (project) or ~/.dsh/skills (user);
+# .agents/skills is scanned at both levels too
+./bin/install-skills.sh --client dsh --scope project
+./bin/install-skills.sh --client dsh --scope user
 
 # Any other client — copy the tree anywhere, wire it into the client's
 # rules/context file yourself (Windsurf .windsurfrules, Cline .clinerules,
@@ -423,8 +465,9 @@ cp -R claude/diviskit-agent/skills/* .devin/skills/
 
 Copy [templates/AGENTS.md](templates/AGENTS.md) into the WordPress project root
 and fill in the marked placeholders (site URL, page IDs, store state).
-Devin reads `AGENTS.md` automatically as project rules; Claude Code reads it
-too (or symlink it as `CLAUDE.md`). It carries the Divi 5 authoring rules that
+Devin, opencode, Codex and dsh read `AGENTS.md` automatically as project
+rules; Claude Code reads it too (or symlink it as `CLAUDE.md`). It carries
+the Divi 5 authoring rules that
 prevent silent corruption — admin-label paths, the `post_content` write
 restrictions, icon entity format, validator limits — plus the per-project MCP
 config shape.

@@ -70,7 +70,7 @@ The plugin does not add analytics or tracking. It exposes authenticated REST end
 2. Activate **Diviskit Agent** and confirm Divi 5 is active on the site.
 3. Create a WordPress Application Password from **Users > Profile > Application Passwords**.
 4. Configure the separately installed Diviskit MCP server in your compatible AI client with your site URL, WordPress username and Application Password.
-5. Install the Diviskit authoring skills: the plugin ships `bin/install-skills.sh`, downloadable from the Diviskit dashboard (or directly at `wp-content/plugins/diviskit-agent/bin/install-skills.sh`). It syncs version-locked skill copies into Devin, Codex, Claude Code, Cursor, opencode, or any custom directory. Then ask your agent to inspect the site's capabilities before editing.
+5. Install the Diviskit authoring skills: the plugin ships `bin/install-skills.sh`, downloadable from the Diviskit dashboard (or directly at `wp-content/plugins/diviskit-agent/bin/install-skills.sh`). It syncs version-locked skill copies into Devin, Codex, Claude Code, Cursor, opencode, DeepSeek Harness (dsh), or any custom directory. Then ask your agent to inspect the site's capabilities before editing.
 
 See the [Diviskit setup guide](https://diviskit.com/docs/) for client configuration and connection checks.
 
@@ -78,7 +78,7 @@ See the [Diviskit setup guide](https://diviskit.com/docs/) for client configurat
 
 = Can I use Codex or Claude? =
 
-Yes. The Diviskit MCP server connects compatible clients including Codex, Claude Code, opencode and Claude Desktop to this plugin. Client configuration and client access are separate from the WordPress plugin.
+Yes. The Diviskit MCP server connects compatible clients including Codex, Claude Code, opencode, DeepSeek Harness and Claude Desktop to this plugin. Client configuration and client access are separate from the WordPress plugin.
 
 = Does this plugin work without the MCP server? =
 

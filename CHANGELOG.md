@@ -1,5 +1,23 @@
 # Changelog
 
+## Unreleased
+
+### Client support
+
+- Adds DeepSeek Harness (`dsh`) as a supported client:
+  `install-skills.sh --client dsh` targets `.dsh/skills/` (project) and
+  `$DSH_HOME/skills` (`~/.dsh/skills`, user) — dsh also auto-discovers
+  `.agents/skills/` at both levels. Credentials resolve from a
+  `dsh-mcp-client` row's `config.env` in `cordis.patch.yml`
+  (`!!js process.env.NAME` supported), searched upward from the project
+  plus `$DSH_HOME/cordis.patch.yml` and `$DSH_HOME/profiles/*/`.
+- New `templates/dsh/cordis.patch.yml` registers `@diviskit/mcp-server`
+  through dsh's shipped `dsh-mcp-client` plugin — tools reach the model
+  as `mcp__diviskit__diviskit_*`. dsh reads `AGENTS.md` natively, so the
+  project-rules template works unchanged.
+- Setup docs, README and the AGENTS.md Grundtemplate now cover dsh
+  alongside Claude Code, Codex, Devin, opencode and Cursor.
+
 ## v1.0.0 — First public Diviskit distribution (2026-09-24)
 
 First public release of the Diviskit stack — the GPL-licensed fork line of
