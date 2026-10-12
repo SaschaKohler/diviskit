@@ -3,7 +3,7 @@ Contributors: diviskit
 Tags: divi, mcp, ai, rest-api, site-builder
 Requires at least: 6.5
 Tested up to: 7.1
-Stable tag: 1.7.9
+Stable tag: 1.7.10
 Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -116,6 +116,10 @@ Run it from anywhere inside your DDEV project (or pass the project directory as 
 2. An agent-authored page open in the Divi 5 Visual Builder, with the native Heading module content controls available for continued editing. Divi is a separate required product.
 
 == Changelog ==
+
+= 1.7.10 =
+
+* `diviskit_validate_blocks` flags Divi 4 `[et_pb_*]` shortcode markup with a dedicated `legacy_shortcode` error code — detected in freeform blocks and inside named blocks' inner content. Legacy-corpus output fails loudly at validate time instead of landing as literal text in post_content. The builder skill and AGENTS.md template gain an explicit never-emit-`[et_pb_*]` rule.
 
 = 1.7.9 =
 
