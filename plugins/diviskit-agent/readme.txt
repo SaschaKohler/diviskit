@@ -3,7 +3,7 @@ Contributors: diviskit
 Tags: divi, mcp, ai, rest-api, site-builder
 Requires at least: 6.5
 Tested up to: 7.1
-Stable tag: 1.7.8
+Stable tag: 1.7.9
 Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -116,6 +116,10 @@ Run it from anywhere inside your DDEV project (or pass the project directory as 
 2. An agent-authored page open in the Divi 5 Visual Builder, with the native Heading module content controls available for continued editing. Divi is a separate required product.
 
 == Changelog ==
+
+= 1.7.9 =
+
+* Adds DeepSeek Harness (dsh) as a supported client: `install-skills.sh --client dsh` targets `.dsh/skills/` / `~/.dsh/skills/` (`$DSH_HOME`-aware; `.agents/skills/` is scanned too) and resolves credentials from a `dsh-mcp-client` row's `config.env` in `cordis.patch.yml` (incl. `!!js process.env.NAME` references), searched in the project and under `~/.dsh`. Setup docs, templates and dashboard copy updated.
 
 = 1.7.8 =
 
