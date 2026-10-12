@@ -83,7 +83,7 @@ All namespaces have adopted the envelope as of the last wave (`module_*` + `sect
 - `diviskit_preset_scan_orphans` — list page-referenced preset UUIDs missing from the D5 registry; separates dangling orphans from D4-legacy refs
 - `diviskit_library_list` / `diviskit_library_get` — browse and load Divi Library items
 - `diviskit_render_preview` — render block markup to HTML for preview. Accepts EITHER `content` (inline markup) OR `page_id` (loads from DB; requires edit_post on the page). Use `page_id` for regression preview of shipped pages without round-tripping the markup blob.
-- `diviskit_validate_blocks` — validate block markup (structure, required attrs, known pitfalls). Accepts EITHER `content` (inline markup) OR `page_id` (loads from DB; requires edit_post on the page). Use `page_id` to validate shipped pages without round-tripping the markup blob.
+- `diviskit_validate_blocks` — validate block markup (structure, required attrs, known pitfalls; flags embedded Divi 4 `[et_pb_*]` shortcode markup as `legacy_shortcode`). Accepts EITHER `content` (inline markup) OR `page_id` (loads from DB; requires edit_post on the page). Use `page_id` to validate shipped pages without round-tripping the markup blob.
 - `diviskit_tb_template_list` / `diviskit_tb_layout_get` — browse Theme Builder templates and layouts
 - `diviskit_canvas_list` / `diviskit_canvas_get` — browse and read off-canvas workspaces (popups, modals, menus)
 - `diviskit_variable_list` — list design token variables, filter by type (`colors`, `numbers`, etc.) or ID prefix. `prefix` matches the stored ID only; it does not match `label`. For semantic token names such as `oa-*` labels on UUID-backed Divi variables, list by `type` and filter the returned `label` client-side.

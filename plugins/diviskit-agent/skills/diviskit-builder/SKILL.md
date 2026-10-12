@@ -120,7 +120,8 @@ The generator (`gen_all.py`) and fetch script (`update_skills.sh`) live in
 7. **Font inheritance**: Set global fonts via theme options, skip explicit `family` on modules
 8. **Use semantic HTML**: Set `elementType` for SEO/accessibility (`header`, `nav`, `main`, `article`, `footer`)
 9. **Always use section/row/column structure**: Wrapperless top-level modules lose styling
-10. **Cache invalidation**: All write tools auto-invalidate Divi's CSS cache. If styles appear stale, hard-refresh the browser.
+10. **Never emit `[et_pb_*]` Divi 4 shortcode markup**: Authoring targets `<!-- divi/... -->` block comments with JSON attrs — shortcode output parses as freeform text, not modules, and `diviskit_validate_blocks` flags it as `legacy_shortcode`.
+11. **Cache invalidation**: All write tools auto-invalidate Divi's CSS cache. If styles appear stale, hard-refresh the browser.
 
 ### Verification convention
 

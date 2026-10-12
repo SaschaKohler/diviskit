@@ -96,10 +96,41 @@ trait Diviskit_Agent_Validate {
 						'message' => 'Malformed block comment — contains divi markup but failed to parse',
 					];
 				}
+				$legacy = self::legacy_shortcode_names( $inner );
+				if ( $legacy ) {
+					$errors[] = [
+						'block'   => '(freeform)',
+						'index'   => $index + 1,
+						'code'    => 'legacy_shortcode',
+						'message' => sprintf(
+							'Divi 4 shortcode markup detected ([et_pb_%s]) — authoring targets the Divi 5 block format (<!-- divi/... --> comments + JSON attrs). Re-emit as native divi/* blocks; et_pb markup parses as freeform text, not modules.',
+							implode( '], [et_pb_', $legacy )
+						),
+					];
+				}
 				continue;
 			}
 
 			$index++;
+
+			// Divi 4 shortcode markup embedded between blocks — parses inert,
+			// is not the D5 storage format, and signals corpus recall rather
+			// than intentional markup.
+			$legacy = self::legacy_shortcode_names(
+				implode( '', array_filter( $block['innerContent'] ?? [], 'is_string' ) )
+			);
+			if ( $legacy ) {
+				$errors[] = [
+					'block'   => $name,
+					'index'   => $index,
+					'code'    => 'legacy_shortcode',
+					'message' => sprintf(
+						'Divi 4 [et_pb_%s] shortcode markup embedded inside %s — re-emit as native divi/* blocks; et_pb markup is not the Divi 5 storage format.',
+						implode( '], [et_pb_', $legacy ),
+						$name
+					),
+				];
+			}
 
 			$is_divi_block = 0 === strpos( $name, 'divi/' ) && 'divi/placeholder' !== $name;
 
@@ -963,5 +994,23 @@ trait Diviskit_Agent_Validate {
 				'path'    => $ref['path'] ?? 'module.decoration.attributes.*.value.attributes[].value',
 			];
 		}
+	}
+
+	/**
+	 * Unique et_pb_* shortcode names present in raw HTML. Divi 4 stored
+	 * layouts as `[et_pb_*]` shortcodes; Divi 5 uses block comments + JSON —
+	 * et_pb markup in submitted content is corpus-recall junk that parses as
+	 * freeform text, not modules.
+	 *
+	 * @return string[] Lowercase shortcode names without the `et_pb_` prefix.
+	 */
+	private static function legacy_shortcode_names( string $html ): array {
+		if ( '' === $html || false === stripos( $html, '[et_pb_' ) ) {
+			return [];
+		}
+		if ( ! preg_match_all( '/\[\/?et_pb_([a-z0-9_]+)/i', $html, $m ) ) {
+			return [];
+		}
+		return array_values( array_unique( array_map( 'strtolower', $m[1] ) ) );
 	}
 }

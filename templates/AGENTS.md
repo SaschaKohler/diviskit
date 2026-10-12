@@ -81,6 +81,10 @@ Violating these corrupts data or silently strips attributes.
    dropdown-bearing markup locally with `json.loads` per block.
 10. **After preset/style writes**, flush with `diviskit_meta_flush_cache all`
     — `wp cache flush` does not touch `wp-content/et-cache/`.
+11. **Never emit Divi 4 `[et_pb_*]` shortcode markup** — authoring targets
+    `<!-- divi/... -->` block comments with JSON attrs. Shortcode output
+    parses as freeform text, not modules, and `diviskit_validate_blocks`
+    flags it as `legacy_shortcode`.
 
 ## Writes go through `dry_run` first
 

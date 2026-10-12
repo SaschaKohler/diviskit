@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+### Validation hardening
+
+- `diviskit_validate_blocks` now flags Divi 4 `[et_pb_*]` shortcode markup
+  with a dedicated `legacy_shortcode` error code — detected in freeform
+  blocks and embedded inside a named block's inner content. LLM output
+  pulled from the legacy-corpus fails loudly at validate time instead of
+  landing as literal shortcode text in `post_content`. Covered by new
+  `ValidateTest` unit tests.
+- `diviskit-builder` skill and the AGENTS.md template gain an explicit
+  rule: never emit `[et_pb_*]` — authoring targets `<!-- divi/... -->`
+  block comments with JSON attrs.
+
 ### Client support
 
 - Adds DeepSeek Harness (`dsh`) as a supported client:
